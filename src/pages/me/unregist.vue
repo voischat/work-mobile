@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import HomeLayout from '~/components/HomeLayout.vue'
+import BackLayout from '~/components/BackLayout.vue'
 import Tab from '~/components/Tab.vue'
 import UnregistEmail from './UnregistEmail.vue'
 import UnregistPhone from './UnregistPhone.vue'
@@ -15,14 +15,10 @@ const tabs = [
 </script>
 
 <template>
-  <HomeLayout>
+  <BackLayout title="注销账号">
     <div class="p-4">
       <div class="max-w-md mx-auto">
         <div class="bg-white rounded-lg shadow-md p-6">
-          <h1 class="text-2xl font-bold text-gray-900 mb-6">
-            注销账号
-          </h1>
-
           <div class="mb-6">
             <p class="text-sm text-red-600 mb-4">
               警告：注销账号后，所有数据将被永久删除，此操作不可恢复！
@@ -37,5 +33,5 @@ const tabs = [
         </div>
       </div>
     </div>
-  </HomeLayout>
+  </BackLayout>
 </template>

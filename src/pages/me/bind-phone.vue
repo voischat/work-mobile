@@ -3,7 +3,7 @@ import type { BindPhoneRequest } from '~/types/auth'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
-import HomeLayout from '~/components/HomeLayout.vue'
+import BackLayout from '~/components/BackLayout.vue'
 import { useForm } from '~/composables/useForm'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
@@ -62,14 +62,10 @@ function handleSubmit() {
 </script>
 
 <template>
-  <HomeLayout>
+  <BackLayout title="绑定手机">
     <div class="p-4">
       <div class="max-w-md mx-auto">
         <div class="bg-white rounded-lg shadow-md p-6">
-          <h1 class="text-2xl font-bold text-gray-900 mb-6">
-            绑定手机
-          </h1>
-
           <form class="space-y-4" @submit.prevent="handleSubmit">
             <!-- 国家代码输入框 -->
             <div>
@@ -158,5 +154,5 @@ function handleSubmit() {
         </div>
       </div>
     </div>
-  </HomeLayout>
+  </BackLayout>
 </template>
