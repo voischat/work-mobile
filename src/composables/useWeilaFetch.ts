@@ -2,7 +2,10 @@ import { getRootUrl } from '@kvoon/utils'
 import { createFetch } from '@vueuse/core'
 import md5 from 'md5'
 import { computed } from 'vue'
-import { token } from './useAuth'
+
+import { useAuth } from './useAuth'
+
+const { token } = useAuth()
 
 export const appid = computed(() => {
   const demo = '102036'

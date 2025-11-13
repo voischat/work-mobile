@@ -4,7 +4,7 @@ import md5 from 'md5'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
-import { saveAuth } from '~/composables/useAuth'
+import { useAuth } from '~/composables/useAuth'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 // 表单验证 schema
@@ -16,6 +16,7 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 const router = useRouter()
+const { saveAuth } = useAuth()
 
 // 表单数据
 const formData = ref<LoginForm>({
@@ -24,7 +25,7 @@ const formData = ref<LoginForm>({
 })
 
 // 调用登录 API（非立即执行）
-const { error, isFetching, data, execute: login } = useWeilaFetch<LoginResponse>('/corp/auth/login', {
+const { error, isFetching, isFinished, data, execute: login } = useWeilaFetch<LoginResponse>('/corp/auth/login', {
   immediate: false,
 }).post(() => ({
   account: formData.value.account,
@@ -36,11 +37,18 @@ const errorMessage = computed(() => {
 })
 
 // 监听登录成功
-watch(data, (loginData) => {
+watch([data, isFinished, error], ([loginData, isFinished, error]) => {
+  console.log('loginData', loginData)
+  console.log('isFinished', isFinished)
+  console.log('error', error)
+  if (isFinished) {
+    return
+  }
+  if (error) {
+    return
+  }
   if (loginData) {
-    // 保存 token 到 localStorage
     saveAuth(loginData.access_token, loginData.refresh_token)
-    // 登录成功后跳转到首页
     router.push('/')
   }
 })

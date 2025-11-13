@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useIntervalFn } from '@vueuse/core'
 import { watch } from 'vue'
-import { clearAuth, refreshToken, saveAuth, token } from '~/composables/useAuth'
+import { useAuth } from '~/composables/useAuth'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 const REFRESH_INTERVAL = 3 * 60 * 1000 // 3分钟
+const { token, refreshToken, clearAuth, saveAuth } = useAuth()
 
 // 刷新 token 的 fetch（非立即执行）
 const { data, error, execute: refreshTokenExecute } = useWeilaFetch<{
