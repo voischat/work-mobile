@@ -37,7 +37,7 @@ const { error, isFetching, isFinished, data, execute: login } = useWeilaFetch<Lo
 })).json()
 
 const errorMessage = computed(() => {
-  return error.value?.message || '登录失败，请稍后重试'
+  return error.value?.message || ''
 })
 
 // 监听登录成功
