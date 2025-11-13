@@ -60,7 +60,8 @@ export const useWeilaFetch = createFetch({
         options,
       }
     },
-    async afterFetch({ data, response }) {
+    async afterFetch(ctx) {
+      const { data } = ctx
       // 确保 data 是对象格式
       if (!data || typeof data !== 'object') {
         throw new Error('响应格式错误')
@@ -76,10 +77,9 @@ export const useWeilaFetch = createFetch({
       // errcode 为 0 表示成功
       if (apiResponse.errcode === 0) {
         // 返回 data 字段，如果没有则为 undefined
-        return {
-          data: apiResponse.data,
-          response,
-        }
+        ctx.data = apiResponse.data
+        console.log('data', ctx.data)
+        return ctx
       }
 
       // errcode 为 31 表示 token 失效
@@ -89,6 +89,7 @@ export const useWeilaFetch = createFetch({
       }
 
       // 其他 errcode 值表示失败
+      console.log('error', apiResponse.errmsg)
       throw new Error(apiResponse.errmsg || `请求失败，错误码: ${apiResponse.errcode}`)
     },
   },

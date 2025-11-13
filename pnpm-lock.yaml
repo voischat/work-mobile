@@ -27,6 +27,9 @@ importers:
       vue-router:
         specifier: ^4.5.1
         version: 4.5.1(vue@3.5.16(typescript@5.8.3))
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^4.14.1
@@ -3003,9 +3006,6 @@ packages:
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
 
-  ts-macro@0.1.25:
-    resolution: {integrity: sha512-C8Lxnn/XXvqMx+orKU6/gKrCmU/dOFUAxRstRTSmNUdrIjxoTuwsK8vTrLyYP0L+IVbIq9WgKBiGFUIab36l1Q==}
-
   ts-macro@0.1.32:
     resolution: {integrity: sha512-kE31MD1WZabOYxD/YhkHwxZ+fWeW2sGC/l6PtyBKDihUi5muK1CTBY0IffLumQ44k/K3tGzABD6ZbRODXYqqIA==}
 
@@ -3404,6 +3404,9 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -4452,7 +4455,7 @@ snapshots:
       '@vue-macros/short-vmodel': 1.5.5(vue@3.5.16(typescript@5.8.3))
       '@vue/language-core': 2.1.10(typescript@5.8.3)
       muggle-string: 0.4.1
-      ts-macro: 0.1.25(typescript@5.8.3)
+      ts-macro: 0.1.32
     optionalDependencies:
       vue-tsc: 2.2.10(typescript@5.8.3)
     transitivePeerDependencies:
@@ -6588,15 +6591,6 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-macro@0.1.25(typescript@5.8.3):
-    dependencies:
-      '@volar/language-core': 2.4.11
-      '@vue/language-core': 2.2.10(typescript@5.8.3)
-      muggle-string: 0.4.1
-      unplugin-utils: 0.2.4
-    transitivePeerDependencies:
-      - typescript
-
   ts-macro@0.1.32:
     dependencies:
       muggle-string: 0.4.1
@@ -6995,5 +6989,7 @@ snapshots:
   yaml@2.8.0: {}
 
   yocto-queue@0.1.0: {}
+
+  zod@3.25.76: {}
 
   zwitch@2.0.4: {}

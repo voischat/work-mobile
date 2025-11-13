@@ -15,6 +15,27 @@ export default defineConfig({
       '~/': `${path.resolve(__dirname, 'src')}/`,
     },
   },
+
+  server: {
+    cors: true,
+    proxy: {
+      '/v1': {
+        target: 'http://demo.weila.hk',
+        timeout: 20 * 1000,
+        // target: 'http://192.168.0.125:8088',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/v2': {
+        target: 'http://demo.weila.hk',
+        timeout: 20 * 1000,
+        // target: 'http://192.168.0.125:8090',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+
   plugins: [
     // https://github.com/posva/unplugin-vue-router
     VueRouter(),

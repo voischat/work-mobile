@@ -6,7 +6,12 @@ import { globalIgnores } from 'eslint/config'
 export default antfu(
   {
     formatters: true,
-    pnpm: true,
+  },
+  {
+    rules: {
+      'no-alert': 'off',
+      'no-console': 'off',
+    },
   },
   globalIgnores([
     '**/API-LIST.md',
