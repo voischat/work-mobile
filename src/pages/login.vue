@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { useAuth } from '~/composables/useAuth'
+import { useForm } from '~/composables/useForm'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 // 表单验证 schema
@@ -23,6 +24,9 @@ const formData = ref<LoginForm>({
   account: '',
   password: '',
 })
+
+// 表单验证
+const { errors, validate } = useForm(loginSchema)
 
 // 调用登录 API（非立即执行）
 const { error, isFetching, isFinished, data, execute: login } = useWeilaFetch<LoginResponse>('/corp/auth/login', {
@@ -54,10 +58,7 @@ watch([data, isFinished, error], ([loginData, isFinished, error]) => {
 })
 
 function handleLogin() {
-  const result = loginSchema.safeParse(formData.value)
-  if (!result.success) {
-    // 这里只做简单弹窗，可根据需求替换为更复杂的表单错误展示
-    alert(result.error.issues[0].message)
+  if (!validate(formData.value)) {
     return
   }
   login()
@@ -83,9 +84,13 @@ function handleLogin() {
               v-model="formData.account"
               type="text"
               placeholder="请输入账号"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              :class="errors.account ? 'border-red-500' : 'border-gray-300'"
               :disabled="isFetching"
             >
+            <div v-if="errors.account" class="mt-1 text-sm text-red-600">
+              {{ errors.account }}
+            </div>
           </div>
 
           <!-- 密码输入框 -->
@@ -98,9 +103,13 @@ function handleLogin() {
               v-model="formData.password"
               type="password"
               placeholder="请输入密码"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              :class="errors.password ? 'border-red-500' : 'border-gray-300'"
               :disabled="isFetching"
             >
+            <div v-if="errors.password" class="mt-1 text-sm text-red-600">
+              {{ errors.password }}
+            </div>
           </div>
 
           <!-- 错误提示 -->
