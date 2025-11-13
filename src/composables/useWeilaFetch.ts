@@ -2,6 +2,7 @@ import { getRootUrl } from '@kvoon/utils'
 import { createFetch } from '@vueuse/core'
 import md5 from 'md5'
 import { computed } from 'vue'
+import { token } from './useAuth'
 
 export const appid = computed(() => {
   const demo = '102036'
@@ -30,9 +31,8 @@ function generateV2Query(): Record<string, string> {
     et: String(et),
     sign: app_sign_v2,
   }
-  const token = localStorage.getItem('token')
-  if (token)
-    res.token = token
+  if (token.value)
+    res.token = token.value
   return res
 }
 
