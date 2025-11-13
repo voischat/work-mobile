@@ -38,6 +38,12 @@ function generateV2Query(): Record<string, string> {
 
 const baseUrl = `${getRootUrl(window.location.href)}/v2`
 
+interface WeilaApiResponse<T = any> {
+  errcode: number
+  errmsg: string
+  data?: T
+}
+
 export const useWeilaFetch = createFetch({
   baseUrl,
   options: {
@@ -53,6 +59,37 @@ export const useWeilaFetch = createFetch({
         url: urlObj.toString(),
         options,
       }
+    },
+    async afterFetch({ data, response }) {
+      // 确保 data 是对象格式
+      if (!data || typeof data !== 'object') {
+        throw new Error('响应格式错误')
+      }
+
+      const apiResponse = data as WeilaApiResponse
+
+      // 检查 errcode 是否存在
+      if (typeof apiResponse.errcode !== 'number') {
+        throw new TypeError('响应格式错误：缺少 errcode')
+      }
+
+      // errcode 为 0 表示成功
+      if (apiResponse.errcode === 0) {
+        // 返回 data 字段，如果没有则为 undefined
+        return {
+          data: apiResponse.data,
+          response,
+        }
+      }
+
+      // errcode 为 31 表示 token 失效
+      if (apiResponse.errcode === 31) {
+        // TODO: 处理 token 失效
+        throw new Error(apiResponse.errmsg || 'Token 失效')
+      }
+
+      // 其他 errcode 值表示失败
+      throw new Error(apiResponse.errmsg || `请求失败，错误码: ${apiResponse.errcode}`)
     },
   },
 })
