@@ -21,8 +21,8 @@ const { saveAuth } = useAuth()
 
 // 表单数据
 const formData = ref<LoginForm>({
-  account: '',
-  password: '',
+  account: '19225302194',
+  password: '123456',
 })
 
 // 表单验证

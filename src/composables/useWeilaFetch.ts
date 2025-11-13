@@ -199,7 +199,8 @@ export const useWeilaFetch = createFetch({
         else {
           isRefreshing = false
           refreshSubscribers.length = 0
-          throw new Error(apiResponse.errmsg || 'Token 失效，刷新失败')
+          clearAuth()
+          window.location.href = '/login'
         }
       }
 

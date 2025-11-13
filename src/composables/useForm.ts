@@ -1,12 +1,12 @@
 import type { z } from 'zod'
-import { computed, ref, type Ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export function useForm<T extends z.ZodTypeAny>(schema: T) {
-  const errors = ref<Record<string, string>>({}) as Ref<Record<string, string>>
+  const errorsRef = ref<Record<string, string>>({})
 
   function validate(data: z.infer<T>): boolean {
     // 清空之前的验证错误
-    errors.value = {}
+    errorsRef.value = {}
 
     const result = schema.safeParse(data)
     if (!result.success) {
@@ -14,7 +14,7 @@ export function useForm<T extends z.ZodTypeAny>(schema: T) {
       result.error.issues.forEach((issue) => {
         const field = issue.path[0] as string
         if (field) {
-          errors.value[field] = issue.message
+          errorsRef.value[field] = issue.message
         }
       })
       return false
@@ -23,14 +23,17 @@ export function useForm<T extends z.ZodTypeAny>(schema: T) {
   }
 
   function clearErrors() {
-    errors.value = {}
+    errorsRef.value = {}
   }
 
   function hasError(field: string) {
-    return computed(() => !!errors.value[field])
+    return computed(() => !!errorsRef.value[field])
   }
 
-  const hasErrors = computed(() => Object.keys(errors.value).length > 0)
+  const hasErrors = computed(() => Object.keys(errorsRef.value).length > 0)
+
+  // 返回 computed 对象，可以直接解构并在模板中使用
+  const errors = computed(() => errorsRef.value)
 
   return {
     errors,
