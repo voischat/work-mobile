@@ -1,5 +1,5 @@
 <template>
-  <main>
+  <main class="bg-red-500">
     <RouterView />
   </main>
 </template>
