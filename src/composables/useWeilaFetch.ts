@@ -29,7 +29,7 @@ function getMd5Middle8Chars(md5Str: string): string {
   return md5Str.slice(12, 20)
 }
 
-function generateV2Query(): Record<string, string> {
+export function generateV2Query(): Record<string, string> {
   const timestamp = Date.now() || -1
   const et = Math.floor(timestamp / 1000)
   const app_sign = md5(`${et}${appkey.value}`)
