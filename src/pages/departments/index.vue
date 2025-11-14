@@ -92,6 +92,11 @@ async function handleRefresh() {
   allDepts.value = []
   await refetchDepts()
 }
+
+// 处理部门卡片点击，跳转到部门成员列表
+function handleDeptClick(deptId: number) {
+  router.push(`/departments/${deptId}/members`)
+}
 </script>
 
 <template>
@@ -130,7 +135,10 @@ async function handleRefresh() {
             class="bg-white rounded-lg p-4 border border-gray-200"
           >
             <div class="flex items-center justify-between">
-              <div class="flex-1">
+              <div
+                class="flex-1 cursor-pointer hover:bg-gray-50 -m-4 p-4 rounded-lg transition-colors"
+                @click="handleDeptClick(dept.id)"
+              >
                 <h3 class="text-lg font-medium text-gray-900 mb-2">
                   {{ dept.name }}
                 </h3>
@@ -138,7 +146,9 @@ async function handleRefresh() {
                   成员数量: {{ dept.user_count }}
                 </p>
               </div>
-              <DeptActions :dept="dept" @refresh="handleRefresh" />
+              <div @click.stop>
+                <DeptActions :dept="dept" @refresh="handleRefresh" />
+              </div>
             </div>
           </div>
         </div>
