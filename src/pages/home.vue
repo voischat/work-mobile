@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import HomeLayout from '~/components/HomeLayout.vue'
 
 const router = useRouter()
-
+const { showToast } = useToast()
 // 菜单项配置
 const menuItems = [
   {
@@ -47,6 +47,13 @@ function handleMenuClick(path: string) {
           >
             <span class="text-4xl">{{ item.icon }}</span>
             <span class="text-lg font-medium text-gray-900">{{ item.name }}</span>
+          </button>
+          <button
+            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center justify-center space-y-3 min-h-[120px] m-2"
+            @click="showToast(`Hello, world!${Math.random()}`)"
+          >
+            <span class="text-4xl">🔍</span>
+            <span class="text-lg font-medium text-gray-900">toast</span>
           </button>
         </div>
       </div>

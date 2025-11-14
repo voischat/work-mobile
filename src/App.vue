@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useIntervalFn } from '@vueuse/core'
 import { watch } from 'vue'
+import Toast from '~/components/Toast.vue'
 import { useAuth } from '~/composables/useAuth'
+import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 const REFRESH_INTERVAL = 3 * 60 * 1000 // 3分钟
@@ -45,10 +47,14 @@ watch([token, refreshToken], ([t, rt]) => {
   else
     pause()
 }, { immediate: true })
+
+// Toast
+const { toasts, removeToast } = useToast()
 </script>
 
 <template>
   <main>
     <RouterView />
+    <Toast :toasts="toasts" @remove="removeToast" />
   </main>
 </template>
