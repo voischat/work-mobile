@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import BackLayout from '~/components/BackLayout.vue'
 import { useForm } from '~/composables/useForm'
+import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 // 表单验证 schema
@@ -21,6 +22,7 @@ const changePasswordSchema = z.object({
 type ChangePasswordForm = z.infer<typeof changePasswordSchema>
 
 const router = useRouter()
+const { showToast } = useToast()
 
 // 表单数据
 const formData = ref<ChangePasswordForm>({
@@ -51,7 +53,7 @@ watch([data, isFinished, error], ([result, finished, err]) => {
   if (err)
     return
   if (result) {
-    alert('密码修改成功')
+    showToast('密码修改成功')
     router.push('/me')
   }
 })

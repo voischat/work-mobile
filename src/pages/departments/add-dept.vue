@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import BackLayout from '~/components/BackLayout.vue'
 import { useForm } from '~/composables/useForm'
+import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 // 表单验证 schema
@@ -15,6 +16,7 @@ const addDeptSchema = z.object({
 type AddDeptForm = z.infer<typeof addDeptSchema>
 
 const router = useRouter()
+const { showToast } = useToast()
 
 // 表单数据
 const formData = ref<AddDeptForm>({
@@ -42,7 +44,7 @@ watch([data, isFinished, error], ([result, finished, err]) => {
   if (err)
     return
   if (result !== undefined) {
-    alert('部门创建成功')
+    showToast('部门创建成功')
     router.back()
   }
 })

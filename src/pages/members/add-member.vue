@@ -7,6 +7,7 @@ import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
 import BackLayout from '~/components/BackLayout.vue'
 import { useForm } from '~/composables/useForm'
+import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 // 表单验证 schema
@@ -26,6 +27,7 @@ const addMemberSchema = z.object({
 type AddMemberForm = z.infer<typeof addMemberSchema>
 
 const router = useRouter()
+const { showToast } = useToast()
 
 // 获取部门列表
 const {
@@ -78,7 +80,7 @@ watch([data, isFinished, error], ([result, finished, err]) => {
   if (err)
     return
   if (result !== undefined) {
-    alert('成员创建成功')
+    showToast('成员创建成功')
     router.back()
   }
 })

@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { useAuth } from '~/composables/useAuth'
 import { useForm } from '~/composables/useForm'
+import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 // 邮箱注销表单验证 schema
@@ -18,6 +19,7 @@ type UnregistEmailForm = z.infer<typeof unregistEmailSchema>
 
 const router = useRouter()
 const { clearAuth } = useAuth()
+const { showToast } = useToast()
 
 // 表单数据
 const formData = ref<UnregistEmailForm>({
@@ -55,7 +57,7 @@ watch([data, isFinished, error], ([result, finished, err]) => {
   if (err)
     return
   if (result !== undefined) {
-    alert('账号注销成功')
+    showToast('账号注销成功')
     clearAuth()
     router.push('/login')
   }

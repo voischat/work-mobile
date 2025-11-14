@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import BackLayout from '~/components/BackLayout.vue'
 import { useForm } from '~/composables/useForm'
+import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 // 表单验证 schema
@@ -17,6 +18,7 @@ const bindPhoneSchema = z.object({
 type BindPhoneForm = z.infer<typeof bindPhoneSchema>
 
 const router = useRouter()
+const { showToast } = useToast()
 
 // 表单数据
 const formData = ref<BindPhoneForm>({
@@ -48,7 +50,7 @@ watch([data, isFinished, error], ([result, finished, err]) => {
   if (err)
     return
   if (result !== undefined) {
-    alert('手机号绑定成功')
+    showToast('手机号绑定成功')
     router.push('/me')
   }
 })
