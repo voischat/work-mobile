@@ -24,13 +24,13 @@ export interface UsePageReturn {
  *
  * @example
  * ```ts
- * const { curPage, pageSize, reset, next } = usePage({ pageSize: 10 })
+ * const { curPage, pageSize, reset, next } = usePage()
  * ```
  */
 export function usePage(options: UsePageOptions = {}): UsePageReturn {
   const {
     pageSize = 10,
-    initialPage = 0,
+    initialPage = 1,
   } = options
 
   const curPage = ref(initialPage)

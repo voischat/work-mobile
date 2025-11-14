@@ -11,7 +11,7 @@ import { isAtBottom } from '~/shared/states'
 const router = useRouter()
 
 // 分页状态
-const { curPage, pageSize } = usePage({ pageSize: 10 })
+const { curPage, pageSize } = usePage()
 const allGroups = ref<Group[]>([]) // 累积存储所有已加载的群组
 const isLoadingMore = ref(false) // 是否正在加载更多
 

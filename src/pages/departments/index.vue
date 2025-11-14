@@ -11,7 +11,7 @@ import { isAtBottom } from '~/shared/states'
 const router = useRouter()
 
 // 分页状态
-const { curPage, pageSize } = usePage({ pageSize: 10 })
+const { curPage, pageSize } = usePage()
 const allDepts = ref<Dept[]>([]) // 累积存储所有已加载的部门
 const isLoadingMore = ref(false) // 是否正在加载更多
 const lastPageItemCount = ref(0) // 最后一次返回的列表长度，用于判断是否还有更多数据

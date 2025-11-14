@@ -17,7 +17,7 @@ const router = useRouter()
 const deptId = computed(() => Number(route.params.id))
 
 // 分页状态
-const { curPage, pageSize, reset } = usePage({ pageSize: 20 })
+const { curPage, pageSize, reset } = usePage()
 const allMembers = ref<Member[]>([]) // 累积存储所有已加载的成员
 const isLoadingMore = ref(false) // 是否正在加载更多
 

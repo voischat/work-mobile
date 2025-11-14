@@ -12,7 +12,7 @@ import { isAtBottom } from '~/shared/states'
 const router = useRouter()
 
 // 分页状态
-const { curPage, pageSize } = usePage({ pageSize: 2 }) // 每页大小限制为 2，便于测试翻页功能
+const { curPage, pageSize } = usePage()
 const allMembers = ref<Member[]>([]) // 累积存储所有已加载的成员
 const isLoadingMore = ref(false) // 是否正在加载更多
 
