@@ -1,22 +1,88 @@
 <script setup lang="ts">
-import type { Dept } from '~/types/management'
-import { computed } from 'vue'
+import type { Dept, DeptListResponse } from '~/types/management'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
 
-// 获取部门列表（pickWeilaData 会自动提取 depts 数组）
+// 分页状态
+const { curPage, pageSize } = usePage({ pageSize: 10 })
+const allDepts = ref<Dept[]>([]) // 累积存储所有已加载的部门
+const isLoadingMore = ref(false) // 是否正在加载更多
+const lastPageItemCount = ref(0) // 最后一次返回的列表长度，用于判断是否还有更多数据
+
+// 动态构建 API URL
+const deptListUrl = computed(() => `/corp/address/get-my-manage-dept-list?page=${curPage.value}&size=${pageSize}`)
+
+// 获取部门列表
 const {
-  data,
+  data: deptListData,
   error: deptError,
   isFetching: isDeptFetching,
-} = useWeilaFetch<Dept[]>('/corp/address/get-my-manage-dept-list?page=0&size=10')
+  execute: refetchDepts,
+} = useWeilaFetch<DeptListResponse>(deptListUrl)
   .post()
   .json()
 
-const depts = computed(() => data.value?.depts || [])
+// 监听初始数据加载完成，填充 allDepts
+watch(deptListData, (newData) => {
+  if (newData?.depts) {
+    const depts = newData.depts || []
+    lastPageItemCount.value = depts.length
+
+    if (curPage.value === 0) {
+      // 初始加载时，直接设置 allDepts
+      allDepts.value = [...depts]
+    }
+    else {
+      // 加载更多时，追加到 allDepts
+      allDepts.value.push(...depts)
+    }
+  }
+}, { immediate: true })
+
+// 加载更多部门
+async function loadMoreDepts() {
+  // 防止重复加载
+  if (isLoadingMore.value || isDeptFetching.value) {
+    isAtBottom.value = false
+    return
+  }
+
+  // 检查是否还有更多数据（通过最后一次返回的列表长度判断）
+  if (lastPageItemCount.value > 0 && lastPageItemCount.value < pageSize) {
+    isAtBottom.value = false
+    return
+  }
+
+  isLoadingMore.value = true
+  curPage.value++
+
+  try {
+    await refetchDepts()
+  }
+  catch (error) {
+    console.error('加载更多部门失败:', error)
+    // 加载失败时回退页码
+    curPage.value--
+  }
+  finally {
+    isLoadingMore.value = false
+    // 加载完成后重置 isAtBottom 状态
+    isAtBottom.value = false
+  }
+}
+
+// 监听 isAtBottom 状态，当滚动到底部时加载更多数据
+watch(isAtBottom, (value) => {
+  if (value) {
+    loadMoreDepts()
+  }
+})
 </script>
 
 <template>
@@ -48,9 +114,9 @@ const depts = computed(() => data.value?.depts || [])
         </div>
 
         <!-- 部门列表 -->
-        <div v-else-if="depts?.length" class="space-y-4">
+        <div v-else-if="allDepts?.length" class="space-y-4">
           <div
-            v-for="dept in depts"
+            v-for="dept in allDepts"
             :key="dept.id"
             class="bg-white rounded-lg p-4 border border-gray-200"
           >
@@ -70,6 +136,20 @@ const depts = computed(() => data.value?.depts || [])
         <!-- 空数据状态 -->
         <div v-else class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无部门数据
+        </div>
+
+        <!-- 加载更多状态 -->
+        <div v-if="isLoadingMore" class="mt-4 flex items-center justify-center py-4">
+          <div class="text-gray-600 text-sm">
+            加载中...
+          </div>
+        </div>
+
+        <!-- 没有更多数据提示 -->
+        <div v-else-if="allDepts.length > 0 && lastPageItemCount > 0 && lastPageItemCount < pageSize" class="mt-4 flex items-center justify-center py-4">
+          <div class="text-gray-400 text-sm">
+            已加载全部数据（共 {{ allDepts.length }} 条）
+          </div>
         </div>
       </div>
     </div>

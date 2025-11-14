@@ -3,19 +3,19 @@ import type { Dept, Member, MemberListResponse } from '~/types/management'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
 
-// 翻页相关状态
-const currentPage = ref(0)
-const pageSize = 2 // 每页大小限制为 2，便于测试翻页功能
+// 分页状态
+const { curPage, pageSize } = usePage({ pageSize: 2 }) // 每页大小限制为 2，便于测试翻页功能
 const allMembers = ref<Member[]>([]) // 累积存储所有已加载的成员
 const isLoadingMore = ref(false) // 是否正在加载更多
 
 // 动态构建 API URL
-const memberListUrl = computed(() => `/corp/address/get-member-list?page=${currentPage.value}&size=${pageSize}`)
+const memberListUrl = computed(() => `/corp/address/get-member-list?page=${curPage.value}&size=${pageSize}`)
 
 // 获取成员列表
 const {
@@ -29,11 +29,17 @@ const {
   }))
   .json()
 
-// 监听初始数据加载完成，填充 allMembers
+// 监听数据加载完成，填充 allMembers
 watch(memberListData, (newData) => {
-  if (newData?.members && currentPage.value === 0) {
-    // 初始加载时，直接设置 allMembers
-    allMembers.value = [...newData.members]
+  if (newData?.members) {
+    if (curPage.value === 0) {
+      // 初始加载时，直接设置 allMembers
+      allMembers.value = [...newData.members]
+    }
+    else {
+      // 加载更多时，追加到 allMembers
+      allMembers.value.push(...newData.members)
+    }
   }
 }, { immediate: true })
 
@@ -52,19 +58,16 @@ async function loadMoreMembers() {
   }
 
   isLoadingMore.value = true
-  currentPage.value++
+  curPage.value++
 
   try {
     await refetchMembers()
-    // 等待数据更新后追加到 allMembers
-    if (memberListData.value?.members) {
-      allMembers.value.push(...memberListData.value.members)
-    }
+    // 数据会在 watch 中自动追加
   }
   catch (error) {
     console.error('加载更多成员失败:', error)
     // 加载失败时回退页码
-    currentPage.value--
+    curPage.value--
   }
   finally {
     isLoadingMore.value = false
