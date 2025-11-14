@@ -1,5 +1,14 @@
 <script setup lang="ts">
+import { useRouteQuery } from '@vueuse/router'
 import BottomNav from '~/components/BottomNav.vue'
+
+const enableHomeLayout = useRouteQuery(
+  'enableHomeLayout',
+  'true',
+  {
+    transform: (val: string) => val === 'true',
+  },
+)
 </script>
 
 <template>
@@ -10,6 +19,6 @@ import BottomNav from '~/components/BottomNav.vue'
     </main>
 
     <!-- 底部导航栏 -->
-    <BottomNav />
+    <BottomNav v-if="enableHomeLayout" />
   </div>
 </template>

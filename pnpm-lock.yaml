@@ -58,6 +58,9 @@ importers:
       '@vue/test-utils':
         specifier: ^2.4.6
         version: 2.4.6
+      '@vueuse/router':
+        specifier: 14.0.0-alpha.0
+        version: 14.0.0-alpha.0(vue-router@4.5.1(vue@3.5.16(typescript@5.8.3)))(vue@3.5.16(typescript@5.8.3))
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.21(postcss@8.5.3)
@@ -1284,6 +1287,17 @@ packages:
 
   '@vueuse/metadata@14.0.0-alpha.2':
     resolution: {integrity: sha512-RXEF/r6LQ71D/KbOFLwfwuNvxJ6a76nQdmAYKFUUs3XddMq5mCzkVDHoE1R5iU2r849WzcAI37BRSUMDCJ/kbA==}
+
+  '@vueuse/router@14.0.0-alpha.0':
+    resolution: {integrity: sha512-fyV3YxpeS22u7O0lzil0qWho7mAaSFe3YuwC06et9jk/BqpvedRS165ThJprVtq2r30i1wOyiR3s7aI1etfYCA==}
+    peerDependencies:
+      vue: ^3.5.0
+      vue-router: ^4.0.0
+
+  '@vueuse/shared@14.0.0-alpha.0':
+    resolution: {integrity: sha512-J8cmTJkB0hAwPBXRR5U3N9FJkhPBrhyYiQm21kZ3j/o8W69Pg6JlPSxLOJtkg+AwC/r5x7Gpq2Vglv84vHotwA==}
+    peerDependencies:
+      vue: ^3.5.0
 
   '@vueuse/shared@14.0.0-alpha.2':
     resolution: {integrity: sha512-xcAybkGZG5gxl5CQ7sas1G42kd4PTUuRCAYAYFOTjmM3m/JcEG8MFSkUm55aacmiSJTCPw5kRwspqRSn6j9KEw==}
@@ -4580,6 +4594,16 @@ snapshots:
       vue: 3.5.16(typescript@5.8.3)
 
   '@vueuse/metadata@14.0.0-alpha.2': {}
+
+  '@vueuse/router@14.0.0-alpha.0(vue-router@4.5.1(vue@3.5.16(typescript@5.8.3)))(vue@3.5.16(typescript@5.8.3))':
+    dependencies:
+      '@vueuse/shared': 14.0.0-alpha.0(vue@3.5.16(typescript@5.8.3))
+      vue: 3.5.16(typescript@5.8.3)
+      vue-router: 4.5.1(vue@3.5.16(typescript@5.8.3))
+
+  '@vueuse/shared@14.0.0-alpha.0(vue@3.5.16(typescript@5.8.3))':
+    dependencies:
+      vue: 3.5.16(typescript@5.8.3)
 
   '@vueuse/shared@14.0.0-alpha.2(vue@3.5.16(typescript@5.8.3))':
     dependencies:
