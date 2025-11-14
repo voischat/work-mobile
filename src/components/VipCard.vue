@@ -59,11 +59,11 @@ function formatSupportName(name: string): string {
         <h4 class="text-lg font-medium text-gray-900 mb-3">
           支持的功能
         </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 -m-1.5">
           <div
             v-for="support in vip.vip_supports"
             :key="`${support.name}-${support.type}`"
-            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg m-1.5"
           >
             <div class="flex items-center space-x-2">
               <span

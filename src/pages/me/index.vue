@@ -76,8 +76,8 @@ function formatDate(timestamp: number) {
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div class="border-b pb-2">
+          <div class="grid grid-cols-1 md:grid-cols-2 -m-2 mb-6">
+            <div class="border-b pb-2 m-2">
               <p class="text-sm text-gray-500">
                 工号
               </p>
@@ -85,7 +85,7 @@ function formatDate(timestamp: number) {
                 {{ userInfo.job_num || '-' }}
               </p>
             </div>
-            <div class="border-b pb-2">
+            <div class="border-b pb-2 m-2">
               <p class="text-sm text-gray-500">
                 手机号
               </p>
@@ -93,7 +93,7 @@ function formatDate(timestamp: number) {
                 {{ userInfo.bind_phone || userInfo.phone || '-' }}
               </p>
             </div>
-            <div class="border-b pb-2">
+            <div class="border-b pb-2 m-2">
               <p class="text-sm text-gray-500">
                 邮箱
               </p>
@@ -101,7 +101,7 @@ function formatDate(timestamp: number) {
                 {{ userInfo.bind_email || '-' }}
               </p>
             </div>
-            <div class="border-b pb-2">
+            <div class="border-b pb-2 m-2">
               <p class="text-sm text-gray-500">
                 创建时间
               </p>

@@ -38,11 +38,11 @@ function handleMenuClick(path: string) {
         </h1>
 
         <!-- 两列菜单网格 -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 -m-2">
           <button
             v-for="item in menuItems"
             :key="item.path"
-            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center justify-center space-y-3 min-h-[120px]"
+            class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center justify-center space-y-3 min-h-[120px] m-2"
             @click="handleMenuClick(item.path)"
           >
             <span class="text-4xl">{{ item.icon }}</span>
