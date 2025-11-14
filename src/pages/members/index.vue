@@ -109,7 +109,7 @@ const onlineStatusMap = {
   1: { label: '在线', color: 'bg-green-100 text-green-700' },
 } as const
 
-// 追踪类型映射（根据参考代码，track 值对应：关闭/高/中/低/快）
+// 轨迹类型映射（根据参考代码，track 值对应：关闭/高/中/低/快）
 const trackTypeMap = {
   0: { label: '关闭', color: 'bg-gray-100 text-gray-700' },
   1: { label: '高', color: 'bg-red-100 text-red-700' },
@@ -118,7 +118,7 @@ const trackTypeMap = {
   4: { label: '快', color: 'bg-blue-100 text-blue-700' },
 } as const
 
-// 位置分享映射
+// 位置共享映射
 const locShareMap = {
   0: { label: '关闭', color: 'bg-gray-100 text-gray-700' },
   1: { label: '开启', color: 'bg-green-100 text-green-700' },
@@ -278,12 +278,12 @@ function formatDate(timestamp: number): string {
               <span
                 class="px-2 py-0.5 rounded text-xs font-medium" :class="[trackTypeMap[member.track as keyof typeof trackTypeMap]?.color || 'bg-gray-100 text-gray-700']"
               >
-                追踪: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || '未知' }}
+                轨迹: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || '未知' }}
               </span>
               <span
                 class="px-2 py-0.5 rounded text-xs font-medium" :class="[locShareMap[member.loc_share as keyof typeof locShareMap]?.color || 'bg-gray-100 text-gray-700']"
               >
-                位置分享: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || '未知' }}
+                位置共享: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || '未知' }}
               </span>
             </div>
 
