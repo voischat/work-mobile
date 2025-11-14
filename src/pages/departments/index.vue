@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Dept } from '~/types/management'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
@@ -51,7 +52,7 @@ const depts = computed(() => data.value?.depts || [])
           <div
             v-for="dept in depts"
             :key="dept.id"
-            class="bg-white rounded-lg shadow-md p-4"
+            class="bg-white rounded-lg p-4 border border-gray-200"
           >
             <div class="flex items-center justify-between">
               <div class="flex-1">
@@ -67,7 +68,7 @@ const depts = computed(() => data.value?.depts || [])
         </div>
 
         <!-- 空数据状态 -->
-        <div v-else class="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
+        <div v-else class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无部门数据
         </div>
       </div>

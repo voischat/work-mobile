@@ -49,7 +49,7 @@ const {
           <div
             v-for="group in groupListData.groups"
             :key="group.id"
-            class="bg-white rounded-lg shadow-md p-4"
+            class="bg-white rounded-lg p-4 border border-gray-200"
           >
             <div class="flex items-center space-x-4">
               <!-- 头像 -->
@@ -72,7 +72,7 @@ const {
         </div>
 
         <!-- 空数据状态 -->
-        <div v-else class="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
+        <div v-else class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无群组数据
         </div>
       </div>
