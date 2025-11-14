@@ -35,5 +35,7 @@ declare module 'vue-router/auto-routes' {
     '/members/': RouteRecordInfo<'/members/', '/members', Record<never, never>, Record<never, never>>,
     '/members/add-device': RouteRecordInfo<'/members/add-device', '/members/add-device', Record<never, never>, Record<never, never>>,
     '/members/add-member': RouteRecordInfo<'/members/add-member', '/members/add-member', Record<never, never>, Record<never, never>>,
+    '/members/edit-member-[id]': RouteRecordInfo<'/members/edit-member-[id]', '/members/edit-member-:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/members/reset-password-[id]': RouteRecordInfo<'/members/reset-password-[id]', '/members/reset-password-:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
   }
 }
