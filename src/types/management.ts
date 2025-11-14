@@ -3,6 +3,8 @@ export interface Member {
   user_id: number
   user_num: string
   job_num: string
+  product?: string
+  imei?: string
   sex: number
   name: string
   avatar: string

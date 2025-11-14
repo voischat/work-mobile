@@ -294,6 +294,54 @@ defineExpose({
       </div>
     </div>
 
+    <!-- 设备信息（仅设备显示） -->
+    <template v-if="isDevice">
+      <!-- 产品型号 -->
+      <div>
+        <label for="product" class="block text-sm font-medium text-gray-700 mb-1">
+          产品型号
+        </label>
+        <input
+          id="product"
+          :value="member?.product || ''"
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
+          readonly
+          disabled
+        >
+      </div>
+
+      <!-- IMEI -->
+      <div>
+        <label for="imei" class="block text-sm font-medium text-gray-700 mb-1">
+          IMEI
+        </label>
+        <input
+          id="imei"
+          :value="member?.imei || ''"
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
+          readonly
+          disabled
+        >
+      </div>
+
+      <!-- 微喇号 -->
+      <div>
+        <label for="user_num" class="block text-sm font-medium text-gray-700 mb-1">
+          微喇号
+        </label>
+        <input
+          id="user_num"
+          :value="member?.user_num || ''"
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
+          readonly
+          disabled
+        >
+      </div>
+    </template>
+
     <!-- 位置共享 -->
     <div>
       <label for="loc_share" class="block text-sm font-medium text-gray-700 mb-1">
