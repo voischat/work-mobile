@@ -135,10 +135,10 @@ function handleSubmit() {
               <AvatarUpload v-model="formData.avatar" />
             </div>
 
-            <!-- 突发模式 -->
+            <!-- 对讲模式 -->
             <div>
               <label for="burst_mode" class="block text-sm font-medium text-gray-700 mb-1">
-                突发模式
+                对讲模式
               </label>
               <select
                 id="burst_mode"
@@ -148,10 +148,10 @@ function handleSubmit() {
                 :disabled="isFetching"
               >
                 <option :value="0">
-                  关闭
+                  排麦
                 </option>
                 <option :value="1">
-                  开启
+                  抢麦
                 </option>
               </select>
               <div v-if="errors.burst_mode" class="mt-1 text-sm text-red-600">

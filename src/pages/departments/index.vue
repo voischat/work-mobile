@@ -3,6 +3,7 @@ import type { Dept, DeptListResponse } from '~/types/management'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import DeptActions from '~/components/DeptActions.vue'
 import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
@@ -83,6 +84,14 @@ watch(isAtBottom, (value) => {
     loadMoreDepts()
   }
 })
+
+// 处理刷新数据
+async function handleRefresh() {
+  // 重置到第一页并重新加载
+  curPage.value = 0
+  allDepts.value = []
+  await refetchDepts()
+}
 </script>
 
 <template>
@@ -129,6 +138,7 @@ watch(isAtBottom, (value) => {
                   成员数量: {{ dept.user_count }}
                 </p>
               </div>
+              <DeptActions :dept="dept" @refresh="handleRefresh" />
             </div>
           </div>
         </div>

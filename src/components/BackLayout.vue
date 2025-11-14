@@ -49,10 +49,6 @@ onMounted(() => {
 onUnmounted(() => {
   isAtBottom.value = false
 })
-
-watchEffect(() => {
-  console.log(isAtBottom.value)
-})
 </script>
 
 <template>

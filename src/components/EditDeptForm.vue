@@ -1,0 +1,126 @@
+<script setup lang="ts">
+import type { Dept } from '~/types/management'
+import { computed, ref, watch } from 'vue'
+import { z } from 'zod'
+import { useForm } from '~/composables/useForm'
+import { useWeilaFetch } from '~/composables/useWeilaFetch'
+
+const props = defineProps<{
+  dept: Dept
+}>()
+
+// 编辑部门的 schema
+const editDeptSchema = z.object({
+  dept_id: z.number(),
+  name: z.string().min(1, '部门名称不能为空'),
+})
+
+type EditDeptForm = z.infer<typeof editDeptSchema>
+
+// 表单数据
+const formData = ref<EditDeptForm>({
+  dept_id: props.dept?.id || 0,
+  name: props.dept?.name || '',
+})
+
+// 监听 dept prop 变化，更新表单数据
+watch(() => props.dept, (newDept) => {
+  if (newDept) {
+    formData.value = {
+      dept_id: newDept.id || 0,
+      name: newDept.name || '',
+    }
+  }
+}, { immediate: true, deep: true })
+
+// 表单验证
+const { errors, validate } = useForm(editDeptSchema)
+
+// 调用编辑部门 API
+const { error, isFetching, isFinished, data, execute: editDept } = useWeilaFetch<{ dept: Dept }>('/corp/address/change-dept', {
+  immediate: false,
+}).post(() => ({
+  dept_id: formData.value.dept_id,
+  name: formData.value.name,
+})).json()
+
+const errorMessage = computed(() => {
+  return error.value?.message || ''
+})
+
+// 提交方法，返回 Promise
+async function submit(): Promise<void> {
+  // 如果正在提交中，直接返回
+  if (isFetching.value) {
+    return Promise.resolve()
+  }
+
+  if (!validate(formData.value)) {
+    throw new Error('表单验证失败')
+  }
+
+  return new Promise((resolve, reject) => {
+    // 监听编辑结果
+    const stopWatcher = watch([data, isFinished, error], ([result, finished, err]) => {
+      if (!finished)
+        return
+
+      // 停止监听
+      stopWatcher()
+
+      if (err) {
+        reject(err)
+        return
+      }
+
+      if (result !== undefined) {
+        resolve()
+      }
+      else {
+        reject(new Error('提交失败'))
+      }
+    })
+
+    // 执行提交
+    editDept()
+  })
+}
+
+// 暴露 submit 方法和 isFetching 状态供父组件调用
+defineExpose({
+  submit,
+  isFetching,
+})
+</script>
+
+<template>
+  <div v-if="!dept" class="text-center text-gray-500 py-8">
+    加载中...
+  </div>
+
+  <form v-else class="space-y-4" @submit.prevent>
+    <!-- 部门名称输入框 -->
+    <div>
+      <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+        部门名称 <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="name"
+        v-model="formData.name"
+        type="text"
+        placeholder="请输入部门名称"
+        class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        :class="errors.name ? 'border-red-500' : 'border-gray-300'"
+        :disabled="isFetching"
+      >
+      <div v-if="errors.name" class="mt-1 text-sm text-red-600">
+        {{ errors.name }}
+      </div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div v-if="errorMessage" class="text-sm text-red-600">
+      {{ errorMessage }}
+    </div>
+  </form>
+</template>

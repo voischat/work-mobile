@@ -3,6 +3,7 @@ import type { Group, GroupListResponse } from '~/types/management'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import GroupActions from '~/components/GroupActions.vue'
 import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
@@ -80,6 +81,14 @@ watch(isAtBottom, (value) => {
     loadMoreGroups()
   }
 })
+
+// 处理刷新数据
+async function handleRefresh() {
+  // 重置到第一页并重新加载
+  curPage.value = 0
+  allGroups.value = []
+  await refetchGroups()
+}
 </script>
 
 <template>
@@ -117,22 +126,25 @@ watch(isAtBottom, (value) => {
             :key="group.id"
             class="bg-white rounded-lg p-4 border border-gray-200"
           >
-            <div class="flex items-center space-x-4">
-              <!-- 头像 -->
-              <img
-                :src="group.avatar"
-                :alt="group.name"
-                class="w-12 h-12 rounded-full object-cover flex-shrink-0"
-              >
-              <!-- 信息 -->
-              <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-medium text-gray-900 mb-1 truncate">
-                  {{ group.name }}
-                </h3>
-                <p class="text-sm text-gray-600">
-                  成员数量: {{ group.user_count }}
-                </p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4 flex-1 min-w-0">
+                <!-- 头像 -->
+                <img
+                  :src="group.avatar"
+                  :alt="group.name"
+                  class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                >
+                <!-- 信息 -->
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-medium text-gray-900 mb-1 truncate">
+                    {{ group.name }}
+                  </h3>
+                  <p class="text-sm text-gray-600">
+                    成员数量: {{ group.user_count }}
+                  </p>
+                </div>
               </div>
+              <GroupActions :group="group" @refresh="handleRefresh" />
             </div>
           </div>
         </div>
