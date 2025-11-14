@@ -14,7 +14,7 @@ const emit = defineEmits<{
 
 const { showToast } = useToast()
 
-// 使用 ref 管理状态（0=启用, 1=暂停）
+// 使用 ref 管理状态（0=启用, 1=停用）
 const state = ref(props.member.state)
 
 // 监听 member 变化，同步状态
@@ -41,7 +41,7 @@ async function handleToggle() {
     const result = await changeState()
     if (result) {
       state.value = newState.value
-      showToast(state.value === 0 ? '已启用' : '已暂停')
+      showToast(state.value === 0 ? '已启用' : '已停用')
       emit('updated', { ...props.member, state: state.value })
     }
   }
@@ -65,6 +65,6 @@ async function handleToggle() {
     :disabled="isFetching"
     @click="handleToggle"
   >
-    {{ state === 0 ? '启用' : '暂停' }}
+    {{ state === 0 ? '启用' : '停用' }}
   </button>
 </template>

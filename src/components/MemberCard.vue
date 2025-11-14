@@ -22,10 +22,10 @@ const memberTypeMap = {
   255: { label: '企业主', color: 'bg-purple-100 text-purple-700' },
 } as const
 
-// 状态映射（state: 0=启用, 1=暂停）
+// 状态映射（state: 0=启用, 1=停用）
 const stateMap = {
   0: { label: '启用', color: 'bg-green-100 text-green-700' },
-  1: { label: '暂停', color: 'bg-gray-100 text-gray-700' },
+  1: { label: '停用', color: 'bg-gray-100 text-gray-700' },
 } as const
 
 // 在线状态映射
