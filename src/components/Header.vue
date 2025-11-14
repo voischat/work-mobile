@@ -23,7 +23,7 @@ function handleBack() {
       <!-- 返回按钮 -->
       <button
         v-if="showBack"
-        class="mr-3 p-2 -ml-2 text-gray-600 hover:text-gray-900 transition-colors"
+        class="bg-transparent mr-3 p-2 -ml-2 text-gray-600 hover:text-gray-900"
         @click="handleBack"
       >
         <svg
