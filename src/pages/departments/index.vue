@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { Dept } from '~/types/management'
+import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+
+const router = useRouter()
 
 // 获取部门列表（pickWeilaData 会自动提取 depts 数组）
 const {
@@ -17,6 +20,16 @@ const {
   <BackLayout title="部门管理">
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
+        <!-- 按钮区域 -->
+        <div class="mb-4">
+          <button
+            class="bg-blue-600 text-white px-4 py-2 rounded"
+            @click="router.push('/departments/add-dept')"
+          >
+            添加部门
+          </button>
+        </div>
+
         <!-- 加载状态 -->
         <div v-if="isDeptFetching" class="flex items-center justify-center py-12">
           <div class="text-gray-600">

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { Dept, MemberListResponse } from '~/types/management'
+import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+
+const router = useRouter()
 
 // 获取成员列表
 const {
@@ -70,6 +73,22 @@ function formatDate(timestamp: number): string {
   <BackLayout title="成员管理">
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
+        <!-- 按钮区域 -->
+        <div class="mb-4 flex space-x-2">
+          <button
+            class="bg-blue-600 text-white px-4 py-2 rounded"
+            @click="router.push('/members/add-member')"
+          >
+            创建成员
+          </button>
+          <button
+            class="bg-blue-600 text-white px-4 py-2 rounded"
+            @click="router.push('/members/add-device')"
+          >
+            添加设备
+          </button>
+        </div>
+
         <!-- 加载状态 -->
         <div v-if="isMemberFetching" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
@@ -97,7 +116,7 @@ function formatDate(timestamp: number): string {
               <img
                 :src="member.avatar"
                 :alt="member.name"
-                class="w-12 h-12 rounded object-cover flex-shrink-0"
+                class="size-14 rounded object-cover flex-shrink-0"
               >
               <!-- 基本信息 -->
               <div class="flex-1 min-w-0">

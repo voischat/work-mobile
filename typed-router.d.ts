@@ -19,8 +19,10 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
-    '/departments': RouteRecordInfo<'/departments', '/departments', Record<never, never>, Record<never, never>>,
-    '/groups': RouteRecordInfo<'/groups', '/groups', Record<never, never>, Record<never, never>>,
+    '/departments/': RouteRecordInfo<'/departments/', '/departments', Record<never, never>, Record<never, never>>,
+    '/departments/add-dept': RouteRecordInfo<'/departments/add-dept', '/departments/add-dept', Record<never, never>, Record<never, never>>,
+    '/groups/': RouteRecordInfo<'/groups/', '/groups', Record<never, never>, Record<never, never>>,
+    '/groups/add-group': RouteRecordInfo<'/groups/add-group', '/groups/add-group', Record<never, never>, Record<never, never>>,
     '/home': RouteRecordInfo<'/home', '/home', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/me/': RouteRecordInfo<'/me/', '/me', Record<never, never>, Record<never, never>>,
@@ -30,6 +32,8 @@ declare module 'vue-router/auto-routes' {
     '/me/unregist': RouteRecordInfo<'/me/unregist', '/me/unregist', Record<never, never>, Record<never, never>>,
     '/me/UnregistEmail': RouteRecordInfo<'/me/UnregistEmail', '/me/UnregistEmail', Record<never, never>, Record<never, never>>,
     '/me/UnregistPhone': RouteRecordInfo<'/me/UnregistPhone', '/me/UnregistPhone', Record<never, never>, Record<never, never>>,
-    '/members': RouteRecordInfo<'/members', '/members', Record<never, never>, Record<never, never>>,
+    '/members/': RouteRecordInfo<'/members/', '/members', Record<never, never>, Record<never, never>>,
+    '/members/add-device': RouteRecordInfo<'/members/add-device', '/members/add-device', Record<never, never>, Record<never, never>>,
+    '/members/add-member': RouteRecordInfo<'/members/add-member', '/members/add-member', Record<never, never>, Record<never, never>>,
   }
 }

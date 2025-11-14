@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { GroupListResponse } from '~/types/management'
+import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+
+const router = useRouter()
 
 // 获取群组列表
 const {
@@ -17,6 +20,16 @@ const {
   <BackLayout title="群组管理">
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
+        <!-- 按钮区域 -->
+        <div class="mb-4">
+          <button
+            class="bg-blue-600 text-white px-4 py-2 rounded"
+            @click="router.push('/groups/add-group')"
+          >
+            添加群组
+          </button>
+        </div>
+
         <!-- 加载状态 -->
         <div v-if="isGroupFetching" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
