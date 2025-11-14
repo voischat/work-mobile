@@ -8,12 +8,14 @@ const router = useRouter()
 
 // 获取部门列表（pickWeilaData 会自动提取 depts 数组）
 const {
-  data: depts,
+  data,
   error: deptError,
   isFetching: isDeptFetching,
 } = useWeilaFetch<Dept[]>('/corp/address/get-my-manage-dept-list?page=0&size=10')
   .post()
   .json()
+
+const depts = computed(() => data.value?.depts || [])
 </script>
 
 <template>
