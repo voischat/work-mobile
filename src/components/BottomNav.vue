@@ -12,6 +12,11 @@ const navItems = [
     icon: '🏠',
   },
   {
+    name: '工作台',
+    path: '/home',
+    icon: '💼',
+  },
+  {
     name: '我的',
     path: '/me',
     icon: '👤',
@@ -20,7 +25,12 @@ const navItems = [
 
 // 判断当前路由是否激活
 function isActive(path: string) {
-  return route.path === path
+  // 对于根路径，需要精确匹配
+  if (path === '/') {
+    return route.path === path
+  }
+  // 对于其他路径，检查是否以该路径开头
+  return route.path.startsWith(path)
 }
 
 // 处理导航点击
