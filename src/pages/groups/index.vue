@@ -62,6 +62,8 @@ async function loadMoreGroups() {
   try {
     await refetchGroups()
     // 数据会在 watch 中自动追加
+    // 加载成功后重置 isAtBottom 状态
+    isAtBottom.value = false
   }
   catch (error) {
     console.error('加载更多群组失败:', error)
@@ -70,8 +72,6 @@ async function loadMoreGroups() {
   }
   finally {
     isLoadingMore.value = false
-    // 加载完成后重置 isAtBottom 状态
-    isAtBottom.value = false
   }
 }
 

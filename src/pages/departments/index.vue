@@ -65,6 +65,8 @@ async function loadMoreDepts() {
 
   try {
     await refetchDepts()
+    // 加载成功后重置 isAtBottom 状态
+    isAtBottom.value = false
   }
   catch (error) {
     console.error('加载更多部门失败:', error)
@@ -73,8 +75,6 @@ async function loadMoreDepts() {
   }
   finally {
     isLoadingMore.value = false
-    // 加载完成后重置 isAtBottom 状态
-    isAtBottom.value = false
   }
 }
 

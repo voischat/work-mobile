@@ -65,6 +65,8 @@ async function loadMoreMembers() {
   try {
     await refetchMembers()
     // 数据会在 watch 中自动追加
+    // 加载成功后重置 isAtBottom 状态
+    isAtBottom.value = false
   }
   catch (error) {
     console.error('加载更多成员失败:', error)
@@ -73,8 +75,6 @@ async function loadMoreMembers() {
   }
   finally {
     isLoadingMore.value = false
-    // 加载完成后重置 isAtBottom 状态
-    isAtBottom.value = false
   }
 }
 
