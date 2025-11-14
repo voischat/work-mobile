@@ -1,13 +1,20 @@
 <script setup lang="ts">
-import { useIntervalFn } from '@vueuse/core'
-import { watch } from 'vue'
-import Toast from '~/components/Toast.vue'
-import { useAuth } from '~/composables/useAuth'
-import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { useRouteQuery } from '@vueuse/router'
 
 const REFRESH_INTERVAL = 3 * 60 * 1000 // 3分钟
 const { token, refreshToken, clearAuth, saveAuth } = useAuth()
+
+// 从 URL query 获取 token 和 refresh_token
+const queryToken = useRouteQuery('token', '')
+const queryRefreshToken = useRouteQuery('refresh_token', '')
+
+// 监听 URL query 中的 token，如果两者都存在则保存
+const { stop } = watch([queryToken, queryRefreshToken], ([tokenValue, refreshTokenValue]) => {
+  if (tokenValue && refreshTokenValue) {
+    saveAuth(tokenValue, refreshTokenValue)
+    stop()
+  }
+}, { immediate: true })
 
 // 刷新 token 的 fetch（非立即执行）
 const { data, error, execute: refreshTokenExecute } = useWeilaFetch<{
