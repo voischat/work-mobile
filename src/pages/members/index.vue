@@ -1,21 +1,84 @@
 <script setup lang="ts">
-import type { Dept, MemberListResponse } from '~/types/management'
+import type { Dept, Member, MemberListResponse } from '~/types/management'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
+
+// 翻页相关状态
+const currentPage = ref(0)
+const pageSize = 2 // 每页大小限制为 2，便于测试翻页功能
+const allMembers = ref<Member[]>([]) // 累积存储所有已加载的成员
+const isLoadingMore = ref(false) // 是否正在加载更多
+
+// 动态构建 API URL
+const memberListUrl = computed(() => `/corp/address/get-member-list?page=${currentPage.value}&size=${pageSize}`)
 
 // 获取成员列表
 const {
   data: memberListData,
   error: memberError,
   isFetching: isMemberFetching,
-} = useWeilaFetch<MemberListResponse>('/corp/address/get-member-list?page=0&size=10')
+  execute: refetchMembers,
+} = useWeilaFetch<MemberListResponse>(memberListUrl)
   .post(() => ({
     key: '',
   }))
   .json()
+
+// 监听初始数据加载完成，填充 allMembers
+watch(memberListData, (newData) => {
+  if (newData?.members && currentPage.value === 0) {
+    // 初始加载时，直接设置 allMembers
+    allMembers.value = [...newData.members]
+  }
+}, { immediate: true })
+
+// 加载更多成员
+async function loadMoreMembers() {
+  // 防止重复加载
+  if (isLoadingMore.value || isMemberFetching.value) {
+    isAtBottom.value = false
+    return
+  }
+
+  // 检查是否还有更多数据
+  if (allMembers.value.length >= (memberListData.value?.count || 0)) {
+    isAtBottom.value = false
+    return
+  }
+
+  isLoadingMore.value = true
+  currentPage.value++
+
+  try {
+    await refetchMembers()
+    // 等待数据更新后追加到 allMembers
+    if (memberListData.value?.members) {
+      allMembers.value.push(...memberListData.value.members)
+    }
+  }
+  catch (error) {
+    console.error('加载更多成员失败:', error)
+    // 加载失败时回退页码
+    currentPage.value--
+  }
+  finally {
+    isLoadingMore.value = false
+    // 加载完成后重置 isAtBottom 状态
+    isAtBottom.value = false
+  }
+}
+
+// 监听 isAtBottom 状态，当滚动到底部时加载更多数据
+watch(isAtBottom, (value) => {
+  if (value) {
+    loadMoreMembers()
+  }
+})
 
 // 获取部门列表（用于显示部门名称）
 const {
@@ -103,10 +166,13 @@ function formatDate(timestamp: number): string {
           </div>
         </div>
 
-        <!-- 成员列表 -->
-        <div v-else-if="memberListData?.members?.length" class="space-y-4">
+        <div v-if="allMembers.length === 0" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+          暂无成员数据
+        </div>
+
+        <div v-else class="space-y-4">
           <div
-            v-for="member in memberListData.members"
+            v-for="member in allMembers"
             :key="member.user_id"
             class="bg-white rounded-lg p-4 border border-gray-200"
           >
@@ -230,9 +296,18 @@ function formatDate(timestamp: number): string {
           </div>
         </div>
 
-        <!-- 空数据状态 -->
-        <div v-else class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
-          暂无成员数据
+        <!-- 加载更多状态 -->
+        <div v-if="isLoadingMore" class="mt-4 flex items-center justify-center py-4">
+          <div class="text-gray-600 text-sm">
+            加载中...
+          </div>
+        </div>
+
+        <!-- 没有更多数据提示 -->
+        <div v-else-if="allMembers.length > 0 && allMembers.length >= (memberListData?.count || 0)" class="mt-4 flex items-center justify-center py-4">
+          <div class="text-gray-400 text-sm">
+            已加载全部数据（共 {{ memberListData?.count || 0 }} 条）
+          </div>
         </div>
       </div>
     </div>

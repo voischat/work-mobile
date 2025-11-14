@@ -14,6 +14,6 @@ export default antfu(
     },
   },
   globalIgnores([
-    '**/API-LIST.md',
+    '**/docs/**',
   ]),
 )
