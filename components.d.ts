@@ -13,6 +13,7 @@ declare module 'vue' {
     BottomNav: typeof import('./src/components/BottomNav.vue')['default']
     ConfirmModal: typeof import('./src/components/ConfirmModal.vue')['default']
     DeptActions: typeof import('./src/components/DeptActions.vue')['default']
+    DeptMemberTreeSelector: typeof import('./src/components/DeptMemberTreeSelector.vue')['default']
     EditDeptForm: typeof import('./src/components/EditDeptForm.vue')['default']
     EditDeptModal: typeof import('./src/components/EditDeptModal.vue')['default']
     EditGroupForm: typeof import('./src/components/EditGroupForm.vue')['default']

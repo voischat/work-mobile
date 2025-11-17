@@ -3,17 +3,25 @@ import type { Dept, Group, GroupListResponse, Member, MemberListResponse } from 
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
 import MemberActions from '~/components/MemberActions.vue'
 import MemberCard from '~/components/MemberCard.vue'
+import Modal from '~/components/Modal.vue'
 import { usePage } from '~/composables/usePage'
+import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
 
 const route = useRoute()
+const { showToast } = useToast()
 
 // 从路由参数获取群ID
 // @ts-expect-error - route.params.id 的类型定义问题
 const groupId = computed(() => Number(route.params.id))
+
+// 添加成员Modal状态
+const isAddMemberModalOpen = ref(false)
+const treeSelectorRef = ref<InstanceType<typeof DeptMemberTreeSelector> | null>(null)
 
 // 分页状态
 const { curPage, pageSize, reset } = usePage()
@@ -130,12 +138,61 @@ async function handleRefresh() {
   allMembers.value = []
   await refetchMembers()
 }
+
+// 处理添加成员确认
+async function handleAddMembersConfirm(memberIds: number[]) {
+  if (memberIds.length === 0) {
+    showToast('请至少选择一个成员')
+    return
+  }
+
+  try {
+    const {
+      execute: addMembersToGroup,
+    } = useWeilaFetch('/corp/group/add-group-members', {
+      immediate: false,
+    })
+      .post(() => ({
+        group_id: groupId.value,
+        user_ids: memberIds,
+      }))
+      .json()
+
+    await addMembersToGroup()
+    showToast('添加成员成功')
+    isAddMemberModalOpen.value = false
+    // 清空选择
+    treeSelectorRef.value?.clearSelection()
+    // 刷新成员列表
+    await handleRefresh()
+  }
+  catch (error) {
+    console.error('添加成员失败:', error)
+    showToast('添加成员失败')
+  }
+}
+
+// 打开添加成员Modal
+function openAddMemberModal() {
+  isAddMemberModalOpen.value = true
+}
 </script>
 
 <template>
   <BackLayout :title="groupName || '群成员'">
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
+        <!-- 添加成员按钮 -->
+        <div class="mb-4">
+          <button
+            type="button"
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            @click="openAddMemberModal"
+          >
+            添加成员
+          </button>
+        </div>
+
         <!-- 加载状态 -->
         <div v-if="isMemberFetching && curPage === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
@@ -184,5 +241,29 @@ async function handleRefresh() {
         </div>
       </div>
     </div>
+
+    <!-- 添加成员Modal -->
+    <Modal
+      v-model:open="isAddMemberModalOpen"
+      title="选择成员"
+    >
+      <template #content>
+        <DeptMemberTreeSelector
+          ref="treeSelectorRef"
+          @confirm="handleAddMembersConfirm"
+        />
+      </template>
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+            @click="isAddMemberModalOpen = false"
+          >
+            取消
+          </button>
+        </div>
+      </template>
+    </Modal>
   </BackLayout>
 </template>
