@@ -6,6 +6,11 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Vitesse Lite</title>
     <meta name="description" content="Opinionated Vite Starter Template" />
+    <script type="module">
+      if (import.meta.env.DEV) {
+        import('react-grab')
+      }
+    </script>
   </head>
   <body class="font-sans">
     <div id="app"></div>
