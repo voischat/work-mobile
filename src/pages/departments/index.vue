@@ -2,6 +2,7 @@
 import type { Dept, DeptListResponse } from '~/types/management'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
 import DeptActions from '~/components/DeptActions.vue'
 import { usePage } from '~/composables/usePage'
@@ -136,15 +137,23 @@ function handleDeptClick(deptId: number) {
           >
             <div class="flex items-center justify-between">
               <div
-                class="flex-1 cursor-pointer hover:bg-gray-50 -m-4 p-4 rounded-lg transition-colors"
+                class="flex-1 cursor-pointer hover:bg-gray-50 -m-4 p-4 rounded-lg transition-colors flex items-center space-x-3"
                 @click="handleDeptClick(dept.id)"
               >
-                <h3 class="text-lg font-medium text-gray-900 mb-2">
-                  {{ dept.name }}
-                </h3>
-                <p class="text-sm text-gray-600">
-                  成员数量: {{ dept.user_count }}
-                </p>
+                <Avatar
+                  src=""
+                  :alt="dept.name"
+                  size="md"
+                  shape="rounded"
+                />
+                <div>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    {{ dept.name }}
+                  </h3>
+                  <p class="text-sm text-gray-600">
+                    成员数量: {{ dept.user_count }}
+                  </p>
+                </div>
               </div>
               <div @click.stop>
                 <DeptActions :dept="dept" @refresh="handleRefresh" />

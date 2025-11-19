@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { OrgInfo } from '~/types/org'
+import Avatar from '~/components/Avatar.vue'
 
 defineProps<{
   org: OrgInfo
@@ -18,12 +19,12 @@ function formatDate(timestamp: number): string {
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 -m-2">
       <div class="flex items-center space-x-4 m-2">
-        <img
-          v-if="org.avatar"
+        <Avatar
           :src="org.avatar"
           :alt="org.name"
-          class="w-16 h-16 rounded-full object-cover"
-        >
+          size="lg"
+          shape="circle"
+        />
         <div>
           <h3 class="text-xl font-medium text-gray-900">
             {{ org.name }}

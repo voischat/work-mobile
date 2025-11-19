@@ -2,6 +2,7 @@
 import type { Group, GroupListResponse } from '~/types/management'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
 import GroupActions from '~/components/GroupActions.vue'
 import { usePage } from '~/composables/usePage'
@@ -130,11 +131,12 @@ async function handleRefresh() {
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4 flex-1 min-w-0">
                 <!-- 头像 -->
-                <img
+                <Avatar
                   :src="group.avatar"
                   :alt="group.name"
-                  class="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                >
+                  size="md"
+                  shape="rounded"
+                />
                 <!-- 信息 -->
                 <div class="flex-1 min-w-0">
                   <h3 class="text-lg font-medium text-gray-900 mb-1 truncate">

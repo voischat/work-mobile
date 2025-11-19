@@ -2,6 +2,7 @@
 import type { UserInfo } from '~/types/auth'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import Avatar from '~/components/Avatar.vue'
 import HomeLayout from '~/components/HomeLayout.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
@@ -61,11 +62,12 @@ function formatDate(timestamp: number) {
         <!-- 用户信息卡片 -->
         <div v-else-if="userInfo" class="bg-white rounded-lg shadow-md p-6">
           <div class="flex items-center space-x-4 mb-6">
-            <img
+            <Avatar
               :src="userInfo.avatar"
               :alt="userInfo.name"
-              class="w-20 h-20 rounded-full object-cover"
-            >
+              size="xl"
+              shape="circle"
+            />
             <div class="flex-1">
               <h2 class="text-2xl font-bold text-gray-900">
                 {{ userInfo.name || '未设置' }}

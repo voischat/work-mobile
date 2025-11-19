@@ -1,27 +1,15 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
+import Avatar from '~/components/Avatar.vue'
 
-const props = defineProps<{
+defineProps<{
   member: Member
   deptName?: string
 }>()
 
 // 展开/收缩状态，默认收缩
 const isExpanded = ref(false)
-
-// 头像加载错误状态
-const avatarError = ref(false)
-
-// 处理头像加载错误
-function handleAvatarError() {
-  avatarError.value = true
-}
-
-// 当 member.avatar 变化时，重置头像错误状态
-watch(() => props.member?.avatar, () => {
-  avatarError.value = false
-})
 
 // 切换展开/收缩
 function toggleExpand() {
@@ -73,32 +61,12 @@ function formatDate(timestamp: number): string {
     <!-- 顶部：头像、姓名、类型、状态 -->
     <div class="flex items-start space-x-3 mb-4">
       <!-- 头像 -->
-      <img
-        v-if="!avatarError"
+      <Avatar
         :src="member.avatar"
         :alt="member.name"
-        class="size-14 rounded object-cover flex-shrink-0"
-        @error="handleAvatarError"
-      >
-      <!-- 头像错误占位符 -->
-      <div
-        v-else
-        class="size-14 rounded bg-gray-200 flex-shrink-0 flex items-center justify-center"
-      >
-        <svg
-          class="w-8 h-8 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
-        </svg>
-      </div>
+        size="md"
+        shape="rounded"
+      />
       <!-- 基本信息 -->
       <div
         class="flex-1 min-w-0"
