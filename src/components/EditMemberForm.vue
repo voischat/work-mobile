@@ -382,13 +382,13 @@ defineExpose({
           关闭
         </option>
         <option :value="1">
-          高
+          低频
         </option>
         <option :value="2">
-          中
+          中频
         </option>
         <option :value="3">
-          低
+          高频
         </option>
         <option :value="4">
           快
