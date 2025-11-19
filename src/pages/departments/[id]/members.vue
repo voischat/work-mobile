@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Dept, Member, MemberListResponse } from '~/types/management'
-import { computed, ref, watch } from 'vue'
+import { refDebounced } from '@vueuse/core'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
@@ -23,6 +24,11 @@ const deptId = computed(() => Number(route.params.id))
 // 添加成员Modal状态
 const isAddMemberModalOpen = ref(false)
 const treeSelectorRef = ref<InstanceType<typeof DeptMemberTreeSelector> | null>(null)
+
+// 搜索关键词（使用 shallowRef 用于防抖）
+const searchKey = shallowRef('')
+// 防抖后的搜索关键词（300ms 延迟）
+const debouncedSearchKey = refDebounced(searchKey, 300)
 
 // 分页状态
 const { curPage, pageSize, reset } = usePage()
@@ -49,7 +55,7 @@ const {
   .post(() => ({
     dept_id: deptId.value,
     member_types: [],
-    key: '',
+    key: debouncedSearchKey.value,
   }))
   .json()
 
@@ -69,6 +75,13 @@ watch(memberListData, (newData) => {
 
 // 监听部门ID变化，重置分页并重新加载数据
 watch(deptId, () => {
+  reset()
+  allMembers.value = []
+  refetchMembers()
+})
+
+// 监听防抖后的搜索关键词变化，重置分页并重新加载数据
+watch(debouncedSearchKey, () => {
   reset()
   allMembers.value = []
   refetchMembers()
@@ -199,6 +212,15 @@ function openAddMemberModal() {
                 {{ dept.name }}
               </option>
             </select>
+          </div>
+          <div>
+            <input
+              id="search-input"
+              v-model="searchKey"
+              type="text"
+              placeholder="请输入成员姓名、手机号或工号"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
           </div>
           <div>
             <button

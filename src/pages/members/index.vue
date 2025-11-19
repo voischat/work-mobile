@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Dept, Member, MemberListResponse } from '~/types/management'
-import { computed, ref, watch } from 'vue'
+import { refDebounced } from '@vueuse/core'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import MemberActions from '~/components/MemberActions.vue'
@@ -11,8 +12,13 @@ import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
 
+// 搜索关键词（使用 shallowRef 用于防抖）
+const searchKey = shallowRef('')
+// 防抖后的搜索关键词（300ms 延迟）
+const debouncedSearchKey = refDebounced(searchKey, 300)
+
 // 分页状态
-const { curPage, pageSize } = usePage()
+const { curPage, pageSize, reset } = usePage()
 const allMembers = ref<Member[]>([]) // 累积存储所有已加载的成员
 const isLoadingMore = ref(false) // 是否正在加载更多
 
@@ -27,7 +33,7 @@ const {
   execute: refetchMembers,
 } = useWeilaFetch<MemberListResponse>(memberListUrl)
   .post(() => ({
-    key: '',
+    key: debouncedSearchKey.value,
   }))
   .json()
 
@@ -85,6 +91,13 @@ watch(isAtBottom, (value) => {
   }
 })
 
+// 监听防抖后的搜索关键词变化，重置分页并重新加载数据
+watch(debouncedSearchKey, () => {
+  reset()
+  allMembers.value = []
+  refetchMembers()
+})
+
 // 获取部门列表（用于显示部门名称）
 const {
   data: depts,
@@ -100,7 +113,7 @@ function getDeptName(deptId: number): string {
 // 处理刷新数据
 async function handleRefresh() {
   // 重置到第一页并重新加载
-  curPage.value = 0
+  reset()
   allMembers.value = []
   await refetchMembers()
 }
@@ -110,20 +123,31 @@ async function handleRefresh() {
   <BackLayout title="成员管理">
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
-        <!-- 按钮区域 -->
-        <div class="mb-4 flex space-x-2">
-          <button
-            class="bg-blue-600 text-white px-4 py-2 rounded"
-            @click="router.push('/members/add-member')"
-          >
-            创建成员
-          </button>
-          <button
-            class="bg-blue-600 text-white px-4 py-2 rounded"
-            @click="router.push('/members/add-device')"
-          >
-            添加设备
-          </button>
+        <!-- 搜索和按钮区域 -->
+        <div class="mb-4 space-y-4">
+          <div>
+            <input
+              id="search-input"
+              v-model="searchKey"
+              type="text"
+              placeholder="请输入成员姓名、手机号或工号"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+          </div>
+          <div class="flex space-x-2">
+            <button
+              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              @click="router.push('/members/add-member')"
+            >
+              创建成员
+            </button>
+            <button
+              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              @click="router.push('/members/add-device')"
+            >
+              添加设备
+            </button>
+          </div>
         </div>
 
         <!-- 加载状态 -->
