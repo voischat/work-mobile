@@ -188,7 +188,7 @@ function openAddMemberModal() {
             <select
               id="dept-select"
               :value="deptId"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               @change="handleDeptChange"
             >
               <option

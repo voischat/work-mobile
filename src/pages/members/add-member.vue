@@ -145,7 +145,7 @@ function handleSubmit() {
               <select
                 id="dept_id"
                 v-model.number="formData.dept_id"
-                class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.dept_id ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
               >
@@ -173,7 +173,7 @@ function handleSubmit() {
               <select
                 id="sex"
                 v-model.number="formData.sex"
-                class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.sex ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
               >
@@ -243,7 +243,7 @@ function handleSubmit() {
               <select
                 id="is_admin"
                 v-model.number="formData.is_admin"
-                class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.is_admin ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
               >
@@ -267,7 +267,7 @@ function handleSubmit() {
               <select
                 id="loc_share"
                 v-model.number="formData.loc_share"
-                class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.loc_share ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
               >
@@ -291,7 +291,7 @@ function handleSubmit() {
               <select
                 id="track"
                 v-model.number="formData.track"
-                class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.track ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
               >
