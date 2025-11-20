@@ -27,6 +27,7 @@ declare module 'vue' {
     HomeLayout: typeof import('./src/components/HomeLayout.vue')['default']
     ImageVerifyCode: typeof import('./src/components/ImageVerifyCode.vue')['default']
     MemberActions: typeof import('./src/components/MemberActions.vue')['default']
+    MemberAIGenerator: typeof import('./src/components/MemberAIGenerator.vue')['default']
     MemberCard: typeof import('./src/components/MemberCard.vue')['default']
     MemberStateToggle: typeof import('./src/components/MemberStateToggle.vue')['default']
     Modal: typeof import('./src/components/Modal.vue')['default']

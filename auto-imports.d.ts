@@ -7,10 +7,12 @@
 export {}
 declare global {
   const EffectScope: typeof import('vue')['EffectScope']
+  const addMemberSchema: typeof import('./src/composables/useGenMember')['addMemberSchema']
   const appid: typeof import('./src/composables/useWeilaFetch')['appid']
   const appkey: typeof import('./src/composables/useWeilaFetch')['appkey']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
+  const bridge: typeof import('./src/utils/bridge.js')['bridge']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
   const computedEager: typeof import('@vueuse/core')['computedEager']
@@ -120,6 +122,7 @@ declare global {
   const unref: typeof import('vue')['unref']
   const unrefElement: typeof import('@vueuse/core')['unrefElement']
   const until: typeof import('@vueuse/core')['until']
+  const useAIMemberParser: typeof import('./src/composables/useGenMember')['generateMember']
   const useActiveElement: typeof import('@vueuse/core')['useActiveElement']
   const useAnimate: typeof import('@vueuse/core')['useAnimate']
   const useArrayDifference: typeof import('@vueuse/core')['useArrayDifference']
@@ -317,6 +320,9 @@ declare global {
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
   // @ts-ignore
+  export type { AddMemberForm, ParsedMemberInfo } from './src/composables/useAIMemberParser'
+  import('./src/composables/useGenMember')
+  // @ts-ignore
   export type { UsePageOptions, UsePageReturn } from './src/composables/usePage'
   import('./src/composables/usePage')
   // @ts-ignore
@@ -333,10 +339,12 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly addMemberSchema: UnwrapRef<typeof import('./src/composables/useGenMember')['addMemberSchema']>
     readonly appid: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['appid']>
     readonly appkey: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['appkey']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
+    readonly bridge: UnwrapRef<typeof import('./src/utils/bridge.js')['bridge']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
@@ -443,6 +451,7 @@ declare module 'vue' {
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly unrefElement: UnwrapRef<typeof import('@vueuse/core')['unrefElement']>
     readonly until: UnwrapRef<typeof import('@vueuse/core')['until']>
+    readonly useAIMemberParser: UnwrapRef<typeof import('./src/composables/useGenMember')['generateMember']>
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
     readonly useArrayDifference: UnwrapRef<typeof import('@vueuse/core')['useArrayDifference']>

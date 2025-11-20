@@ -1,30 +1,15 @@
 <script setup lang="ts">
+import type { AddMemberForm } from '~/composables/useGenMember'
 import type { Dept, Member } from '~/types/management'
 import md5 from 'md5'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
 import BackLayout from '~/components/BackLayout.vue'
 import { useForm } from '~/composables/useForm'
+import { addMemberSchema, useGenerateMember } from '~/composables/useGenMember'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
-
-// 表单验证 schema
-const addMemberSchema = z.object({
-  name: z.string().min(1, '名称不能为空'),
-  job_num: z.string().optional(),
-  dept_id: z.number().int().min(0, '请选择部门'),
-  sex: z.number().int().min(1).max(2),
-  avatar: z.string().optional().or(z.literal('')),
-  phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号').optional().or(z.literal('')),
-  is_admin: z.number().int().min(0).max(1),
-  loc_share: z.number().int().min(0).max(1),
-  track: z.number().int().min(0).max(4),
-  password: z.string().min(6, '密码至少6位'),
-})
-
-type AddMemberForm = z.infer<typeof addMemberSchema>
 
 const router = useRouter()
 const { showToast } = useToast()
@@ -36,8 +21,7 @@ const {
   .post()
   .json()
 
-// 表单数据
-const formData = ref<AddMemberForm>({
+const form = ref<AddMemberForm>({
   name: '',
   job_num: '',
   dept_id: 0,
@@ -57,21 +41,37 @@ const { errors, validate } = useForm(addMemberSchema)
 const { error, isFetching, isFinished, data, execute: createMember } = useWeilaFetch<{ member: Member }>('/corp/address/create-member', {
   immediate: false,
 }).post(() => ({
-  name: formData.value.name,
-  job_num: formData.value.job_num || '',
-  dept_id: formData.value.dept_id,
-  sex: formData.value.sex,
-  avatar: formData.value.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/default/user.png',
-  phone: formData.value.phone || '',
-  is_admin: formData.value.is_admin,
-  loc_share: formData.value.loc_share,
-  track: formData.value.track,
-  password: md5(formData.value.password),
+  name: form.value.name,
+  job_num: form.value.job_num || '',
+  dept_id: form.value.dept_id,
+  sex: form.value.sex,
+  avatar: form.value.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/default/user.png',
+  phone: form.value.phone || '',
+  is_admin: form.value.is_admin,
+  loc_share: form.value.loc_share,
+  track: form.value.track,
+  password: md5(form.value.password),
 })).json()
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
 })
+
+const {
+  isParsing: isGenerating,
+  error: aiError,
+  generate,
+} = useGenerateMember(form)
+
+async function handleQuickGenerate() {
+  const parsed = await generate('我需要一个密码为 123456 的成员')
+  if (parsed) {
+    showToast('已填充表单')
+  }
+  else if (aiError.value) {
+    showToast(aiError.value)
+  }
+}
 
 // 监听创建成员成功
 watch([data, isFinished, error], ([result, finished, err]) => {
@@ -86,7 +86,7 @@ watch([data, isFinished, error], ([result, finished, err]) => {
 })
 
 function handleSubmit() {
-  if (!validate(formData.value)) {
+  if (!validate(form.value)) {
     return
   }
   createMember()
@@ -99,6 +99,32 @@ function handleSubmit() {
       <div class="max-w-md mx-auto">
         <div class="bg-white rounded-lg shadow-md p-6">
           <form class="space-y-4" @submit.prevent="handleSubmit">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-base font-semibold text-gray-900">
+                成员信息
+              </h3>
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-full bg-blue-600 text-white px-3 py-1.5 text-sm font-medium shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                :disabled="isFetching || isGenerating"
+                @click="handleQuickGenerate"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4-4m0 0l4-4m-4 4l-4-4m4 4l4 4m6 2l-1.5 3.5m-2-7L16 21m4-10l-3.5 1.5" />
+                </svg>
+                <span>{{ isGenerating ? '生成中...' : '一键生成' }}</span>
+              </button>
+            </div>
+            <div v-if="aiError" class="text-sm text-red-500">
+              {{ aiError }}
+            </div>
             <!-- 名称输入框 -->
             <div>
               <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
@@ -106,7 +132,7 @@ function handleSubmit() {
               </label>
               <input
                 id="name"
-                v-model="formData.name"
+                v-model="form.name"
                 type="text"
                 placeholder="请输入名称"
                 class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -125,7 +151,7 @@ function handleSubmit() {
               </label>
               <input
                 id="job_num"
-                v-model="formData.job_num"
+                v-model="form.job_num"
                 type="text"
                 placeholder="请输入工号（可选）"
                 class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -144,7 +170,7 @@ function handleSubmit() {
               </label>
               <select
                 id="dept_id"
-                v-model.number="formData.dept_id"
+                v-model.number="form.dept_id"
                 class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.dept_id ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
@@ -172,7 +198,7 @@ function handleSubmit() {
               </label>
               <select
                 id="sex"
-                v-model.number="formData.sex"
+                v-model.number="form.sex"
                 class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.sex ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
@@ -196,7 +222,7 @@ function handleSubmit() {
               </label>
               <input
                 id="phone"
-                v-model="formData.phone"
+                v-model="form.phone"
                 type="tel"
                 placeholder="请输入手机号（可选）"
                 class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -213,7 +239,7 @@ function handleSubmit() {
               <label class="block text-sm font-medium text-gray-700 mb-1">
                 头像
               </label>
-              <AvatarUpload v-model="formData.avatar" />
+              <AvatarUpload v-model="form.avatar" />
             </div>
 
             <!-- 密码输入框 -->
@@ -223,7 +249,7 @@ function handleSubmit() {
               </label>
               <input
                 id="password"
-                v-model="formData.password"
+                v-model="form.password"
                 type="password"
                 placeholder="请输入密码（至少6位）"
                 class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -242,7 +268,7 @@ function handleSubmit() {
               </label>
               <select
                 id="is_admin"
-                v-model.number="formData.is_admin"
+                v-model.number="form.is_admin"
                 class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.is_admin ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
@@ -266,7 +292,7 @@ function handleSubmit() {
               </label>
               <select
                 id="loc_share"
-                v-model.number="formData.loc_share"
+                v-model.number="form.loc_share"
                 class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.loc_share ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
@@ -290,7 +316,7 @@ function handleSubmit() {
               </label>
               <select
                 id="track"
-                v-model.number="formData.track"
+                v-model.number="form.track"
                 class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.track ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isFetching"
