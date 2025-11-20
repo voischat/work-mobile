@@ -103,3 +103,18 @@ export interface UnregistByEmailRequest {
   country_code: string
   verifycode: string
 }
+
+// 图形验证码响应
+export interface ImageVerifyCodeResponse {
+  id: string
+  image: string
+}
+
+// 发送短信验证码请求参数
+export interface SendSmsVerifyCodeRequest {
+  phone: string
+  countrycode: string
+  verify_id: string
+  verify_answer: string
+  smstype: string
+}
