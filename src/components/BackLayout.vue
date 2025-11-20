@@ -54,7 +54,7 @@ onUnmounted(() => {
 <template>
   <div class="grid grid-rows-[min-content_1fr] h-screen overflow-hidden">
     <!-- Header -->
-    <Header :title="title" :show-back="showBack" />
+    <Header :title="title" :show-back="showBack" :show-exit="true" />
 
     <!-- 内容区域 -->
     <main ref="mainElement" class="flex-1 overflow-y-auto">

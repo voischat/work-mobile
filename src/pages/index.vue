@@ -29,10 +29,6 @@ const hasError = computed(() => !!orgError.value || !!vipError.value)
   <HomeLayout>
     <div class="p-4">
       <div class="max-w-4xl mx-auto space-y-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">
-          组织信息
-        </h1>
-
         <!-- 加载状态 -->
         <div v-if="isLoading" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
