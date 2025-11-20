@@ -23,16 +23,7 @@ export const addMemberSchema = z.object({
   avatar: z.string().optional().or(z.literal('')),
 })
 
-// AI 解析时不需要部门与头像，由业务层再补充
-const aiMemberSchema = addMemberSchema.omit({
-  dept_id: true,
-  avatar: true,
-}).extend({
-  dept_name: z.string().optional(),
-})
-
 export type AddMemberForm = z.infer<typeof addMemberSchema>
-export type ParsedMemberInfo = z.infer<typeof aiMemberSchema>
 
 export function useGenerateMember(curMember?: Ref<Record<string, any> | null>) {
   const isLoading = ref(false)
@@ -56,14 +47,15 @@ export function useGenerateMember(curMember?: Ref<Record<string, any> | null>) {
     try {
       const { object } = await generateObject({
         model: deepseek('deepseek-chat'),
-        schema: aiMemberSchema,
+        schema: addMemberSchema,
         prompt: [
           '你是一个成员信息生成助手',
           '根据用户描述和当前已有数据生成成员信息，请确保返回的是合理有效且尽量不重复的 JSON 格式数据。',
-          '其中部门 id 和头像 url 请使用默认值: 0 和 空字符串',
           '输出要求：严格返回单个 JSON 对象，不要多余文本或 markdown。',
-          '字段含义：',
-          '- name：成员姓名，字符串',
+          '字段：',
+          '- dept_id：部门 id，0',
+          '- avatar：头像 url，空字符串',
+          '- name：成员姓名，字符串，可以添加一个随机数在名称后面',
           '- job_num：工号，可为空字符串',
           '- sex：数字 1 表示男、2 表示女',
           '- phone：11 位手机号，可为空字符串',
@@ -71,7 +63,6 @@ export function useGenerateMember(curMember?: Ref<Record<string, any> | null>) {
           '- loc_share：0 不共享位置，1 共享位置',
           '- track：0~4 之间的整数',
           '- password：至少 6 位',
-          `示例：{"name":"张三","sex":1,"phone":"13800000000","is_admin":0,"loc_share":1,"track":2,"password":"abc123"}`,
           `当前已有数据：${stringifyCurrent()}`,
           `用户描述：${prompt}`,
         ].join('\n'),
@@ -79,6 +70,8 @@ export function useGenerateMember(curMember?: Ref<Record<string, any> | null>) {
 
       if (curMember)
         curMember.value = object
+
+      console.log('object', object)
 
       return object
     }
