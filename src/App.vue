@@ -1,23 +1,34 @@
 <script setup lang="ts">
+import type { LoginResponse } from '~/types/auth'
 import { useRouteQuery } from '@vueuse/router'
+
+const { showToast } = useToast()
 
 const REFRESH_INTERVAL = 3 * 60 * 1000 // 3分钟
 const { token, refreshToken, clearAuth, saveAuth } = useAuth()
 
-// 从 URL query 获取 token 和 refresh_token
-const queryToken = useRouteQuery('token', '')
-const queryRefreshToken = useRouteQuery('refresh_token', '')
+// 从 URL query 获取账号与加密密码
+const queryAccount = useRouteQuery('account', '')
+const queryPassword = useRouteQuery('password', '')
 
-// 监听 URL query 中的 token，如果两者都存在则保存
-const { stop } = watch([queryToken, queryRefreshToken], ([tokenValue, refreshTokenValue]) => {
-  if (tokenValue && refreshTokenValue) {
-    saveAuth(tokenValue, refreshTokenValue)
-    stop()
-  }
-}, { immediate: true })
+// 登录 fetch（非立即执行）
+const {
+  data: loginData,
+  error: loginError,
+  execute: loginExecute,
+} = useWeilaFetch<LoginResponse>('/corp/auth/login', {
+  immediate: false,
+}).post(() => ({
+  account: queryAccount.value,
+  password: queryPassword.value,
+})).json()
 
 // 刷新 token 的 fetch（非立即执行）
-const { data, error, execute: refreshTokenExecute } = useWeilaFetch<{
+const {
+  data: refreshData,
+  error: refreshError,
+  execute: refreshTokenExecute,
+} = useWeilaFetch<{
   access_token: string
   expires_in: number
   refresh_token: string
@@ -27,14 +38,36 @@ const { data, error, execute: refreshTokenExecute } = useWeilaFetch<{
   refresh_token: refreshToken.value!,
 })).json()
 
+// 监听 URL 账号密码，触发一次登录
+const stopLoginWatcher = watch([queryAccount, queryPassword], ([account, password]) => {
+  if (account && password) {
+    loginExecute()
+    stopLoginWatcher()
+  }
+}, { immediate: true })
+
+// 监听登录结果
+const stopLoginResultWatcher = watch([loginData, loginError], () => {
+  if (loginError.value) {
+    showToast(loginError.value.message)
+    clearAuth()
+    stopLoginResultWatcher()
+    return
+  }
+  if (loginData.value) {
+    saveAuth(loginData.value.access_token, loginData.value.refresh_token)
+    stopLoginResultWatcher()
+  }
+})
+
 // 监听刷新结果
-watch([data, error], () => {
-  if (error.value) {
+watch([refreshData, refreshError], () => {
+  if (refreshError.value) {
     clearAuth()
     return
   }
-  if (data.value) {
-    saveAuth(data.value.access_token, data.value.refresh_token)
+  if (refreshData.value) {
+    saveAuth(refreshData.value.access_token, refreshData.value.refresh_token)
   }
 })
 
