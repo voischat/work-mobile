@@ -1,6 +1,6 @@
 import { getRootUrl } from '@kvoon/utils'
 import { WeilaApi } from '@wl/network'
-import { appid, appkey } from '~/composables/useWeilaFetch'
+import { appid, appkey } from '~/shared/const'
 
 export const weilaApi = new WeilaApi(
   appid.value,
