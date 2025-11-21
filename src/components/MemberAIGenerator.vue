@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { type AddMemberForm, type ParsedMemberInfo, useGenerateMember } from '~/composables/useGenMember'
+import { type AddMemberForm, useGenerateMember } from '~/composables/useGenMember'
 import { useToast } from '~/composables/useToast'
 
 const props = withDefaults(defineProps<{
@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (e: 'filled', info: ParsedMemberInfo): void
+  (e: 'filled', info: AddMemberForm): void
 }>()
 
 const member = defineModel<AddMemberForm>('member', { default: undefined })

@@ -13,6 +13,7 @@ const router = useRouter()
 const { showToast } = useToast()
 
 // 从路由参数获取成员 ID
+// @ts-expect-error - route.params.id 的类型定义问题
 const memberId = computed(() => Number(route.params.id))
 
 // 表单验证 schema
