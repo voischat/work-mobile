@@ -8,8 +8,8 @@ export {}
 declare global {
   const EffectScope: typeof import('vue')['EffectScope']
   const addMemberSchema: typeof import('./src/composables/useGenMember')['addMemberSchema']
-  const appid: typeof import('./src/utils/weilaApi')['appid']
-  const appkey: typeof import('./src/utils/weilaApi')['appkey']
+  const appid: typeof import('./src/composables/useWeilaFetch')['appid']
+  const appkey: typeof import('./src/composables/useWeilaFetch')['appkey']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
   const bridge: typeof import('./src/utils/bridge.js')['bridge']
@@ -341,8 +341,8 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly addMemberSchema: UnwrapRef<typeof import('./src/composables/useGenMember')['addMemberSchema']>
-    readonly appid: UnwrapRef<typeof import('./src/utils/weilaApi')['appid']>
-    readonly appkey: UnwrapRef<typeof import('./src/utils/weilaApi')['appkey']>
+    readonly appid: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['appid']>
+    readonly appkey: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['appkey']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly bridge: UnwrapRef<typeof import('./src/utils/bridge.js')['bridge']>

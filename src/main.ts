@@ -5,8 +5,6 @@ import App from './App.vue'
 
 import './styles/main.css'
 
-console.log('routes', JSON.stringify(routes, null, 2))
-
 const app = createApp(App)
 const router = createRouter({
   routes,

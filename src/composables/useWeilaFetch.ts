@@ -2,7 +2,7 @@ import { isObject, objectKeys } from '@antfu/utils'
 import { getRootUrl } from '@kvoon/utils'
 import { createFetch } from '@vueuse/core'
 import md5 from 'md5'
-import { computed } from 'vue'
+import { appid, appkey } from '~/shared/const'
 
 import { useAuth } from './useAuth'
 
@@ -11,18 +11,6 @@ const { token, refreshToken, saveAuth, clearAuth } = useAuth()
 // 刷新 token 的状态管理
 let isRefreshing = false
 const refreshSubscribers: Array<() => void> = []
-
-export const appid = computed(() => {
-  const demo = '102036'
-  const normal = '102065'
-  return (import.meta.env.DEV || import.meta.env.MODE === 'staging') ? demo : normal
-})
-
-export const appkey = computed(() => {
-  const demo = 'b3c658bd2e637c65efb134fb381d4a18'
-  const normal = '3c227f2cbc2084ebdd9617fd283c42c7'
-  return (import.meta.env.DEV || import.meta.env.MODE === 'staging') ? demo : normal
-})
 
 function getMd5Middle8Chars(md5Str: string): string {
   // 888e0f79573741ac3e1f09a3c9e46968 -> 41ac3e1f
