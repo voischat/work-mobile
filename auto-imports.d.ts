@@ -341,8 +341,6 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly addMemberSchema: UnwrapRef<typeof import('./src/composables/useGenMember')['addMemberSchema']>
-    readonly appid: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['appid']>
-    readonly appkey: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['appkey']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly bridge: UnwrapRef<typeof import('./src/utils/bridge.js')['bridge']>
