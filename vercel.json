@@ -9,5 +9,6 @@
       "source": "/v2/:match*",
       "destination": "https://www.voiswork.cn/v2/:match*"
     }
-  ]
+  ],
+  "cleanUrls": true
 }
