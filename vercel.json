@@ -2,10 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    },
-    {
       "source": "/v1/:match*",
       "destination": "https://demo.weila.hk/v1/:match*"
     },
@@ -13,6 +9,5 @@
       "source": "/v2/:match*",
       "destination": "https://www.voiswork.cn/v2/:match*"
     }
-  ],
-  "cleanUrls": true
+  ]
 }
