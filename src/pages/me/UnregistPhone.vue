@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { useAuth } from '~/composables/useAuth'
+import { useConfirmModal } from '~/composables/useConfirmModal'
 import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
@@ -20,6 +21,7 @@ type UnregistPhoneForm = z.infer<typeof unregistPhoneSchema>
 const router = useRouter()
 const { clearAuth } = useAuth()
 const { showToast } = useToast()
+const { showConfirmModal } = useConfirmModal()
 
 // 表单数据
 const formData = ref<UnregistPhoneForm>({
@@ -63,11 +65,18 @@ watch([data, isFinished, error], ([result, finished, err]) => {
   }
 })
 
-function handleSubmit() {
+async function handleSubmit() {
   if (!validate(formData.value)) {
     return
   }
-  if (!confirm('确定要注销账号吗？此操作不可恢复！')) {
+  const confirmed = await showConfirmModal({
+    title: '确认注销',
+    message: '确定要注销账号吗？此操作不可恢复！',
+    confirmText: '确认注销',
+    cancelText: '取消',
+    confirmButtonType: 'danger',
+  })
+  if (!confirmed) {
     return
   }
   unregistByPhone()
