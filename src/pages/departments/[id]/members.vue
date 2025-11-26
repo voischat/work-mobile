@@ -24,6 +24,7 @@ const deptId = computed(() => Number(route.params.id))
 // 添加成员Modal状态
 const isAddMemberModalOpen = ref(false)
 const treeSelectorRef = ref<InstanceType<typeof DeptMemberTreeSelector> | null>(null)
+const selectedMemberIds = ref(new Set<number>()) // 选中的成员ID集合
 
 // 搜索关键词（使用 shallowRef 用于防抖）
 const searchKey = shallowRef('')
@@ -150,8 +151,8 @@ async function handleRefresh() {
 }
 
 // 处理添加成员确认
-async function handleAddMembersConfirm(memberIds: number[]) {
-  if (memberIds.length === 0) {
+async function handleAddMembersConfirm() {
+  if (selectedMemberIds.value.size === 0) {
     showToast('请至少选择一个成员')
     return
   }
@@ -164,7 +165,7 @@ async function handleAddMembersConfirm(memberIds: number[]) {
     })
       .post(() => ({
         dept_id: deptId.value,
-        user_ids: memberIds,
+        user_ids: Array.from(selectedMemberIds.value),
       }))
       .json()
 
@@ -308,19 +309,33 @@ function openAddMemberModal() {
       <template #content>
         <DeptMemberTreeSelector
           ref="treeSelectorRef"
+          v-model:selected-member-ids="selectedMemberIds"
           :existing-member-ids="existingMemberIds"
-          @confirm="handleAddMembersConfirm"
         />
       </template>
       <template #footer>
-        <div class="flex justify-end space-x-3">
-          <button
-            type="button"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-            @click="isAddMemberModalOpen = false"
-          >
-            取消
-          </button>
+        <div class="flex items-center justify-between">
+          <!-- 左侧显示选中数量 -->
+          <div class="text-sm text-gray-600">
+            <span class="font-medium text-blue-600">{{ selectedMemberIds.size }}</span> 位成员已选择
+          </div>
+          <!-- 右侧按钮组 -->
+          <div class="flex space-x-3">
+            <button
+              type="button"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+              @click="isAddMemberModalOpen = false"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              @click="() => handleAddMembersConfirm()"
+            >
+              确认添加
+            </button>
+          </div>
         </div>
       </template>
     </Modal>

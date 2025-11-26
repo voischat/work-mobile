@@ -3,23 +3,23 @@ import type { Dept, Member } from '~/types/management'
 import { computed, ref } from 'vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
-// 定义props
 const props = withDefaults(defineProps<{
   existingMemberIds?: number[]
 }>(), {
   existingMemberIds: () => [],
 })
 
-// 定义事件
-const emit = defineEmits<{
-  confirm: [memberIds: number[]]
-}>()
-
-// 选中的成员ID列表
-const selectedMemberIds = ref<Set<number>>(new Set())
+// 使用 defineModel 进行双向绑定
+const selectedMemberIds = defineModel<Set<number>>('selectedMemberIds', {
+  default: () => new Set(),
+  required: true,
+})
 
 // 已存在成员的ID集合（计算属性）
 const existingMemberIdsSet = computed(() => new Set(props.existingMemberIds))
+
+// 将 v-model 转换为 Set 便于操作
+const selectedMemberIdsSet = computed(() => new Set(selectedMemberIds.value))
 
 // 展开的部门ID集合
 const expandedDeptIds = ref<Set<number>>(new Set())
@@ -111,12 +111,16 @@ function toggleMember(memberId: number) {
     return
   }
 
-  if (selectedMemberIds.value.has(memberId)) {
-    selectedMemberIds.value.delete(memberId)
+  const newSelectedSet = new Set(selectedMemberIds.value)
+
+  if (newSelectedSet.has(memberId)) {
+    newSelectedSet.delete(memberId)
   }
   else {
-    selectedMemberIds.value.add(memberId)
+    newSelectedSet.add(memberId)
   }
+
+  selectedMemberIds.value = newSelectedSet
 }
 
 // 获取部门的成员列表
@@ -131,7 +135,7 @@ function isDeptLoading(deptId: number): boolean {
 
 // 检查成员是否被选中
 function isMemberSelected(memberId: number): boolean {
-  return selectedMemberIds.value.has(memberId) || existingMemberIdsSet.value.has(memberId)
+  return selectedMemberIdsSet.value.has(memberId) || existingMemberIdsSet.value.has(memberId)
 }
 
 // 检查成员是否已存在
@@ -139,24 +143,12 @@ function isMemberExisting(memberId: number): boolean {
   return existingMemberIdsSet.value.has(memberId)
 }
 
-// 获取选中的成员ID数组（只包含新选择的成员，不包括已存在的）
-const selectedMemberIdsArray = computed(() => Array.from(selectedMemberIds.value))
-
-// 获取所有选中的成员数量（包括已存在的）
-const totalSelectedCount = computed(() => selectedMemberIds.value.size + existingMemberIdsSet.value.size)
-
 // 暴露给父组件的方法和属性
 defineExpose({
-  selectedMemberIds: selectedMemberIdsArray,
   clearSelection: () => {
-    selectedMemberIds.value.clear()
+    selectedMemberIds.value = new Set()
   },
 })
-
-// 确认选择
-function handleConfirm() {
-  emit('confirm', selectedMemberIdsArray.value)
-}
 </script>
 
 <template>
@@ -269,25 +261,6 @@ function handleConfirm() {
     <!-- 空状态 -->
     <div v-else class="text-center py-8 text-gray-500">
       暂无部门数据
-    </div>
-
-    <!-- 底部：选中数量和确认按钮 -->
-    <div v-if="totalSelectedCount > 0" class="mt-4 pt-4 border-t border-gray-200">
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-600">
-          已选择 <span class="font-medium text-blue-600">{{ totalSelectedCount }}</span> 位成员
-          <span v-if="existingMemberIdsSet.size > 0" class="text-xs text-gray-500 ml-2">
-            （{{ existingMemberIdsSet.size }} 位已存在）
-          </span>
-        </span>
-        <button
-          type="button"
-          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          @click="handleConfirm"
-        >
-          确认添加
-        </button>
-      </div>
     </div>
   </div>
 </template>
