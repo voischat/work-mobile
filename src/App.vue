@@ -11,6 +11,7 @@ const { token, refreshToken, clearAuth, saveAuth } = useAuth()
 // 从 URL query 获取账号与加密密码
 const queryAccount = useRouteQuery('account', '')
 const queryPassword = useRouteQuery('password', '')
+const queryCountryCode = useRouteQuery('country-code', '')
 
 // 登录 fetch（非立即执行）
 const {
@@ -20,6 +21,7 @@ const {
 } = useWeilaFetch<LoginResponse>('/corp/auth/login', {
   immediate: false,
 }).post(() => ({
+  country_code: queryCountryCode.value,
   account: queryAccount.value,
   password: queryPassword.value,
 })).json()
