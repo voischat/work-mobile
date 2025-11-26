@@ -3,6 +3,13 @@ import type { Dept, Member } from '~/types/management'
 import { computed, ref } from 'vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
+// 定义props
+const props = withDefaults(defineProps<{
+  existingMemberIds?: number[]
+}>(), {
+  existingMemberIds: () => [],
+})
+
 // 定义事件
 const emit = defineEmits<{
   confirm: [memberIds: number[]]
@@ -10,6 +17,9 @@ const emit = defineEmits<{
 
 // 选中的成员ID列表
 const selectedMemberIds = ref<Set<number>>(new Set())
+
+// 已存在成员的ID集合（计算属性）
+const existingMemberIdsSet = computed(() => new Set(props.existingMemberIds))
 
 // 展开的部门ID集合
 const expandedDeptIds = ref<Set<number>>(new Set())
@@ -96,6 +106,11 @@ async function loadDeptMembers(deptId: number) {
 
 // 切换成员选中状态
 function toggleMember(memberId: number) {
+  // 如果成员已存在，不允许取消选择
+  if (existingMemberIdsSet.value.has(memberId)) {
+    return
+  }
+
   if (selectedMemberIds.value.has(memberId)) {
     selectedMemberIds.value.delete(memberId)
   }
@@ -116,11 +131,19 @@ function isDeptLoading(deptId: number): boolean {
 
 // 检查成员是否被选中
 function isMemberSelected(memberId: number): boolean {
-  return selectedMemberIds.value.has(memberId)
+  return selectedMemberIds.value.has(memberId) || existingMemberIdsSet.value.has(memberId)
 }
 
-// 获取选中的成员ID数组
+// 检查成员是否已存在
+function isMemberExisting(memberId: number): boolean {
+  return existingMemberIdsSet.value.has(memberId)
+}
+
+// 获取选中的成员ID数组（只包含新选择的成员，不包括已存在的）
 const selectedMemberIdsArray = computed(() => Array.from(selectedMemberIds.value))
+
+// 获取所有选中的成员数量（包括已存在的）
+const totalSelectedCount = computed(() => selectedMemberIds.value.size + existingMemberIdsSet.value.size)
 
 // 暴露给父组件的方法和属性
 defineExpose({
@@ -205,7 +228,12 @@ function handleConfirm() {
                 <input
                   type="checkbox"
                   :checked="isMemberSelected(member.user_id)"
-                  class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                  :disabled="isMemberExisting(member.user_id)"
+                  class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  :class="{
+                    'cursor-pointer': !isMemberExisting(member.user_id),
+                    'cursor-not-allowed opacity-50': isMemberExisting(member.user_id),
+                  }"
                   @click.stop="toggleMember(member.user_id)"
                 >
                 <!-- 头像 -->
@@ -216,8 +244,16 @@ function handleConfirm() {
                 >
                 <!-- 成员信息 -->
                 <div class="flex-1 min-w-0">
-                  <div class="text-sm font-medium text-gray-900">
-                    {{ member.name || '未命名' }}
+                  <div class="flex items-center space-x-2">
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ member.name || '未命名' }}
+                    </div>
+                    <span
+                      v-if="isMemberExisting(member.user_id)"
+                      class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"
+                    >
+                      已添加
+                    </span>
                   </div>
                   <div class="text-xs text-gray-500">
                     {{ member.user_num }}
@@ -236,10 +272,13 @@ function handleConfirm() {
     </div>
 
     <!-- 底部：选中数量和确认按钮 -->
-    <div v-if="selectedMemberIds.size > 0" class="mt-4 pt-4 border-t border-gray-200">
+    <div v-if="totalSelectedCount > 0" class="mt-4 pt-4 border-t border-gray-200">
       <div class="flex items-center justify-between">
         <span class="text-sm text-gray-600">
-          已选择 <span class="font-medium text-blue-600">{{ selectedMemberIds.size }}</span> 位成员
+          已选择 <span class="font-medium text-blue-600">{{ totalSelectedCount }}</span> 位成员
+          <span v-if="existingMemberIdsSet.size > 0" class="text-xs text-gray-500 ml-2">
+            （{{ existingMemberIdsSet.size }} 位已存在）
+          </span>
         </span>
         <button
           type="button"

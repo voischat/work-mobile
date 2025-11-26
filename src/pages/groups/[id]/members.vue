@@ -172,6 +172,24 @@ async function handleAddMembersConfirm(memberIds: number[]) {
   }
 }
 
+const { data: groupAllMembers, execute: refreshGroupAllMembers } = useWeilaFetch<
+  MemberListResponse
+>('/corp/group/get-group-all-member', {
+  immediate: false,
+})
+  .post(() => ({
+    group_id: groupId.value,
+  }))
+  .json()
+
+watch(isAddMemberModalOpen, (open) => {
+  if (open) {
+    refreshGroupAllMembers()
+  }
+})
+
+const existingMemberIds = computed(() => groupAllMembers.value.map((i: any) => i.user_id))
+
 // 打开添加成员Modal
 function openAddMemberModal() {
   isAddMemberModalOpen.value = true
@@ -250,6 +268,7 @@ function openAddMemberModal() {
       <template #content>
         <DeptMemberTreeSelector
           ref="treeSelectorRef"
+          :existing-member-ids="existingMemberIds"
           @confirm="handleAddMembersConfirm"
         />
       </template>
