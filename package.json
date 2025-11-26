@@ -24,6 +24,7 @@
     "@wl/network": "https://pkg.pr.new/kvoon3/wl-network/@weila/network@fde0a8d578908d4d3ee6e6c695aab6b2db4d27c8",
     "ai": "^5.0.92",
     "md5": "^2.3.0",
+    "nanoid": "^5.1.6",
     "react-grab": "^0.0.39",
     "vue": "^3.5.16",
     "vue-router": "^4.5.1",

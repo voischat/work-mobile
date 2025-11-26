@@ -2,8 +2,9 @@ import { isObject, objectKeys } from '@antfu/utils'
 import { getRootUrl } from '@kvoon/utils'
 import { createFetch } from '@vueuse/core'
 import md5 from 'md5'
-import { appid, appkey } from '~/shared/const'
+import { nanoid } from 'nanoid'
 
+import { appid, appkey } from '~/shared/const'
 import { useAuth } from './useAuth'
 
 const { token, refreshToken, saveAuth, clearAuth } = useAuth()
@@ -22,10 +23,12 @@ export function generateV2Query(): Record<string, string> {
   const et = Math.floor(timestamp / 1000)
   const app_sign = md5(`${et}${appkey.value}`)
   const app_sign_v2 = getMd5Middle8Chars(app_sign)
+  const uuid = genUUID('weila-work-webview')
   const res: Record<string, string> = {
     appid: appid.value,
     et: String(et),
     sign: app_sign_v2,
+    uuid,
   }
   if (token.value)
     res.token = token.value
@@ -198,3 +201,13 @@ export const useWeilaFetch = createFetch({
     },
   },
 })
+
+export function genUUID(appName: string): string {
+  const uuidKey = `__${appName}-uuid__`
+  let uuid = localStorage.getItem(uuidKey)
+  if (!uuid) {
+    uuid = nanoid()
+    localStorage.setItem(uuidKey, uuid)
+  }
+  return uuid
+}

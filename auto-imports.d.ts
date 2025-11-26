@@ -153,6 +153,7 @@ declare global {
   const useCloned: typeof import('@vueuse/core')['useCloned']
   const useColorMode: typeof import('@vueuse/core')['useColorMode']
   const useConfirmDialog: typeof import('@vueuse/core')['useConfirmDialog']
+  const useConfirmModal: typeof import('./src/composables/useConfirmModal')['useConfirmModal']
   const useCountdown: typeof import('@vueuse/core')['useCountdown']
   const useCounter: typeof import('@vueuse/core')['useCounter']
   const useCssModule: typeof import('vue')['useCssModule']
@@ -330,6 +331,9 @@ declare global {
   export type { WeilaRes } from './src/composables/useWeilaFetch'
   import('./src/composables/useWeilaFetch')
   // @ts-ignore
+  export type { ConfirmModalOptions, ConfirmModalItem } from './src/composables/useConfirmModal'
+  import('./src/composables/useConfirmModal')
+  // @ts-ignore
   export type { ToastItem } from './src/composables/useToast'
   import('./src/composables/useToast')
 }
@@ -480,6 +484,7 @@ declare module 'vue' {
     readonly useCloned: UnwrapRef<typeof import('@vueuse/core')['useCloned']>
     readonly useColorMode: UnwrapRef<typeof import('@vueuse/core')['useColorMode']>
     readonly useConfirmDialog: UnwrapRef<typeof import('@vueuse/core')['useConfirmDialog']>
+    readonly useConfirmModal: UnwrapRef<typeof import('./src/composables/useConfirmModal')['useConfirmModal']>
     readonly useCountdown: UnwrapRef<typeof import('@vueuse/core')['useCountdown']>
     readonly useCounter: UnwrapRef<typeof import('@vueuse/core')['useCounter']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
