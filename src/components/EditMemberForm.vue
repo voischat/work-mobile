@@ -391,7 +391,7 @@ defineExpose({
           高频
         </option>
         <option :value="4">
-          快
+          快速
         </option>
       </select>
       <div v-if="errors.track" class="mt-1 text-sm text-red-600">

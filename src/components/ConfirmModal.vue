@@ -10,14 +10,18 @@ interface Props {
 
 defineProps<Props>()
 
+const emits = defineEmits(['confirm', 'cancel'])
+
 const { closeConfirmModal } = useConfirmModal()
 
 function handleConfirm() {
   closeConfirmModal(true)
+  emits('confirm')
 }
 
 function handleCancel() {
   closeConfirmModal(false)
+  emits('cancel')
 }
 </script>
 
@@ -45,6 +49,7 @@ function handleCancel() {
             <p v-if="modal.config.message" class="text-gray-600">
               {{ modal.config.message }}
             </p>
+            <slot name="content" />
           </div>
 
           <!-- Footer: 固定在底部 -->

@@ -4,12 +4,19 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
+import ConfirmModal from '~/components/ConfirmModal.vue'
+import GroupAddForm from '~/components/forms/GroupAddForm.vue'
 import GroupActions from '~/components/GroupActions.vue'
+import { useConfirmModal } from '~/composables/useConfirmModal'
 import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
+const { showConfirmModal, closeConfirmModal, confirmModal } = useConfirmModal()
+
+// 表单引用
+const groupAddFormRef = ref<InstanceType<typeof GroupAddForm>>()
 
 // 分页状态
 const { curPage, pageSize } = usePage()
@@ -90,6 +97,31 @@ async function handleRefresh() {
   allGroups.value = []
   await refetchGroups()
 }
+
+// 处理创建群组 - 显示模态框
+async function handleAddGroup() {
+  await showConfirmModal({
+    title: '创建群组',
+    confirmText: '确认创建',
+    cancelText: '取消',
+  })
+}
+
+// 处理模态框确认事件
+async function handleConfirmModal() {
+  const result = await groupAddFormRef.value?.submit()
+  if (result) {
+    // 表单提交成功，刷新数据列表
+    await handleRefresh()
+    closeConfirmModal(true)
+  }
+}
+
+// 处理模态框取消事件
+function handleCancelModal() {
+  // 模态框关闭时重置表单
+  groupAddFormRef.value?.reset()
+}
 </script>
 
 <template>
@@ -100,9 +132,9 @@ async function handleRefresh() {
         <div class="mb-4">
           <button
             class="bg-blue-600 text-white px-4 py-2 rounded"
-            @click="router.push('/groups/add-group')"
+            @click="handleAddGroup"
           >
-            添加群组
+            创建群组
           </button>
         </div>
 
@@ -174,5 +206,18 @@ async function handleRefresh() {
         </div>
       </div>
     </div>
+
+    <!-- 创建群组模态框 -->
+    <ConfirmModal
+      :modal="confirmModal"
+      @confirm="handleConfirmModal"
+      @cancel="handleCancelModal"
+    >
+      <template #content>
+        <GroupAddForm
+          ref="groupAddFormRef"
+        />
+      </template>
+    </ConfirmModal>
   </BackLayout>
 </template>

@@ -4,12 +4,19 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
+import ConfirmModal from '~/components/ConfirmModal.vue'
 import DeptActions from '~/components/DeptActions.vue'
+import DeptAddForm from '~/components/forms/DeptAddForm.vue'
+import { useConfirmModal } from '~/composables/useConfirmModal'
 import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
+const { showConfirmModal, closeConfirmModal, confirmModal } = useConfirmModal()
+
+// 表单引用
+const deptAddFormRef = ref<InstanceType<typeof DeptAddForm>>()
 
 // 分页状态
 const { curPage, pageSize } = usePage()
@@ -94,6 +101,33 @@ async function handleRefresh() {
   await refetchDepts()
 }
 
+// 处理创建部门 - 显示模态框
+async function handleAddDept() {
+  await showConfirmModal({
+    title: '创建部门',
+    confirmText: '确认创建',
+    cancelText: '取消',
+  })
+}
+
+// 处理模态框确认事件
+async function handleConfirmModal() {
+  // 通过 ref 触发表单提交并等待结果
+  const result = await deptAddFormRef.value?.submit()
+
+  if (result) {
+    // 表单提交成功，关闭模态框并刷新部门列表
+    closeConfirmModal(true)
+    await handleRefresh()
+  }
+}
+
+// 处理模态框取消事件
+function handleCancelModal() {
+  // 模态框关闭时重置表单
+  deptAddFormRef.value?.reset()
+}
+
 // 处理部门卡片点击，跳转到部门成员列表
 function handleDeptClick(deptId: number) {
   router.push(`/departments/${deptId}/members`)
@@ -108,9 +142,9 @@ function handleDeptClick(deptId: number) {
         <div class="mb-4">
           <button
             class="bg-blue-600 text-white px-4 py-2 rounded"
-            @click="router.push('/departments/add-dept')"
+            @click="handleAddDept"
           >
-            添加部门
+            创建部门
           </button>
         </div>
 
@@ -182,5 +216,18 @@ function handleDeptClick(deptId: number) {
         </div>
       </div>
     </div>
+
+    <!-- 创建部门模态框 -->
+    <ConfirmModal
+      :modal="confirmModal"
+      @confirm="handleConfirmModal"
+      @cancel="handleCancelModal"
+    >
+      <template #content>
+        <DeptAddForm
+          ref="deptAddFormRef"
+        />
+      </template>
+    </ConfirmModal>
   </BackLayout>
 </template>

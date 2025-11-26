@@ -2,15 +2,25 @@
 import type { Dept, Member, MemberListResponse } from '~/types/management'
 import { refDebounced } from '@vueuse/core'
 import { computed, ref, shallowRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import ConfirmModal from '~/components/ConfirmModal.vue'
+import DeviceAddForm from '~/components/forms/DeviceAddForm.vue'
+import MemberAddForm from '~/components/forms/MemberAddForm.vue'
 import MemberActions from '~/components/MemberActions.vue'
 import MemberCard from '~/components/MemberCard.vue'
+import { useConfirmModal } from '~/composables/useConfirmModal'
 import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
 
-const router = useRouter()
+const { showConfirmModal, closeConfirmModal, confirmModal } = useConfirmModal()
+
+// 表单引用
+const memberAddFormRef = ref<InstanceType<typeof MemberAddForm>>()
+const deviceAddFormRef = ref<InstanceType<typeof DeviceAddForm>>()
+
+// 当前显示的模态框类型
+const currentModal = ref<'member' | 'device' | null>(null)
 
 // 搜索关键词（使用 shallowRef 用于防抖）
 const searchKey = shallowRef('')
@@ -117,6 +127,56 @@ async function handleRefresh() {
   allMembers.value = []
   await refetchMembers()
 }
+
+// 处理创建成员 - 显示模态框
+async function handleAddMember() {
+  currentModal.value = 'member'
+  await showConfirmModal({
+    title: '创建成员',
+    confirmText: '确认创建',
+    cancelText: '取消',
+  })
+}
+
+// 处理添加设备 - 显示模态框
+async function handleAddDevice() {
+  currentModal.value = 'device'
+  await showConfirmModal({
+    title: '添加设备',
+    confirmText: '确认添加',
+    cancelText: '取消',
+  })
+}
+
+// 处理模态框确认事件
+async function handleConfirmModal() {
+  let result = false
+
+  // 根据当前模态框类型触发表单提交并等待结果
+  if (currentModal.value === 'member') {
+    result = await memberAddFormRef.value?.submit()
+  }
+  else if (currentModal.value === 'device') {
+    result = await deviceAddFormRef.value?.submit()
+  }
+
+  if (result) {
+    // 表单提交成功，关闭模态框并刷新成员列表
+    closeConfirmModal(true)
+    await handleRefresh()
+  }
+}
+
+// 处理模态框取消事件
+function handleCancelModal() {
+  // 模态框关闭时重置表单
+  if (currentModal.value === 'member') {
+    memberAddFormRef.value?.reset()
+  }
+  else if (currentModal.value === 'device') {
+    deviceAddFormRef.value?.reset()
+  }
+}
 </script>
 
 <template>
@@ -137,13 +197,13 @@ async function handleRefresh() {
           <div class="flex space-x-2">
             <button
               class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              @click="router.push('/members/add-member')"
+              @click="handleAddMember"
             >
               创建成员
             </button>
             <button
               class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              @click="router.push('/members/add-device')"
+              @click="handleAddDevice"
             >
               添加设备
             </button>
@@ -196,5 +256,33 @@ async function handleRefresh() {
         </div>
       </div>
     </div>
+
+    <!-- 创建成员模态框 -->
+    <ConfirmModal
+      v-if="currentModal === 'member'"
+      :modal="confirmModal"
+      @confirm="handleConfirmModal"
+      @cancel="handleCancelModal"
+    >
+      <template #content>
+        <MemberAddForm
+          ref="memberAddFormRef"
+        />
+      </template>
+    </ConfirmModal>
+
+    <!-- 添加设备模态框 -->
+    <ConfirmModal
+      v-if="currentModal === 'device'"
+      :modal="confirmModal"
+      @confirm="handleConfirmModal"
+      @cancel="handleCancelModal"
+    >
+      <template #content>
+        <DeviceAddForm
+          ref="deviceAddFormRef"
+        />
+      </template>
+    </ConfirmModal>
   </BackLayout>
 </template>

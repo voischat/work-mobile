@@ -41,7 +41,7 @@ const trackTypeMap = {
   1: { label: '低频', color: 'bg-yellow-100 text-yellow-700' },
   2: { label: '中频', color: 'bg-orange-100 text-orange-700' },
   3: { label: '高频', color: 'bg-red-100 text-red-700' },
-  4: { label: '快', color: 'bg-blue-100 text-blue-700' },
+  4: { label: '快速', color: 'bg-blue-100 text-blue-700' },
 } as const
 
 // 位置共享映射
