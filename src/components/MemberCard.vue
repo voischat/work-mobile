@@ -79,7 +79,7 @@ function formatDate(timestamp: number): string {
           <!-- 展开/收缩按钮 -->
           <button
             type="button"
-            class="flex-shrink-0 ml-2 p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+            class="flex-shrink-0 ml-2 p-1 text-gray-500 rounded transition-colors"
           >
             <svg
               class="w-5 h-5 transition-transform duration-200"
