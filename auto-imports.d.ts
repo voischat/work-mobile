@@ -44,12 +44,16 @@ declare global {
   const generateV2Query: typeof import('./src/composables/useWeilaFetch')['generateV2Query']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
+  const globalModalCancelCallback: typeof import('./src/composables/useModal')['globalModalCancelCallback']
+  const globalModalConfirmCallback: typeof import('./src/composables/useModal')['globalModalConfirmCallback']
+  const globalModalProps: typeof import('./src/composables/useModal')['globalModalProps']
   const h: typeof import('vue')['h']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
   const isDark: typeof import('./src/composables/dark')['isDark']
   const isDefined: typeof import('@vueuse/core')['isDefined']
+  const isGlobalModalVisible: typeof import('./src/composables/useModal')['isGlobalModalVisible']
   const isProxy: typeof import('vue')['isProxy']
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
@@ -213,6 +217,7 @@ declare global {
   const useMediaQuery: typeof import('@vueuse/core')['useMediaQuery']
   const useMemoize: typeof import('@vueuse/core')['useMemoize']
   const useMemory: typeof import('@vueuse/core')['useMemory']
+  const useModal: typeof import('./src/composables/useModal')['useModal']
   const useModel: typeof import('vue')['useModel']
   const useMounted: typeof import('@vueuse/core')['useMounted']
   const useMouse: typeof import('@vueuse/core')['useMouse']
@@ -329,14 +334,14 @@ declare global {
   export type { UsePageOptions, UsePageReturn } from './src/composables/usePage'
   import('./src/composables/usePage')
   // @ts-ignore
-  export type { WeilaRes } from './src/composables/useWeilaFetch'
-  import('./src/composables/useWeilaFetch')
-  // @ts-ignore
-  export type { ConfirmModalOptions, ConfirmModalItem } from './src/composables/useConfirmModal'
-  import('./src/composables/useConfirmModal')
+  export type { ModalOptions } from './src/composables/useModal'
+  import('./src/composables/useModal')
   // @ts-ignore
   export type { ToastItem } from './src/composables/useToast'
   import('./src/composables/useToast')
+  // @ts-ignore
+  export type { WeilaRes } from './src/composables/useWeilaFetch'
+  import('./src/composables/useWeilaFetch')
 }
 
 // for vue template auto import
@@ -378,12 +383,16 @@ declare module 'vue' {
     readonly generateV2Query: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['generateV2Query']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly globalModalCancelCallback: UnwrapRef<typeof import('./src/composables/useModal')['globalModalCancelCallback']>
+    readonly globalModalConfirmCallback: UnwrapRef<typeof import('./src/composables/useModal')['globalModalConfirmCallback']>
+    readonly globalModalProps: UnwrapRef<typeof import('./src/composables/useModal')['globalModalProps']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly isDark: UnwrapRef<typeof import('./src/composables/dark')['isDark']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
+    readonly isGlobalModalVisible: UnwrapRef<typeof import('./src/composables/useModal')['isGlobalModalVisible']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
@@ -486,7 +495,6 @@ declare module 'vue' {
     readonly useCloned: UnwrapRef<typeof import('@vueuse/core')['useCloned']>
     readonly useColorMode: UnwrapRef<typeof import('@vueuse/core')['useColorMode']>
     readonly useConfirmDialog: UnwrapRef<typeof import('@vueuse/core')['useConfirmDialog']>
-    readonly useConfirmModal: UnwrapRef<typeof import('./src/composables/useConfirmModal')['useConfirmModal']>
     readonly useCountdown: UnwrapRef<typeof import('@vueuse/core')['useCountdown']>
     readonly useCounter: UnwrapRef<typeof import('@vueuse/core')['useCounter']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
@@ -545,6 +553,7 @@ declare module 'vue' {
     readonly useMediaQuery: UnwrapRef<typeof import('@vueuse/core')['useMediaQuery']>
     readonly useMemoize: UnwrapRef<typeof import('@vueuse/core')['useMemoize']>
     readonly useMemory: UnwrapRef<typeof import('@vueuse/core')['useMemory']>
+    readonly useModal: UnwrapRef<typeof import('./src/composables/useModal')['useModal']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useMounted: UnwrapRef<typeof import('@vueuse/core')['useMounted']>
     readonly useMouse: UnwrapRef<typeof import('@vueuse/core')['useMouse']>

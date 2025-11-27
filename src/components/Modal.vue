@@ -2,7 +2,7 @@
 import type { ModalOptions } from '~/composables/useModal'
 import { isWeilaRes } from '@wl/network'
 
-const { onConfirm, onCancel } = withDefaults(defineProps<ModalOptions>(), {
+const props = withDefaults(defineProps<ModalOptions>(), {
   title: undefined,
   message: undefined,
   confirmText: '确认',
@@ -21,7 +21,7 @@ const isConfirming = ref(false)
 async function handleConfirm() {
   isConfirming.value = true
   try {
-    await onConfirm()
+    await props.onConfirm()
     open.value = false
   }
   catch (error: any) {
@@ -41,7 +41,7 @@ async function handleConfirm() {
 
 async function handleCancel() {
   try {
-    await onCancel()
+    await props.onCancel()
     open.value = false
   }
   catch (error: any) {
