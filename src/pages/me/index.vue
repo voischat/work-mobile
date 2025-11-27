@@ -24,9 +24,8 @@ const hasError = computed(() => !!userError.value)
 
 const { showModal } = useModal()
 
-// 退出登录
-async function handleLogout() {
-  await showModal({
+function handleLogout() {
+  showModal({
     title: '确认退出',
     message: '确定要退出登录吗？',
     confirmText: '确认退出',
