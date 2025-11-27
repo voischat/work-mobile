@@ -39,21 +39,6 @@ async function handleConfirm() {
   }
 }
 
-function parseMaybeWeilaErrorString(str: string): string {
-  try {
-    if (str.startsWith('{') && str.endsWith('}')) {
-      const maybeWeilaRes = JSON.parse(str)
-      if (isWeilaRes(maybeWeilaRes)) {
-        return maybeWeilaRes.errmsg
-      }
-    }
-  }
-  catch (error) {
-    console.error('parseMaybeWeilaErrorString error:', error)
-  }
-  return str
-}
-
 async function handleCancel() {
   try {
     await onCancel()
@@ -67,6 +52,21 @@ async function handleCancel() {
     else
       showToast('Unkown error')
   }
+}
+
+function parseMaybeWeilaErrorString(str: string): string {
+  try {
+    if (str.startsWith('{') && str.endsWith('}')) {
+      const maybeWeilaRes = JSON.parse(str)
+      if (isWeilaRes(maybeWeilaRes)) {
+        return maybeWeilaRes.errmsg
+      }
+    }
+  }
+  catch (error) {
+    console.error('parseMaybeWeilaErrorString error:', error)
+  }
+  return str
 }
 </script>
 
