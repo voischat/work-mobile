@@ -101,13 +101,12 @@ const errorMessage = computed(() => {
 
 // 提交方法，返回 Promise
 async function submit(): Promise<void> {
-  // 如果正在提交中，直接返回
   if (isFetching.value) {
     return Promise.resolve()
   }
 
   if (!validate(formData.value)) {
-    throw new Error('表单验证失败')
+    throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
 
   return new Promise((resolve, reject) => {

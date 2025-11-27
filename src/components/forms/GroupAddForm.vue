@@ -53,7 +53,7 @@ const errorMessage = computed(() => {
 // 主要提交方法 - 暴露给父组件
 async function submit(): Promise<false | { group: Group }> {
   if (!validate(formData.value)) {
-    return false
+    throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
 
   try {

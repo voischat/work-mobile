@@ -37,14 +37,14 @@ const errorMessage = computed(() => {
 // 主要提交方法 - 暴露给父组件
 async function submit(): Promise<false | { dept: Dept }> {
   if (!validate(formData.value)) {
-    return false
+    throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
 
   try {
     await createDept()
 
-    if (error.value) {
-      showToast(error.value.message || '部门创建失败')
+    if (error?.value) {
+      showToast(error?.value?.message || '部门创建失败')
       return false
     }
 

@@ -3,7 +3,6 @@ import type { Member } from '~/types/management'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import EditMemberModal from './EditMemberModal.vue'
 import MemberStateToggle from './MemberStateToggle.vue'
 import Modal from './Modal.vue'
@@ -24,13 +23,6 @@ const showDeleteModal = ref(false)
 // 编辑成员弹窗
 const showEditModal = ref(false)
 
-// 删除成员 API
-const { execute: deleteMember } = useWeilaFetch('/corp/address/delete-member', {
-  immediate: false,
-}).post(() => ({
-  user_id: props.member.user_id,
-})).json()
-
 // 处理编辑
 function handleEdit() {
   showEditModal.value = true
@@ -44,7 +36,11 @@ function handleEditSuccess() {
 // 处理删除确认
 async function handleDeleteConfirm() {
   try {
-    await deleteMember()
+    await weilaApi.v2.fetch('/corp/address/delete-member', {
+      body: {
+        user_id: props.member.user_id,
+      },
+    })
     showToast('删除成功')
     // 通知父组件刷新数据
     emit('refresh')
@@ -97,7 +93,7 @@ function handleStateUpdated(_updatedMember: Member) {
     title="确认删除"
     :message="`确定要删除成员「${member.name}」吗？此操作不可恢复。`"
     confirm-button-type="danger"
-    @confirm="handleDeleteConfirm"
+    :on-confirm="handleDeleteConfirm"
   />
 
   <EditMemberModal

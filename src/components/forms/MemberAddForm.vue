@@ -74,7 +74,7 @@ async function handleQuickGenerate() {
 // 主要提交方法 - 暴露给父组件
 async function submit(): Promise<false | { member: Member }> {
   if (!validate(form.value)) {
-    return false
+    throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
 
   try {

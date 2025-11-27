@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import HomeLayout from '~/components/HomeLayout.vue'
 import { useAuth } from '~/composables/useAuth'
-import { useConfirmModal } from '~/composables/useConfirmModal'
+import { useModal } from '~/composables/useModal'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 const router = useRouter()
@@ -22,20 +22,20 @@ const {
 const isLoading = computed(() => isUserFetching.value)
 const hasError = computed(() => !!userError.value)
 
-const { showConfirmModal } = useConfirmModal()
+const { showModal } = useModal()
 
 // 退出登录
 async function handleLogout() {
-  const confirmed = await showConfirmModal({
+  await showModal({
     title: '确认退出',
     message: '确定要退出登录吗？',
     confirmText: '确认退出',
     cancelText: '取消',
+    onConfirm() {
+      clearAuth()
+      router.push('/login')
+    },
   })
-  if (confirmed) {
-    clearAuth()
-    router.push('/login')
-  }
 }
 
 // 格式化日期

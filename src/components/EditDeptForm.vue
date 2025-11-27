@@ -56,7 +56,7 @@ async function submit(): Promise<void> {
   }
 
   if (!validate(formData.value)) {
-    throw new Error('表单验证失败')
+    throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
 
   return new Promise((resolve, reject) => {

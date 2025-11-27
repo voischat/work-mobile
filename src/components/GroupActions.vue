@@ -2,7 +2,6 @@
 import type { Group } from '~/types/management'
 import { ref } from 'vue'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import EditGroupModal from './EditGroupModal.vue'
 import Modal from './Modal.vue'
 
@@ -21,13 +20,6 @@ const showDeleteModal = ref(false)
 // 编辑群组弹窗
 const showEditModal = ref(false)
 
-// 删除群组 API
-const { execute: deleteGroup } = useWeilaFetch('/corp/group/delete-group', {
-  immediate: false,
-}).post(() => ({
-  group_id: props.group.id,
-})).json()
-
 // 处理编辑
 function handleEdit() {
   showEditModal.value = true
@@ -41,7 +33,11 @@ function handleEditSuccess() {
 // 处理删除确认
 async function handleDeleteConfirm() {
   try {
-    await deleteGroup()
+    await weilaApi.v2.fetch('/corp/group/delete-group', {
+      body: {
+        group_id: props.group.id,
+      },
+    })
     showToast('删除成功')
     // 通知父组件刷新数据
     emit('refresh')
@@ -76,7 +72,7 @@ async function handleDeleteConfirm() {
     title="确认删除"
     :message="`确定要删除群组「${group.name}」吗？此操作不可恢复。`"
     confirm-button-type="danger"
-    @confirm="handleDeleteConfirm"
+    :on-confirm="handleDeleteConfirm"
   />
 
   <EditGroupModal

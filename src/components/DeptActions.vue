@@ -2,7 +2,6 @@
 import type { Dept } from '~/types/management'
 import { ref } from 'vue'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import EditDeptModal from './EditDeptModal.vue'
 import Modal from './Modal.vue'
 
@@ -22,11 +21,11 @@ const showDeleteModal = ref(false)
 const showEditModal = ref(false)
 
 // 删除部门 API
-const { execute: deleteDept } = useWeilaFetch('/corp/address/delete-dept', {
-  immediate: false,
-}).post(() => ({
-  dept_id: props.dept.id,
-})).json()
+// const { execute: deleteDept, error: deleteDeptError } = useWeilaFetch('/corp/address/delete-dept', {
+//   immediate: false,
+// }).post(() => ({
+//   dept_id: props.dept.id,
+// })).json()
 
 // 处理编辑
 function handleEdit() {
@@ -40,16 +39,14 @@ function handleEditSuccess() {
 
 // 处理删除确认
 async function handleDeleteConfirm() {
-  try {
-    await deleteDept()
-    showToast('删除成功')
-    // 通知父组件刷新数据
-    emit('refresh')
-  }
-  catch (error) {
-    console.error('删除失败:', error)
-    showToast('删除失败')
-  }
+  await weilaApi.v2.fetch('/corp/address/delete-dept', {
+    body: {
+      dept_id: props.dept.id,
+    },
+  })
+  showToast('删除成功')
+  // 通知父组件刷新数据
+  emit('refresh')
 }
 </script>
 
@@ -76,7 +73,7 @@ async function handleDeleteConfirm() {
     title="确认删除"
     :message="`确定要删除部门「${dept.name}」吗？此操作不可恢复。`"
     confirm-button-type="danger"
-    @confirm="handleDeleteConfirm"
+    :on-confirm="handleDeleteConfirm"
   />
 
   <EditDeptModal

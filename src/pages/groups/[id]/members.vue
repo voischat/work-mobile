@@ -266,13 +266,11 @@ function openAddMemberModal() {
       v-model:open="isAddMemberModalOpen"
       title="选择成员"
     >
-      <template #content>
-        <DeptMemberTreeSelector
-          ref="treeSelectorRef"
-          v-model:selected-member-ids="selectedMemberIds"
-          :existing-member-ids="existingMemberIds"
-        />
-      </template>
+      <DeptMemberTreeSelector
+        ref="treeSelectorRef"
+        v-model:selected-member-ids="selectedMemberIds"
+        :existing-member-ids="existingMemberIds"
+      />
       <template #footer>
         <div class="flex items-center justify-between">
           <!-- 左侧显示选中数量 -->

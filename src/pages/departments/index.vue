@@ -4,19 +4,20 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
-import ConfirmModal from '~/components/ConfirmModal.vue'
 import DeptActions from '~/components/DeptActions.vue'
 import DeptAddForm from '~/components/forms/DeptAddForm.vue'
-import { useConfirmModal } from '~/composables/useConfirmModal'
+import Modal from '~/components/Modal.vue'
 import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
-const { showConfirmModal, closeConfirmModal, confirmModal } = useConfirmModal()
 
 // 表单引用
 const deptAddFormRef = ref<InstanceType<typeof DeptAddForm>>()
+
+// 模态框可见性状态
+const isDeptModalOpen = ref(false)
 
 // 分页状态
 const { curPage, pageSize } = usePage()
@@ -102,30 +103,25 @@ async function handleRefresh() {
 }
 
 // 处理创建部门 - 显示模态框
-async function handleAddDept() {
-  await showConfirmModal({
-    title: '创建部门',
-    confirmText: '确认创建',
-    cancelText: '取消',
-  })
+function handleAddDept() {
+  isDeptModalOpen.value = true
 }
 
-// 处理模态框确认事件
-async function handleConfirmModal() {
-  // 通过 ref 触发表单提交并等待结果
+// 处理创建部门模态框确认事件
+async function handleDeptConfirm() {
   const result = await deptAddFormRef.value?.submit()
-
+  console.log('result', result)
   if (result) {
-    // 表单提交成功，关闭模态框并刷新部门列表
-    closeConfirmModal(true)
+    isDeptModalOpen.value = false
     await handleRefresh()
   }
 }
 
-// 处理模态框取消事件
-function handleCancelModal() {
+// 处理创建部门模态框取消事件
+function handleDeptCancel() {
   // 模态框关闭时重置表单
   deptAddFormRef.value?.reset()
+  isDeptModalOpen.value = false
 }
 
 // 处理部门卡片点击，跳转到部门成员列表
@@ -218,16 +214,17 @@ function handleDeptClick(deptId: number) {
     </div>
 
     <!-- 创建部门模态框 -->
-    <ConfirmModal
-      :modal="confirmModal"
-      @confirm="handleConfirmModal"
-      @cancel="handleCancelModal"
+    <Modal
+      v-model:open="isDeptModalOpen"
+      title="创建部门"
+      confirm-text="确认创建"
+      cancel-text="取消"
+      :on-confirm="handleDeptConfirm"
+      :on-cancel="handleDeptCancel"
     >
-      <template #content>
-        <DeptAddForm
-          ref="deptAddFormRef"
-        />
-      </template>
-    </ConfirmModal>
+      <DeptAddForm
+        ref="deptAddFormRef"
+      />
+    </Modal>
   </BackLayout>
 </template>

@@ -4,8 +4,8 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { useAuth } from '~/composables/useAuth'
-import { useConfirmModal } from '~/composables/useConfirmModal'
 import { useForm } from '~/composables/useForm'
+import { useModal } from '~/composables/useModal'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
@@ -21,7 +21,7 @@ type UnregistEmailForm = z.infer<typeof unregistEmailSchema>
 const router = useRouter()
 const { clearAuth } = useAuth()
 const { showToast } = useToast()
-const { showConfirmModal } = useConfirmModal()
+const { showModal } = useModal()
 
 // 表单数据
 const formData = ref<UnregistEmailForm>({
@@ -69,17 +69,16 @@ async function handleSubmit() {
   if (!validate(formData.value)) {
     return
   }
-  const confirmed = await showConfirmModal({
+  await showModal({
     title: '确认注销',
     message: '确定要注销账号吗？此操作不可恢复！',
     confirmText: '确认注销',
     cancelText: '取消',
     confirmButtonType: 'danger',
+    onConfirm() {
+      unregistByEmail()
+    },
   })
-  if (!confirmed) {
-    return
-  }
-  unregistByEmail()
 }
 </script>
 

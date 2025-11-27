@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { LoginResponse } from '~/types/auth'
 import { useRouteQuery } from '@vueuse/router'
-import { useConfirmModal } from './composables/useConfirmModal'
+import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
 
 const { showToast } = useToast()
 
@@ -93,15 +93,17 @@ watch([token, refreshToken], ([t, rt]) => {
 
 // Toast
 const { toasts, removeToast } = useToast()
-
-// Confirm Modal
-const { confirmModal } = useConfirmModal()
 </script>
 
 <template>
   <main>
     <RouterView />
     <Toast :toasts="toasts" @remove="removeToast" />
-    <ConfirmModal :modal="confirmModal" />
+    <Modal
+      v-model:open="isGlobalModalVisible"
+      v-bind="globalModalProps"
+      :on-confirm="globalModalConfirmCallback"
+      :on-cancel="globalModalCancelCallback"
+    />
   </main>
 </template>
