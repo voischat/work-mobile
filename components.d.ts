@@ -12,6 +12,7 @@ declare module 'vue' {
     AvatarUpload: typeof import('./src/components/AvatarUpload.vue')['default']
     BackLayout: typeof import('./src/components/BackLayout.vue')['default']
     BottomNav: typeof import('./src/components/BottomNav.vue')['default']
+    Breadcrumb: typeof import('./src/components/Breadcrumb.vue')['default']
     ConfirmModal: typeof import('./src/components/ConfirmModal.vue')['default']
     CountDownButton: typeof import('./src/components/CountDownButton.vue')['default']
     DeptActions: typeof import('./src/components/DeptActions.vue')['default']

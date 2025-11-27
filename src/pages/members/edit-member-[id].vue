@@ -3,6 +3,7 @@ import type { Member } from '~/types/management'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import Breadcrumb from '~/components/Breadcrumb.vue'
 import EditMemberForm from '~/components/EditMemberForm.vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
@@ -49,6 +50,13 @@ function handleCancel() {
 
 <template>
   <BackLayout :title="isDevice ? '编辑设备' : '编辑成员'">
+    <template #breadcrumb>
+      <Breadcrumb
+        :items="[
+          { name: '成员管理', steps: 2 }, // 回到成员列表
+        ]"
+      />
+    </template>
     <div class="p-4">
       <div class="max-w-md mx-auto">
         <div v-if="!memberInfo" class="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">

@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import BackLayout from '~/components/BackLayout.vue'
+import Breadcrumb from '~/components/Breadcrumb.vue'
 import CountDownButton from '~/components/CountDownButton.vue'
 import ImageVerifyCode from '~/components/ImageVerifyCode.vue'
 import { useForm } from '~/composables/useForm'
@@ -138,6 +139,14 @@ function handleSubmit() {
 
 <template>
   <BackLayout title="绑定手机">
+    <template #breadcrumb>
+      <Breadcrumb
+        :items="[
+          { name: '我的', steps: 1 },
+          { name: '绑定手机' },
+        ]"
+      />
+    </template>
     <div class="p-4">
       <div class="max-w-md mx-auto">
         <div class="bg-white rounded-lg shadow-md p-6">

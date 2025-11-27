@@ -14,6 +14,8 @@ withDefaults(defineProps<Props>(), {
   showBack: true,
 })
 
+const slots = useSlots()
+
 const route = useRoute()
 
 // 获取 main 元素的引用
@@ -52,9 +54,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="grid grid-rows-[min-content_1fr] h-screen overflow-hidden">
+  <div class="grid grid-rows-[min-content_min-content_1fr] h-screen overflow-hidden">
     <!-- Header -->
     <Header :title="title" :show-back="showBack" :show-exit="true" />
+
+    <!-- Breadcrumb 插槽 -->
+    <div v-if="slots.breadcrumb" class="px-4 py-2 bg-white border-b border-gray-100">
+      <slot name="breadcrumb" />
+    </div>
 
     <!-- 内容区域 -->
     <main ref="mainElement" class="flex-1 overflow-y-auto">

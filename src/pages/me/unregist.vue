@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import BackLayout from '~/components/BackLayout.vue'
+import Breadcrumb from '~/components/Breadcrumb.vue'
 import Tab from '~/components/Tab.vue'
 import UnregistEmail from './UnregistEmail.vue'
 import UnregistPhone from './UnregistPhone.vue'
@@ -16,6 +17,14 @@ const tabs = [
 
 <template>
   <BackLayout title="注销账号">
+    <template #breadcrumb>
+      <Breadcrumb
+        :items="[
+          { name: '我的', steps: 1 },
+          { name: '注销账号' },
+        ]"
+      />
+    </template>
     <div class="p-4">
       <div class="max-w-md mx-auto">
         <div class="bg-white rounded-lg shadow-md p-6">

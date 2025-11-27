@@ -3,6 +3,7 @@ import type { Dept, Group, GroupListResponse, Member, MemberListResponse } from 
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import Breadcrumb from '~/components/Breadcrumb.vue'
 import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
 import MemberActions from '~/components/MemberActions.vue'
 import MemberCard from '~/components/MemberCard.vue'
@@ -198,7 +199,15 @@ function openAddMemberModal() {
 </script>
 
 <template>
-  <BackLayout :title="groupName || '群成员'">
+  <BackLayout :title="groupName || '群成员列表'">
+    <template #breadcrumb>
+      <Breadcrumb
+        :items="[
+          { name: '群组列表', steps: 1 },
+          { name: '群成员列表' },
+        ]"
+      />
+    </template>
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
         <!-- 添加成员按钮 -->

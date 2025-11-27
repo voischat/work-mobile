@@ -4,6 +4,7 @@ import { refDebounced } from '@vueuse/core'
 import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import Breadcrumb from '~/components/Breadcrumb.vue'
 import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
 import MemberActions from '~/components/MemberActions.vue'
 import MemberCard from '~/components/MemberCard.vue'
@@ -208,7 +209,15 @@ function openAddMemberModal() {
 </script>
 
 <template>
-  <BackLayout title="部门成员">
+  <BackLayout :title="getDeptName(deptId) || '部门成员列表'">
+    <template #breadcrumb>
+      <Breadcrumb
+        :items="[
+          { name: '部门列表', steps: 1 },
+          { name: '部门成员列表' },
+        ]"
+      />
+    </template>
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
         <!-- 部门选择下拉菜单和添加成员按钮 -->
