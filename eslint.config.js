@@ -14,6 +14,7 @@ export default antfu(
     },
   },
   globalIgnores([
+    'docs/vueuse/*.md',
     '**/api-examples.md',
   ]),
 )
