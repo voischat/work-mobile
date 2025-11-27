@@ -1,14 +1,35 @@
 <script setup lang="ts">
 import type { OrgInfo } from '~/types/org'
+import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 
 defineProps<{
   org: OrgInfo
 }>()
 
+const router = useRouter()
+
 // 格式化时间戳为日期字符串
 function formatDate(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleString('zh-CN')
+}
+
+// 导航函数
+function navigateToMembers() {
+  router.push('/members/')
+}
+
+function navigateToDepartments() {
+  router.push('/departments/')
+}
+
+function navigateToGroups() {
+  router.push('/groups/')
+}
+
+function navigateToDevices() {
+  // 由于没有专门的设备页面，导航到成员页面（设备通常在成员管理中查看）
+  router.push('/members/')
 }
 </script>
 
@@ -46,7 +67,7 @@ function formatDate(timestamp: number): string {
     <div class="px-6 py-5">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <!-- 成员数 -->
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200 text-center">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200 text-center cursor-pointer" @click="navigateToMembers">
           <div class="flex items-center justify-center mb-3">
             <div class="p-3 rounded-lg">
               <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +84,7 @@ function formatDate(timestamp: number): string {
         </div>
 
         <!-- 部门数 -->
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200 text-center">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200 text-center cursor-pointer" @click="navigateToDepartments">
           <div class="flex items-center justify-center mb-3">
             <div class="p-3 rounded-lg">
               <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +101,7 @@ function formatDate(timestamp: number): string {
         </div>
 
         <!-- 群组数 -->
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200 text-center">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200 text-center cursor-pointer" @click="navigateToGroups">
           <div class="flex items-center justify-center mb-3">
             <div class="p-3 rounded-lg">
               <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +118,7 @@ function formatDate(timestamp: number): string {
         </div>
 
         <!-- 设备数 -->
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200 text-center">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200 text-center cursor-pointer" @click="navigateToDevices">
           <div class="flex items-center justify-center mb-3">
             <div class="p-3 rounded-lg">
               <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
