@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useToast } from '~/composables/useToast'
 import EditMemberModal from './EditMemberModal.vue'
 import MemberStateToggle from './MemberStateToggle.vue'
 import Modal from './Modal.vue'
+import ResetPasswordModal from './ResetPasswordModal.vue'
 
 const props = defineProps<{
   member: Member
@@ -15,13 +15,14 @@ const emit = defineEmits<{
   (e: 'refresh'): void
 }>()
 
-const router = useRouter()
 const { showToast } = useToast()
 
 // 删除确认模态框
 const showDeleteModal = ref(false)
 // 编辑成员弹窗
 const showEditModal = ref(false)
+// 重置密码弹窗
+const showResetPasswordModal = ref(false)
 
 // 处理编辑
 function handleEdit() {
@@ -31,6 +32,11 @@ function handleEdit() {
 // 处理编辑成功
 function handleEditSuccess() {
   emit('refresh')
+}
+
+// 处理重置密码成功
+function handleResetPasswordSuccess() {
+  // 密码重置成功，不需要刷新列表
 }
 
 // 处理删除确认
@@ -53,7 +59,7 @@ async function handleDeleteConfirm() {
 
 // 处理重置密码
 function handleResetPassword() {
-  router.push(`/members/reset-password-${props.member.user_id}`)
+  showResetPasswordModal.value = true
 }
 
 // 处理状态更新（不需要刷新列表，组件内部状态已更新）
@@ -100,5 +106,12 @@ function handleStateUpdated(_updatedMember: Member) {
     v-model:open="showEditModal"
     :member="member"
     @success="handleEditSuccess"
+  />
+
+  <ResetPasswordModal
+    v-model:open="showResetPasswordModal"
+    :member-id="member.user_id"
+    :member-name="member.name"
+    @success="handleResetPasswordSuccess"
   />
 </template>

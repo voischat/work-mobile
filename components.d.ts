@@ -36,6 +36,8 @@ declare module 'vue' {
     MemberStateToggle: typeof import('./src/components/MemberStateToggle.vue')['default']
     Modal: typeof import('./src/components/Modal.vue')['default']
     OrgCard: typeof import('./src/components/OrgCard.vue')['default']
+    ResetPasswordForm: typeof import('./src/components/forms/ResetPasswordForm.vue')['default']
+    ResetPasswordModal: typeof import('./src/components/ResetPasswordModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Tab: typeof import('./src/components/Tab.vue')['default']
