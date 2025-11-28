@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.14.1",
+    "@antfu/ni": "^27.0.1",
     "@antfu/utils": "^9.3.0",
     "@iconify-json/carbon": "^1.2.9",
     "@kvoon/utils": "^0.3.1",

@@ -9,29 +9,37 @@ This is **Weila Work WebView** - a Vue 3 corporate management web application fo
 ## Development Commands
 
 ```bash
-# Install dependencies (use pnpm)
+# Install dependencies (use pnpm or ni)
 pnpm install
+ni
 
 # Run development server with hot reload
 pnpm dev
+nr dev
 
 # Build for production
 pnpm build
+nr build
 
 # Build for staging environment
 pnpm build:staging
+nr build:staging
 
 # Run linting
 pnpm lint
+nr lint
 
 # Run TypeScript type checking
 pnpm typecheck
+nr typecheck
 
 # Run tests
 pnpm test
+nr test
 
 # Update dependencies
 pnpm up
+ncu
 ```
 
 ## Architecture Overview
@@ -41,6 +49,7 @@ pnpm up
 - **Frontend**: Vue 3 with Composition API (`<script setup>`)
 - **Build Tool**: Vite (not Bun - ignore any Bun references in existing docs)
 - **Package Manager**: pnpm
+- **Command Runner**: `@antfu/ni` (ni, nr, ncu commands)
 - **Styling**: TailwindCSS with PostCSS
 - **Language**: TypeScript with strict configuration
 - **Routing**: File-based routing via `unplugin-vue-router`
