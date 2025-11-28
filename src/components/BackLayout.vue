@@ -54,7 +54,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="grid grid-rows-[min-content_min-content_1fr] h-screen overflow-hidden">
+  <div class="h-screen overflow-hidden flex flex-col">
     <!-- Header -->
     <Header :title="title" :show-back="showBack" :show-exit="true" />
 

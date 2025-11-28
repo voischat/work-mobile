@@ -25,13 +25,13 @@ function handleClick(steps: number) {
 <template>
   <nav class="flex items-center space-x-2 text-sm text-gray-600">
     <template v-for="(item, index) in items" :key="index">
-      <button
+      <span
         v-if="item.steps !== undefined"
         class="hover:text-blue-600 transition-colors duration-200 hover:underline"
         @click="handleClick(item.steps)"
       >
         {{ item.name }}
-      </button>
+      </span>
       <span v-else class="text-gray-900 font-medium">
         {{ item.name }}
       </span>

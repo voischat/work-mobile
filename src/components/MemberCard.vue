@@ -77,8 +77,7 @@ function formatDate(timestamp: number): string {
             {{ member.name || '未命名' }}
           </h3>
           <!-- 展开/收缩按钮 -->
-          <button
-            type="button"
+          <span
             class="flex-shrink-0 ml-2 p-1 text-gray-500 rounded transition-colors"
           >
             <svg
@@ -90,7 +89,7 @@ function formatDate(timestamp: number): string {
             >
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
-          </button>
+          </span>
         </div>
         <div class="flex items-center flex-wrap space-x-2">
           <!-- 成员类型标签 -->

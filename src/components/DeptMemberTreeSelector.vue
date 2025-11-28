@@ -152,7 +152,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="dept-member-tree-selector">
+  <div>
     <!-- 部门列表加载状态 -->
     <div v-if="isDeptsLoading" class="flex items-center justify-center py-8">
       <div class="text-gray-600">
@@ -264,10 +264,3 @@ defineExpose({
     </div>
   </div>
 </template>
-
-<style scoped>
-.dept-member-tree-selector {
-  max-height: 60vh;
-  overflow-y: auto;
-}
-</style>
