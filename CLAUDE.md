@@ -163,6 +163,52 @@ src/
 7. **Follow Pagination Pattern**: Use `usePage` for paginated endpoints
 8. **Type Safety**: Define interfaces for all API responses
 
+#### Vue 3.3+ defineModel and defineEmits Patterns
+
+**defineModel Usage**:
+
+```typescript
+// Basic model with potential undefined value
+const modelValue = defineModel<string>()
+//    ^? Ref<string | undefined>
+
+// Model with required option to remove undefined
+const modelValue = defineModel<string>({ required: true })
+//    ^? Ref<string>
+
+// Model with modifiers (trim, uppercase, etc.)
+const [modelValue, modifiers] = defineModel<string, 'trim' | 'uppercase'>()
+//                 ^? Record<'trim' | 'uppercase', true | undefined>
+
+// Using model modifiers in component
+const [modelValue, modelModifiers] = defineModel()
+
+if (modelModifiers.trim) {
+  // Handle trim modifier
+}
+
+// Custom set function for model
+const [modelValue, modelModifiers] = defineModel({
+  set(value) {
+    // Apply trim modifier if present
+    if (modelModifiers.trim) {
+      return value.trim()
+    }
+    return value
+  }
+})
+```
+
+**defineEmits Usage**:
+
+```typescript
+// 3.3+ concise syntax with named tuple
+const emit = defineEmits<{
+  change: [id: number] // named tuple syntax
+  update: [value: string]
+}>()
+```
+
 ### Common Patterns
 
 **Loading Data**:
