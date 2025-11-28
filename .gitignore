@@ -8,5 +8,12 @@ node_modules
 .idea/
 *.log
 
+# Environment files (keep .env.example)
 .env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.*.local
+
 pkg/*.tar.gz

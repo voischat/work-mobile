@@ -49,6 +49,7 @@ declare global {
   const globalModalProps: typeof import('./src/composables/useModal')['globalModalProps']
   const h: typeof import('vue')['h']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
+  const initVConsole: typeof import('./src/utils/vconsole')['initVConsole']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
   const isDark: typeof import('./src/composables/dark')['isDark']
@@ -388,6 +389,7 @@ declare module 'vue' {
     readonly globalModalProps: UnwrapRef<typeof import('./src/composables/useModal')['globalModalProps']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
+    readonly initVConsole: UnwrapRef<typeof import('./src/utils/vconsole')['initVConsole']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly isDark: UnwrapRef<typeof import('./src/composables/dark')['isDark']>

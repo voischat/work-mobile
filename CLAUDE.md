@@ -242,6 +242,29 @@ async function confirmDelete() {
 }
 ```
 
+### Environment Variables
+
+The application uses environment variables for configuration. Environment-specific files are automatically loaded by Vite:
+
+- `.env.development` - Development environment (local development)
+- `.env.staging` - Staging environment
+- `.env.production` - Production environment
+
+**Key Environment Variables:**
+
+- `VITE_APP_ID` - Application ID for API authentication
+- `VITE_APP_KEY` - Application key for API authentication
+- `VITE_DEEPSEEK_API_KEY` - DeepSeek API key for AI features
+- `VITE_DEEPSEEK_BASE_URL` - DeepSeek API base URL
+
+**Usage in Code:**
+
+```typescript
+// Access environment variables
+const appId = import.meta.env.VITE_APP_ID
+const appKey = import.meta.env.VITE_APP_KEY
+```
+
 ### Important Notes
 
 - **Vite Configuration**: Development proxy points to `demo.weila.hk`
