@@ -40,6 +40,7 @@ declare module 'vue' {
     ResetPasswordModal: typeof import('./src/components/ResetPasswordModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Sidebar: typeof import('./src/components/Sidebar.vue')['default']
     Tab: typeof import('./src/components/Tab.vue')['default']
     Toast: typeof import('./src/components/Toast.vue')['default']
     VipCard: typeof import('./src/components/VipCard.vue')['default']

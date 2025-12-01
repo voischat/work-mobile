@@ -20,12 +20,14 @@
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.28",
     "@ai-sdk/openai": "^2.0.32",
+    "@iconify/vue": "^5.0.0",
     "@vueuse/core": "v14.0.0-alpha.2",
     "@wl/network": "https://pkg.pr.new/kvoon3/wl-network/@weila/network@f7937c34febd99f138eb6cd1e856b2e9800a27c5",
     "ai": "^5.0.92",
     "md5": "^2.3.0",
     "nanoid": "^5.1.6",
     "react-grab": "^0.0.39",
+    "reka-ui": "^2.6.0",
     "vue": "^3.5.16",
     "vue-router": "^4.5.1",
     "zod": "^3.25.76"
