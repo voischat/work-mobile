@@ -14,7 +14,7 @@ export interface LoginUser {
   sex: number
   name: string
   avatar: string
-  is_admin: number
+  is_dept_admin: number
   dept_id: number
   phone: string
   country_code: string
@@ -55,7 +55,7 @@ export interface UserInfo {
   sex: number
   name: string
   avatar: string
-  is_admin: number
+  is_dept_admin: number
   dept_id: number
   phone: string
   country_code: string

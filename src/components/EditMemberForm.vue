@@ -21,7 +21,7 @@ const editMemberSchema = z.object({
   sex: z.number().int().min(0).max(2),
   avatar: z.string().optional().or(z.literal('')),
   phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号').optional().or(z.literal('')),
-  is_admin: z.number().int().min(0).max(1).optional(),
+  is_dept_admin: z.number().int().min(0).max(1).optional(),
   loc_share: z.number().int().min(0).max(1),
   track: z.number().int().min(0).max(4),
 })
@@ -44,7 +44,7 @@ const formData = ref<EditMemberForm>({
   sex: props.member?.sex || 0,
   avatar: props.member?.avatar || '',
   phone: props.member?.phone || '',
-  is_admin: 0,
+  is_dept_admin: 0,
   loc_share: props.member?.loc_share || 0,
   track: props.member?.track || 0,
 })
@@ -60,7 +60,7 @@ watch(() => props.member, (newMember) => {
       sex: newMember.sex || 0,
       avatar: newMember.avatar || '',
       phone: newMember.phone || '',
-      is_admin: newMember.is_admin || 0,
+      is_dept_admin: newMember.is_dept_admin || 0,
       loc_share: newMember.loc_share || 0,
       track: newMember.track || 0,
     }
@@ -88,9 +88,9 @@ const { error, isFetching, isFinished, data, execute: editMember } = useWeilaFet
     loc_share: formData.value.loc_share || 0,
     track: formData.value.track || 0,
   }
-  // 只有成员（非设备）才需要 is_admin 字段
+  // 只有成员（非设备）才需要 is_dept_admin 字段
   if (!isDevice.value) {
-    payload.is_admin = formData.value.is_admin || 0
+    payload.is_dept_admin = formData.value.is_dept_admin || 0
   }
   return payload
 }).json()
@@ -269,16 +269,16 @@ defineExpose({
       <AvatarUpload v-model="formData.avatar" />
     </div>
 
-    <!-- 是否管理员（仅成员显示） -->
+    <!-- 是否部门管理员（仅成员显示） -->
     <div v-if="!isDevice">
-      <label for="is_admin" class="block text-sm font-medium text-gray-700 mb-1">
-        是否管理员
+      <label for="is_dept_admin" class="block text-sm font-medium text-gray-700 mb-1">
+        是否部门管理员
       </label>
       <select
-        id="is_admin"
-        v-model.number="formData.is_admin"
+        id="is_dept_admin"
+        v-model.number="formData.is_dept_admin"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        :class="errors.is_admin ? 'border-red-500' : 'border-gray-300'"
+        :class="errors.is_dept_admin ? 'border-red-500' : 'border-gray-300'"
         :disabled="isFetching"
       >
         <option :value="0">
@@ -288,8 +288,8 @@ defineExpose({
           是
         </option>
       </select>
-      <div v-if="errors.is_admin" class="mt-1 text-sm text-red-600">
-        {{ errors.is_admin }}
+      <div v-if="errors.is_dept_admin" class="mt-1 text-sm text-red-600">
+        {{ errors.is_dept_admin }}
       </div>
     </div>
 

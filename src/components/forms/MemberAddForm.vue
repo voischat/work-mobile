@@ -24,7 +24,7 @@ const form = ref<AddMemberForm>({
   sex: 2, // 默认为男
   avatar: '',
   phone: '',
-  is_admin: 0,
+  is_dept_admin: 0,
   loc_share: 0,
   track: 0,
   password: '',
@@ -50,7 +50,7 @@ const { error, data, execute: createMember } = useWeilaFetch<{ member: Member }>
   sex: form.value.sex,
   avatar: form.value.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/default/user.png',
   phone: form.value.phone || '',
-  is_admin: form.value.is_admin,
+  is_dept_admin: form.value.is_dept_admin,
   loc_share: form.value.loc_share,
   track: form.value.track,
   password: md5(form.value.password),
@@ -108,7 +108,7 @@ function reset() {
     sex: 2,
     avatar: '',
     phone: '',
-    is_admin: 0,
+    is_dept_admin: 0,
     loc_share: 0,
     track: 0,
     password: '',
@@ -281,16 +281,16 @@ defineExpose({
       </div>
     </div>
 
-    <!-- 是否管理员 -->
+    <!-- 是否部门管理员 -->
     <div>
-      <label for="is_admin" class="block text-sm font-medium text-gray-700 mb-1">
-        是否管理员
+      <label for="is_dept_admin" class="block text-sm font-medium text-gray-700 mb-1">
+        是否部门管理员
       </label>
       <select
-        id="is_admin"
-        v-model.number="form.is_admin"
+        id="is_dept_admin"
+        v-model.number="form.is_dept_admin"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        :class="errors.is_admin ? 'border-red-500' : 'border-gray-300'"
+        :class="errors.is_dept_admin ? 'border-red-500' : 'border-gray-300'"
       >
         <option :value="0">
           否
@@ -299,8 +299,8 @@ defineExpose({
           是
         </option>
       </select>
-      <div v-if="errors.is_admin" class="mt-1 text-sm text-red-600">
-        {{ errors.is_admin }}
+      <div v-if="errors.is_dept_admin" class="mt-1 text-sm text-red-600">
+        {{ errors.is_dept_admin }}
       </div>
     </div>
 
