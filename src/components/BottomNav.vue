@@ -45,17 +45,13 @@ function handleNavClick(path: string) {
       <button
         v-for="item in navItems"
         :key="item.path"
-        class="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-200" :class="[
-          isActive(item.path)
-            ? 'text-gray-900'
-            : 'text-gray-500 hover:text-gray-700',
-        ]"
+        class="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-200"
+        :class="{
+          'opacity-45': !isActive(item.path),
+        }"
         @click="handleNavClick(item.path)"
       >
-        <div
-          class="mb-1 transition-transform duration-200"
-          :class="isActive(item.path) ? 'scale-110' : ''"
-        >
+        <div class="mb-1 transition-transform duration-200">
           <!-- 首页图标 -->
           <svg
             v-if="item.icon === 'home'"
