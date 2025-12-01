@@ -40,11 +40,11 @@ const formData = ref<EditMemberForm>({
   user_id: props.member?.user_id || 0,
   name: props.member?.name || '',
   job_num: props.member?.job_num || '',
-  dept_id: props.member?.dept_id || props.member?.type === 1 ? 0 : 0,
+  dept_id: props.member?.dept_id || 0,
   sex: props.member?.sex || 0,
   avatar: props.member?.avatar || '',
   phone: props.member?.phone || '',
-  is_dept_admin: 0,
+  is_dept_admin: props.member?.is_dept_admin || 0,
   loc_share: props.member?.loc_share || 0,
   track: props.member?.track || 0,
 })
@@ -166,6 +166,21 @@ defineExpose({
       <div v-if="errors.name" class="mt-1 text-sm text-red-600">
         {{ errors.name }}
       </div>
+    </div>
+
+    <!-- 微喇号（只读） -->
+    <div>
+      <label for="user_num" class="block text-sm font-medium text-gray-700 mb-1">
+        微喇号
+      </label>
+      <input
+        id="user_num"
+        :value="member?.user_num || ''"
+        type="text"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
+        readonly
+        disabled
+      >
     </div>
 
     <!-- 工号输入框 -->
@@ -318,21 +333,6 @@ defineExpose({
         <input
           id="imei"
           :value="member?.imei || ''"
-          type="text"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
-          readonly
-          disabled
-        >
-      </div>
-
-      <!-- 微喇号 -->
-      <div>
-        <label for="user_num" class="block text-sm font-medium text-gray-700 mb-1">
-          微喇号
-        </label>
-        <input
-          id="user_num"
-          :value="member?.user_num || ''"
           type="text"
           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
           readonly
