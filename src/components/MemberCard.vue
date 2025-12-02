@@ -18,16 +18,17 @@ function toggleExpand() {
 
 // 成员类型映射
 const memberTypeMap = {
+  0: { label: '成员', color: 'bg-gray-100 text-gray-700' },
   1: { label: '设备', color: 'bg-gray-100 text-gray-700' },
   2: { label: '管理员', color: 'bg-blue-100 text-blue-700' },
   255: { label: '企业主', color: 'bg-purple-100 text-purple-700' },
 } as const
 
 // 状态映射（state: 0=启用, 1=停用）
-const stateMap = {
-  0: { label: '启用', color: 'bg-green-100 text-green-700' },
-  1: { label: '停用', color: 'bg-gray-100 text-gray-700' },
-} as const
+// const stateMap = {
+//   0: { label: '启用', color: 'bg-green-100 text-green-700' },
+//   1: { label: '停用', color: 'bg-gray-100 text-gray-700' },
+// } as const
 
 // 在线状态映射
 const onlineStatusMap = {
@@ -107,11 +108,11 @@ function formatDate(timestamp: number): string {
             {{ onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.label || '未知' }}
           </span>
           <!-- 成员状态 -->
-          <span
+          <!-- <span
             class="px-2 py-0.5 rounded text-xs font-medium" :class="[stateMap[member.state as keyof typeof stateMap]?.color || 'bg-gray-100 text-gray-700']"
           >
             {{ stateMap[member.state as keyof typeof stateMap]?.label || '未知' }}
-          </span>
+          </span> -->
         </div>
       </div>
     </div>
