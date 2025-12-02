@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useInfiniteScroll } from '@vueuse/core'
-import { onMounted, onUnmounted, useTemplateRef, watch } from 'vue'
+import { onMounted, onUnmounted, useSlots, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Header from '~/components/Header.vue'
+import Sidebar from '~/components/Sidebar.vue'
 import { isAtBottom } from '~/shared/states'
 
 interface Props {
@@ -54,18 +55,23 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-screen overflow-hidden flex flex-col">
-    <!-- Header -->
-    <Header :title="title" :show-back="showBack" :show-exit="true" />
+  <div class="flex flex-col lg:flex-row min-h-screen bg-gray-50">
+    <!-- Sidebar (desktop only) -->
+    <Sidebar class="hidden lg:block" />
 
-    <!-- Breadcrumb 插槽 -->
-    <div v-if="slots.breadcrumb" class="px-4 py-2 bg-white border-b border-gray-100">
-      <slot name="breadcrumb" />
+    <!-- Main content area -->
+    <!-- NOTE: do not use h-screen here -->
+    <div class="flex-1 flex flex-col max-h-screen overflow-y-auto">
+      <!-- Header (mobile only) -->
+      <Header class="lg:hidden" :title="title" :show-back="showBack" :show-exit="true" />
+
+      <div v-if="slots.breadcrumb" class="px-4 py-2 bg-white border-b border-gray-100">
+        <slot name="breadcrumb" />
+      </div>
+
+      <main ref="mainElement" class="flex-1 overflow-y-auto">
+        <slot />
+      </main>
     </div>
-
-    <!-- 内容区域 -->
-    <main ref="mainElement" class="flex-1 overflow-y-auto">
-      <slot />
-    </main>
   </div>
 </template>

@@ -18,13 +18,10 @@ const isDev = import.meta.env.DEV
       <Header class="lg:hidden" :show-back="false" :show-exit="true" />
 
       <!-- Content area -->
-      <main class="flex-1 pb-16 lg:pb-0 overflow-y-auto">
-        <div class="max-w-7xl mx-auto p-4 lg:p-6">
-          <slot />
-        </div>
+      <main class="flex-1 overflow-y-auto">
+        <slot />
       </main>
 
-      <!-- Bottom navigation (mobile only, dev only) -->
       <BottomNav v-if="isDev" class="lg:hidden" />
     </div>
   </div>
