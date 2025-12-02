@@ -40,7 +40,7 @@ function handleNavClick(path: string) {
 </script>
 
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-sm z-50">
+  <nav class="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-sm z-50">
     <div class="flex items-center justify-around h-16">
       <button
         v-for="item in navItems"
