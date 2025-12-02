@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
+import { Icon } from '@iconify/vue'
 import { computed, ref } from 'vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
@@ -174,15 +175,11 @@ defineExpose({
         >
           <div class="flex items-center space-x-3 flex-1">
             <!-- 展开/折叠图标 -->
-            <svg
+            <Icon
+              icon="lucide:chevron-right"
               class="w-5 h-5 text-gray-500 transition-transform duration-200 flex-shrink-0"
               :class="{ 'rotate-90': expandedDeptIds.has(dept.id) }"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
+            />
             <!-- 部门名称 -->
             <span class="font-medium text-gray-900">{{ dept.name }}</span>
             <!-- 成员数量 -->

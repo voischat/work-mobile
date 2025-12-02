@@ -19,6 +19,12 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
+    '/directory/': RouteRecordInfo<'/directory/', '/directory', Record<never, never>, Record<never, never>>,
+    '/directory/departments/': RouteRecordInfo<'/directory/departments/', '/directory/departments', Record<never, never>, Record<never, never>>,
+    '/directory/departments/[id]/members': RouteRecordInfo<'/directory/departments/[id]/members', '/directory/departments/:id/members', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/directory/groups/': RouteRecordInfo<'/directory/groups/', '/directory/groups', Record<never, never>, Record<never, never>>,
+    '/directory/groups/[id]/members': RouteRecordInfo<'/directory/groups/[id]/members', '/directory/groups/:id/members', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/directory/members/': RouteRecordInfo<'/directory/members/', '/directory/members', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/me/': RouteRecordInfo<'/me/', '/me', Record<never, never>, Record<never, never>>,
     '/me/bind-email': RouteRecordInfo<'/me/bind-email', '/me/bind-email', Record<never, never>, Record<never, never>>,

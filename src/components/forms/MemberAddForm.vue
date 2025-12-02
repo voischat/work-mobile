@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AddMemberForm } from '~/composables/useGenMember'
 import type { Dept, Member } from '~/types/management'
+import { Icon } from '@iconify/vue'
 import md5 from 'md5'
 import { computed, ref } from 'vue'
 import { useForm } from '~/composables/useForm'
@@ -134,16 +135,7 @@ defineExpose({
         :disabled="isGenerating"
         @click="handleQuickGenerate"
       >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4-4m0 0l4-4m-4 4l-4-4m4 4l4 4m6 2l-1.5 3.5m-2-7L16 21m4-10l-3.5 1.5" />
-        </svg>
+        <Icon icon="lucide:sparkles" class="w-4 h-4" />
         <span>{{ isGenerating ? '生成中...' : '一键生成' }}</span>
       </button>
     </div>

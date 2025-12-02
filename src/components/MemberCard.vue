@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
+import { Icon } from '@iconify/vue'
 import { ref } from 'vue'
 import Avatar from '~/components/Avatar.vue'
 
@@ -81,15 +82,11 @@ function formatDate(timestamp: number): string {
           <span
             class="flex-shrink-0 ml-2 p-1 text-gray-500 rounded transition-colors"
           >
-            <svg
+            <Icon
+              icon="lucide:chevron-down"
               class="w-5 h-5 transition-transform duration-200"
               :class="{ 'rotate-180': isExpanded }"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            />
           </span>
         </div>
         <div class="flex items-center flex-wrap space-x-2">

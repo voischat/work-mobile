@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
 import { bridge } from '~/utils/bridge'
 
@@ -34,19 +35,7 @@ function handleExit() {
         class="bg-transparent p-2 -ml-2 text-gray-600 hover:text-gray-900"
         @click="handleBack"
       >
-        <svg
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+        <Icon icon="lucide:arrow-left" class="w-6 h-6" />
       </button>
       <!-- 标题 - 绝对居中 -->
       <h1 class="absolute left-1/2 transform -translate-x-1/2 text-lg font-semibold text-gray-900">
@@ -58,19 +47,7 @@ function handleExit() {
         class="bg-transparent ml-auto p-2 -mr-2 text-gray-600 hover:text-gray-900"
         @click="handleExit"
       >
-        <svg
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
+        <Icon icon="lucide:x" class="w-6 h-6" />
       </button>
     </div>
   </header>
