@@ -2,6 +2,7 @@
 import { Icon } from '@iconify/vue'
 import { TreeItem, TreeRoot } from 'reka-ui'
 import { useRouter } from 'vue-router'
+import { isActiveRoute } from '~/utils/router'
 
 interface NavItem {
   title: string
@@ -25,17 +26,17 @@ const items: NavItem[] = [
       {
         title: '部门管理',
         icon: 'lucide:building',
-        route: '/departments',
+        route: '/directory/departments',
       },
       {
         title: '群组管理',
         icon: 'lucide:users',
-        route: '/groups',
+        route: '/directory/groups',
       },
       {
         title: '成员管理',
         icon: 'lucide:user',
-        route: '/members',
+        route: '/directory/members',
       },
     ],
   },
@@ -49,7 +50,7 @@ const items: NavItem[] = [
 function handleItemClick(item: NavItem) {
   // Only navigate if the item has a route and no children (or if it's a leaf node)
   if (item.route && (!item.children || item.children.length === 0)) {
-    router.push(item.route)
+    router.replace(item.route)
   }
   // If the item has children but no route, it will just expand/collapse via TreeRoot
 }
@@ -63,8 +64,8 @@ function handleItemClick(item: NavItem) {
     :get-key="(item) => item.title"
     :default-expanded="['通讯录']"
   >
-    <h2 class="font-semibold text-sm text-stone-400 px-2 pt-1 pb-3">
-      导航菜单
+    <h2 class="font-semibold text-sm text-neutral-400 px-2 pt-1 pb-3">
+      微喇企业版
     </h2>
     <TreeItem
       v-for="item in flattenItems"
@@ -72,7 +73,10 @@ function handleItemClick(item: NavItem) {
       :key="item._id"
       :style="{ 'padding-left': `${item.level - 0.5}rem` }"
       v-bind="item.bind"
-      class="flex items-center py-4 px-4 my-0.5 rounded outline-none focus:ring-grass8 focus:ring-2 data-[selected]:bg-grass4 cursor-pointer hover:bg-gray-100 transition-colors"
+      class="text-neutral-500 flex items-center py-4 px-4 my-0.5 rounded outline-none focus:ring-grass8 focus:ring-2 data-[selected]:bg-grass4 cursor-pointer hover:bg-gray-100 transition-colors"
+      :class="{
+        'text-black bg-neutral-50 text-grass11': item.value.route && isActiveRoute(item.value.route),
+      }"
       @click="handleItemClick(item.value)"
     >
       <template v-if="item.hasChildren">

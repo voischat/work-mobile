@@ -16,20 +16,20 @@ function formatDate(timestamp: number): string {
 
 // 导航函数
 function navigateToMembers() {
-  router.push('/members/')
+  router.push('/directory/members/')
 }
 
 function navigateToDepartments() {
-  router.push('/departments/')
+  router.push('/directory/departments')
 }
 
 function navigateToGroups() {
-  router.push('/groups/')
+  router.push('/directory/groups')
 }
 
 function navigateToDevices() {
   // 由于没有专门的设备页面，导航到成员页面（设备通常在成员管理中查看）
-  router.push('/members/')
+  router.push('/directory/members')
 }
 </script>
 

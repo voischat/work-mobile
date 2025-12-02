@@ -126,7 +126,7 @@ function handleDeptCancel() {
 
 // 处理部门卡片点击，跳转到部门成员列表
 function handleDeptClick(deptId: number) {
-  router.push(`/departments/${deptId}/members`)
+  router.push(`/directory/departments/${deptId}/members`)
 }
 </script>
 

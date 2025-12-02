@@ -19,7 +19,7 @@ function handleMenuClick(path: string) {
           <!-- 成员管理 -->
           <button
             class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-200 flex flex-col items-center justify-center space-y-3 min-h-[140px] p-6"
-            @click="handleMenuClick('/members')"
+            @click="handleMenuClick('/directory/members')"
           >
             <div class="p-3 rounded-lg">
               <svg class="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@ function handleMenuClick(path: string) {
           <!-- 群组管理 -->
           <button
             class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-200 flex flex-col items-center justify-center space-y-3 min-h-[140px] p-6"
-            @click="handleMenuClick('/groups')"
+            @click="handleMenuClick('/directory/groups')"
           >
             <div class="p-3 rounded-lg">
               <svg class="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@ function handleMenuClick(path: string) {
           <!-- 部门管理 -->
           <button
             class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-200 flex flex-col items-center justify-center space-y-3 min-h-[140px] p-6"
-            @click="handleMenuClick('/departments')"
+            @click="handleMenuClick('/directory/departments')"
           >
             <div class="p-3 rounded-lg">
               <svg class="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

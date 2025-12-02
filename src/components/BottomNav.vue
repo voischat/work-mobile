@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { isActiveRoute } from '~/utils/router'
 
-const route = useRoute()
 const router = useRouter()
 
 // 导航项配置
@@ -12,26 +12,21 @@ const navItems = [
     icon: 'home',
   },
   {
-    name: '工作台',
-    path: '/home',
+    name: '通讯录',
+    path: '/directory',
     icon: 'briefcase',
   },
+  // {
+  //   name: '工作台',
+  //   path: '/workbench',
+  //   icon: 'briefcase',
+  // },
   {
     name: '我的',
     path: '/me',
     icon: 'user',
   },
 ]
-
-// 判断当前路由是否激活
-function isActive(path: string) {
-  // 对于根路径，需要精确匹配
-  if (path === '/') {
-    return route.path === path
-  }
-  // 对于其他路径，检查是否以该路径开头
-  return route.path.startsWith(path)
-}
 
 // 处理导航点击
 function handleNavClick(path: string) {
@@ -47,7 +42,7 @@ function handleNavClick(path: string) {
         :key="item.path"
         class="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-200"
         :class="{
-          'opacity-45': !isActive(item.path),
+          'opacity-45': !isActiveRoute(item.path),
         }"
         @click="handleNavClick(item.path)"
       >
@@ -100,7 +95,7 @@ function handleNavClick(path: string) {
         </div>
         <span class="text-xs font-medium">{{ item.name }}</span>
         <div
-          v-if="isActive(item.path)"
+          v-if="isActiveRoute(item.path)"
           class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-gray-900 rounded-full"
         />
       </button>

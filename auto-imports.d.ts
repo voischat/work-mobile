@@ -52,6 +52,8 @@ declare global {
   const initVConsole: typeof import('./src/utils/vconsole')['initVConsole']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
+  const isActive: typeof import('./src/utils/router')['isActive']
+  const isActiveRoute: typeof import('./src/utils/router')['isActiveRoute']
   const isDark: typeof import('./src/composables/dark')['isDark']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isGlobalModalVisible: typeof import('./src/composables/useModal')['isGlobalModalVisible']
@@ -392,6 +394,8 @@ declare module 'vue' {
     readonly initVConsole: UnwrapRef<typeof import('./src/utils/vconsole')['initVConsole']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
+    readonly isActive: UnwrapRef<typeof import('./src/utils/router')['isActive']>
+    readonly isActiveRoute: UnwrapRef<typeof import('./src/utils/router')['isActiveRoute']>
     readonly isDark: UnwrapRef<typeof import('./src/composables/dark')['isDark']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isGlobalModalVisible: UnwrapRef<typeof import('./src/composables/useModal')['isGlobalModalVisible']>

@@ -156,7 +156,7 @@ function handleGroupCancel() {
             v-for="group in allGroups"
             :key="group.id"
             class="bg-white rounded-lg p-4 border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-            @click="router.push(`/groups/${group.id}/members`)"
+            @click="router.push(`/directory/groups/${group.id}/members`)"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4 flex-1 min-w-0">

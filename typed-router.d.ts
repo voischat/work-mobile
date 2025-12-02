@@ -19,11 +19,6 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
-    '/departments/': RouteRecordInfo<'/departments/', '/departments', Record<never, never>, Record<never, never>>,
-    '/departments/[id]/members': RouteRecordInfo<'/departments/[id]/members', '/departments/:id/members', { id: ParamValue<true> }, { id: ParamValue<false> }>,
-    '/groups/': RouteRecordInfo<'/groups/', '/groups', Record<never, never>, Record<never, never>>,
-    '/groups/[id]/members': RouteRecordInfo<'/groups/[id]/members', '/groups/:id/members', { id: ParamValue<true> }, { id: ParamValue<false> }>,
-    '/home': RouteRecordInfo<'/home', '/home', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/me/': RouteRecordInfo<'/me/', '/me', Record<never, never>, Record<never, never>>,
     '/me/bind-email': RouteRecordInfo<'/me/bind-email', '/me/bind-email', Record<never, never>, Record<never, never>>,
@@ -32,6 +27,5 @@ declare module 'vue-router/auto-routes' {
     '/me/unregist': RouteRecordInfo<'/me/unregist', '/me/unregist', Record<never, never>, Record<never, never>>,
     '/me/UnregistEmail': RouteRecordInfo<'/me/UnregistEmail', '/me/UnregistEmail', Record<never, never>, Record<never, never>>,
     '/me/UnregistPhone': RouteRecordInfo<'/me/UnregistPhone', '/me/UnregistPhone', Record<never, never>, Record<never, never>>,
-    '/members/': RouteRecordInfo<'/members/', '/members', Record<never, never>, Record<never, never>>,
   }
 }
