@@ -7,7 +7,7 @@ vi.mock('vue-router', () => ({
   useRoute: vi.fn(),
 }))
 
-const mockedUseRoute = useRoute as vi.MockedFunction<typeof useRoute>
+const mockedUseRoute = vi.mocked(useRoute)
 
 describe('router utilities', () => {
   describe('isActive', () => {
