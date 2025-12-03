@@ -93,11 +93,20 @@ watch([token, refreshToken], ([t, rt]) => {
 
 // Toast
 const { toasts, removeToast } = useToast()
+
+const mainComp = useTemplateRef<any>('mainComp')
+watchEffect(() => {
+  console.log('mainComp.value', mainComp.value)
+})
 </script>
 
 <template>
   <main>
-    <RouterView />
+    <RouterView v-slot="{ Component, route }">
+      <KeepAlive include=" ">
+        <component :is="Component" :key="route.name" ref="mainComp" />
+      </KeepAlive>
+    </RouterView>
     <Toast :toasts="toasts" @remove="removeToast" />
     <Modal
       v-model:open="isGlobalModalVisible"
