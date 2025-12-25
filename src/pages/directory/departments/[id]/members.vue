@@ -30,7 +30,7 @@ const selectedMemberIds = ref(new Set<number>()) // 选中的成员ID集合
 // 搜索关键词（使用 shallowRef 用于防抖）
 const searchKey = shallowRef('')
 // 防抖后的搜索关键词（300ms 延迟）
-const debouncedSearchKey = refDebounced(searchKey, 300)
+const debouncedSearchKey = refDebounced(searchKey, 1000)
 
 // 分页状态
 const { curPage, pageSize, reset } = usePage()
@@ -276,7 +276,7 @@ function openAddMemberModal() {
         </div>
 
         <!-- 空数据状态 -->
-        <div v-else-if="allMembers.length === 0" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+        <div v-else-if="allMembers.length === 0 && !isMemberFetching" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无成员数据
         </div>
 

@@ -236,7 +236,7 @@ function openAddMemberModal() {
         </div>
 
         <!-- 空数据状态 -->
-        <div v-else-if="allMembers.length === 0" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+        <div v-else-if="allMembers.length === 0 && !isMemberFetching" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无成员数据
         </div>
 

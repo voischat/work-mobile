@@ -77,8 +77,9 @@ function handleStateUpdated(_updatedMember: Member) {
     >
       编辑
     </button>
-    <MemberStateToggle :member="member" @updated="handleStateUpdated" />
+    <MemberStateToggle v-if="member.type !== 255" :member="member" @updated="handleStateUpdated" />
     <button
+      v-if="member.type !== 255"
       type="button"
       class="px-3 py-1.5 text-sm text-orange-600 bg-white border-0 hover:text-orange-700 focus:outline-none"
       @click="handleResetPassword"
@@ -86,6 +87,7 @@ function handleStateUpdated(_updatedMember: Member) {
       重置密码
     </button>
     <button
+      v-if="member.type !== 255"
       type="button"
       class="px-3 py-1.5 text-sm text-red-600 bg-white border-0 hover:text-red-700 focus:outline-none"
       @click="showDeleteModal = true"
