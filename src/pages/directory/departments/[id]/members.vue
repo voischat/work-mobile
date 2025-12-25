@@ -184,7 +184,8 @@ function openAddMemberModal() {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '部门列表', steps: 1 },
+          { name: '通讯录', steps: 2 },
+          { name: '部门管理', steps: 1 },
           { name: '部门成员列表' },
         ]"
       />

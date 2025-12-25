@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
+import Breadcrumb from '~/components/Breadcrumb.vue'
 import GroupAddForm from '~/components/forms/GroupAddForm.vue'
 import GroupActions from '~/components/GroupActions.vue'
 import Modal from '~/components/Modal.vue'
@@ -124,6 +125,14 @@ function handleGroupCancel() {
 
 <template>
   <BackLayout title="群组管理">
+    <template #breadcrumb>
+      <Breadcrumb
+        :items="[
+          { name: '通讯录', steps: 1 },
+          { name: '群组管理' },
+        ]"
+      />
+    </template>
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
         <!-- 按钮区域 -->

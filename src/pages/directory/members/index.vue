@@ -3,6 +3,7 @@ import type { Dept, Member, MemberListResponse } from '~/types/management'
 import { refDebounced } from '@vueuse/core'
 import { computed, ref, shallowRef, watch } from 'vue'
 import BackLayout from '~/components/BackLayout.vue'
+import Breadcrumb from '~/components/Breadcrumb.vue'
 import DeviceAddForm from '~/components/forms/DeviceAddForm.vue'
 import MemberAddForm from '~/components/forms/MemberAddForm.vue'
 import MemberActions from '~/components/MemberActions.vue'
@@ -172,6 +173,14 @@ function handleDeviceCancel() {
 
 <template>
   <BackLayout title="成员管理">
+    <template #breadcrumb>
+      <Breadcrumb
+        :items="[
+          { name: '通讯录', steps: 1 },
+          { name: '成员管理' },
+        ]"
+      />
+    </template>
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
         <!-- 搜索和按钮区域 -->
