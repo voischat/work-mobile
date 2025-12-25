@@ -2,6 +2,7 @@
 import type { LoginResponse } from '~/types/auth'
 import { useRouteQuery } from '@vueuse/router'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
+import { isLimitedWebview } from './shared/const'
 
 const { showToast } = useToast()
 
@@ -12,6 +13,13 @@ const { token, refreshToken, clearAuth, saveAuth } = useAuth()
 const queryAccount = useRouteQuery('account', '')
 const queryPassword = useRouteQuery('password', '')
 const queryCountryCode = useRouteQuery('country-code', '')
+
+if (queryAccount.value
+  && queryPassword.value
+  && queryCountryCode.value
+) {
+  isLimitedWebview.value = true
+}
 
 // 登录 fetch（非立即执行）
 const {

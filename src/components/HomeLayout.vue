@@ -2,8 +2,7 @@
 import BottomNav from '~/components/BottomNav.vue'
 import Header from '~/components/Header.vue'
 import Sidebar from '~/components/Sidebar.vue'
-
-const isDev = import.meta.env.DEV
+import { isLimitedWebview } from '~/shared/const'
 </script>
 
 <template>
@@ -22,7 +21,7 @@ const isDev = import.meta.env.DEV
         <slot />
       </main>
 
-      <BottomNav v-if="isDev" class="lg:hidden" />
+      <BottomNav v-if="!isLimitedWebview" class="lg:hidden" />
     </div>
   </div>
 </template>
