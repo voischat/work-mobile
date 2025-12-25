@@ -136,7 +136,7 @@ function formatDate(timestamp: number): string {
             </tr>
             <tr v-if="member.phone" class="hover:bg-gray-50">
               <td class="py-2 pr-4 text-gray-500 w-20">
-                手机
+                手机号
               </td>
               <td class="py-2 text-gray-900">
                 {{ member.phone }}
