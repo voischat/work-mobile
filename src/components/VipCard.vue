@@ -22,7 +22,7 @@ interface LegalInfo {
 const {
   data: legalInfo,
   error: legalError,
-} = useWeilaFetch<LegalInfo>('/corp/org/legal/get-my-legal').post().json()
+} = useWeilaFetch<LegalInfo>('corp/legal/get-legal').post().json()
 
 // 认证状态映射
 const authStatusMap = {
