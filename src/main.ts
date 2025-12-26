@@ -1,3 +1,4 @@
+import { PiniaColada } from '@pinia/colada'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -16,6 +17,11 @@ initVConsole().then(() => {
     history: createWebHashHistory(import.meta.env.BASE_URL),
   })
   app.use(pinia)
+  app.use(PiniaColada, {
+    queryOptions: {
+      gcTime: 300_000, // 5 minutes
+    },
+  })
   app.use(router)
   app.mount('#app')
 })
