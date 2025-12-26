@@ -16,7 +16,6 @@ const addDeviceSchema = z.object({
   job_num: z.string().optional(),
   verifycode: z.string().min(1, '验证码不能为空'),
   phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号').optional().or(z.literal('')),
-  sex: z.number().int().min(1).max(2),
   avatar: z.string().optional().or(z.literal('')),
   loc_share: z.number().int().min(0).max(1),
   track: z.number().int().min(0).max(4),
@@ -38,7 +37,6 @@ const formData = ref<AddDeviceForm>({
   job_num: '',
   verifycode: '',
   phone: '',
-  sex: 2, // 默认为男
   avatar: '',
   loc_share: 0,
   track: 0,
@@ -59,7 +57,6 @@ const { error, data, execute: addDevice } = useWeilaFetch<{ member: Member }>('/
   job_num: formData.value.job_num || '',
   verifycode: formData.value.verifycode,
   phone: formData.value.phone || '',
-  sex: formData.value.sex,
   avatar: formData.value.avatar || 'http://favicon.weila.hk/default/group.png',
   loc_share: formData.value.loc_share,
   track: formData.value.track,
@@ -110,7 +107,6 @@ function reset() {
     job_num: '',
     verifycode: '',
     phone: '',
-    sex: 2,
     avatar: '',
     loc_share: 0,
     track: 0,
@@ -227,30 +223,6 @@ defineExpose({
       >
       <div v-if="errors.phone" class="mt-1 text-sm text-red-600">
         {{ errors.phone }}
-      </div>
-    </div>
-
-    <!-- 性别选择 -->
-    <div>
-      <label for="sex" class="block text-sm font-medium text-gray-700 mb-1">
-        性别
-      </label>
-      <select
-        id="sex"
-        v-model.number="formData.sex"
-        class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        :class="errors.sex ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isLoading"
-      >
-        <option :value="2">
-          男
-        </option>
-        <option :value="1">
-          女
-        </option>
-      </select>
-      <div v-if="errors.sex" class="mt-1 text-sm text-red-600">
-        {{ errors.sex }}
       </div>
     </div>
 

@@ -37,6 +37,12 @@ const onlineStatusMap = {
   1: { label: '在线', color: 'bg-green-100 text-green-700' },
 } as const
 
+// 性别映射
+const sexMap = {
+  1: { icon: 'ph:gender-female-duotone', color: 'text-pink-500' }, // 女
+  2: { icon: 'ph:gender-male-duotone', color: 'text-blue-500' }, // 男
+} as const
+
 // 轨迹类型映射
 const trackTypeMap = {
   0: { label: '关闭', color: 'bg-gray-100 text-gray-700' },
@@ -75,9 +81,18 @@ function formatDate(timestamp: number): string {
         @click="toggleExpand"
       >
         <div class="flex items-center justify-between mb-2">
-          <h3 class="text-lg font-medium text-gray-900">
-            {{ member.name || '未命名' }}
-          </h3>
+          <div class="flex items-center gap-2">
+            <h3 class="text-lg font-medium text-gray-900">
+              {{ member.name || '未命名' }}
+            </h3>
+            <!-- 性别图标 -->
+            <Icon
+              v-if="member.sex && sexMap[member.sex as keyof typeof sexMap]"
+              :icon="sexMap[member.sex as keyof typeof sexMap].icon"
+              class="w-4 h-4"
+              :class="sexMap[member.sex as keyof typeof sexMap].color"
+            />
+          </div>
           <!-- 展开/收缩按钮 -->
           <span
             class="flex-shrink-0 ml-2 p-1 text-gray-500 rounded transition-colors"
