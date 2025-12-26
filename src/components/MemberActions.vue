@@ -9,6 +9,7 @@ import ResetPasswordModal from './ResetPasswordModal.vue'
 
 const props = defineProps<{
   member: Member
+  handleDelete?: (member: Member) => Promise<void>
 }>()
 
 const emit = defineEmits<{
@@ -42,18 +43,25 @@ function handleResetPasswordSuccess() {
 // 处理删除确认
 async function handleDeleteConfirm() {
   try {
-    await weilaApi.v2.fetch('/corp/address/delete-member', {
-      body: {
-        user_id: props.member.user_id,
-      },
-    })
-    showToast('删除成功')
+    if (props?.handleDelete) {
+      // 使用传入的删除函数
+      await props?.handleDelete(props.member)
+    }
+    else {
+      // 默认的删除逻辑（向后兼容）
+      await weilaApi.v2.fetch('/corp/address/delete-member', {
+        body: {
+          user_id: props.member.user_id,
+        },
+      })
+    }
+    showToast('注销成功')
     // 通知父组件刷新数据
     emit('refresh')
   }
   catch (error) {
     console.error('删除失败:', error)
-    showToast('删除失败')
+    showToast('注销失败')
   }
 }
 
@@ -92,14 +100,14 @@ function handleStateUpdated(_updatedMember: Member) {
       class="px-3 py-1.5 text-sm text-red-600 bg-white border-0 hover:text-red-700 focus:outline-none"
       @click="showDeleteModal = true"
     >
-      删除
+      注销
     </button>
   </div>
 
   <Modal
     v-model:open="showDeleteModal"
-    title="确认删除"
-    :message="`确定要删除成员「${member.name}」吗？此操作不可恢复。`"
+    title="确认注销"
+    :message="`确定要注销成员「${member.name}」吗？此操作不可恢复。`"
     confirm-button-type="danger"
     :on-confirm="handleDeleteConfirm"
   />

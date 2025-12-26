@@ -120,6 +120,16 @@ async function handleRefresh() {
   await refetchMembers()
 }
 
+// 处理删除群组成员
+async function handleDeleteGroupMember(member: Member) {
+  await weilaApi.v2.fetch('/corp/group/delete-group-member', {
+    body: {
+      group_id: groupId.value,
+      user_id: member.user_id,
+    },
+  })
+}
+
 async function handleAddMembersConfirm() {
   if (selectedMemberIds.value.size === 0) {
     showToast('请至少选择一个成员')
@@ -254,7 +264,11 @@ function openAddMemberModal() {
             :dept-name="getDeptName(member.dept_id)"
           >
             <template #actions>
-              <MemberActions :member="member" @refresh="handleRefresh" />
+              <MemberActions
+                :member="member"
+                :handle-delete="handleDeleteGroupMember"
+                @refresh="handleRefresh"
+              />
             </template>
           </MemberCard>
         </div>
