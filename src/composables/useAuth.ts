@@ -9,9 +9,13 @@ export function useAuth() {
     refreshToken.value = ''
   }
 
-  function saveAuth(accessTokenValue: string, refreshTokenValue: string) {
+  function saveAuth(accessTokenValue: string, refreshTokenValue: string, expiresInValue: number) {
     token.value = accessTokenValue
     refreshToken.value = refreshTokenValue
+
+    storage.setItem('token', accessTokenValue)
+    storage.setItem('refresh_token', refreshTokenValue)
+    storage.setItem('expires_in', expiresInValue)
   }
   return {
     token,

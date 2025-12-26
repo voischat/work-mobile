@@ -8,8 +8,8 @@ export {}
 declare global {
   const EffectScope: typeof import('vue')['EffectScope']
   const addMemberSchema: typeof import('./src/composables/useGenMember')['addMemberSchema']
-  const appid: typeof import('./src/composables/useWeilaFetch')['appid']
-  const appkey: typeof import('./src/composables/useWeilaFetch')['appkey']
+  const appid: typeof import('./src/shared/const')['appid']
+  const appkey: typeof import('./src/shared/const')['appkey']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
   const bridge: typeof import('./src/utils/bridge.js')['bridge']
@@ -54,9 +54,11 @@ declare global {
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
   const isActive: typeof import('./src/utils/router')['isActive']
   const isActiveRoute: typeof import('./src/utils/router')['isActiveRoute']
+  const isAtBottom: typeof import('./src/shared/states')['isAtBottom']
   const isDark: typeof import('./src/composables/dark')['isDark']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isGlobalModalVisible: typeof import('./src/composables/useModal')['isGlobalModalVisible']
+  const isLimitedWebview: typeof import('./src/shared/const')['isLimitedWebview']
   const isProxy: typeof import('vue')['isProxy']
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
@@ -110,6 +112,7 @@ declare global {
   const shallowReactive: typeof import('vue')['shallowReactive']
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
+  const storage: typeof import('./src/shared/instances')['storage']
   const syncRef: typeof import('@vueuse/core')['syncRef']
   const syncRefs: typeof import('@vueuse/core')['syncRefs']
   const templateRef: typeof import('@vueuse/core')['templateRef']
@@ -325,6 +328,7 @@ declare global {
   const watchTriggerable: typeof import('@vueuse/core')['watchTriggerable']
   const watchWithFilter: typeof import('@vueuse/core')['watchWithFilter']
   const weilaApi: typeof import('./src/utils/weilaApi')['weilaApi']
+  const weilaFetch: typeof import('./src/shared/instances')['weilaFetch']
   const whenever: typeof import('@vueuse/core')['whenever']
 }
 // for type re-export
@@ -356,6 +360,8 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly addMemberSchema: UnwrapRef<typeof import('./src/composables/useGenMember')['addMemberSchema']>
+    readonly appid: UnwrapRef<typeof import('./src/shared/const')['appid']>
+    readonly appkey: UnwrapRef<typeof import('./src/shared/const')['appkey']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly bridge: UnwrapRef<typeof import('./src/utils/bridge.js')['bridge']>
@@ -398,9 +404,11 @@ declare module 'vue' {
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly isActive: UnwrapRef<typeof import('./src/utils/router')['isActive']>
     readonly isActiveRoute: UnwrapRef<typeof import('./src/utils/router')['isActiveRoute']>
+    readonly isAtBottom: UnwrapRef<typeof import('./src/shared/states')['isAtBottom']>
     readonly isDark: UnwrapRef<typeof import('./src/composables/dark')['isDark']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isGlobalModalVisible: UnwrapRef<typeof import('./src/composables/useModal')['isGlobalModalVisible']>
+    readonly isLimitedWebview: UnwrapRef<typeof import('./src/shared/const')['isLimitedWebview']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
@@ -453,6 +461,7 @@ declare module 'vue' {
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
+    readonly storage: UnwrapRef<typeof import('./src/shared/instances')['storage']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
@@ -666,6 +675,7 @@ declare module 'vue' {
     readonly watchTriggerable: UnwrapRef<typeof import('@vueuse/core')['watchTriggerable']>
     readonly watchWithFilter: UnwrapRef<typeof import('@vueuse/core')['watchWithFilter']>
     readonly weilaApi: UnwrapRef<typeof import('./src/utils/weilaApi')['weilaApi']>
+    readonly weilaFetch: UnwrapRef<typeof import('./src/shared/instances')['weilaFetch']>
     readonly whenever: UnwrapRef<typeof import('@vueuse/core')['whenever']>
   }
 }

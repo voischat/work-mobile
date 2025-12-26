@@ -7,9 +7,9 @@
   "scripts": {
     "build": "vite build",
     "build:staging": "vite build --mode staging",
-    "dev": "vite --open --host",
+    "dev": "vite --host",
     "lint": "eslint .",
-    "typecheck": "vue-tsc",
+    "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest",
     "up": "taze major -I",
@@ -30,8 +30,10 @@
     "pinia": "^3.0.4",
     "react-grab": "^0.0.39",
     "reka-ui": "^2.6.0",
+    "unstorage": "^1.17.3",
     "vue": "^3.5.16",
     "vue-router": "^4.5.1",
+    "weila-auth": "link:../weila-auth",
     "zod": "^3.25.76"
   },
   "devDependencies": {

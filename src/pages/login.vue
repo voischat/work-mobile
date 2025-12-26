@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { LoginResponse } from '~/types/auth'
+import { useMutation } from '@pinia/colada'
 import md5 from 'md5'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { useAuth } from '~/composables/useAuth'
 import { useForm } from '~/composables/useForm'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 
 // 表单验证 schema
 const loginSchema = z.object({
@@ -29,30 +29,37 @@ const formData = ref<LoginForm>({
 const { errors, validate } = useForm(loginSchema)
 
 // 调用登录 API（非立即执行）
-const { error, isFetching, isFinished, data, execute: login } = useWeilaFetch<LoginResponse>('/corp/auth/login', {
-  immediate: false,
-}).post(() => ({
-  account: formData.value.account,
-  password: md5(formData.value.password),
-})).json()
+// const { error, isFetching, isFinished, data, execute: login } = useWeilaFetch<LoginResponse>('/corp/auth/login', {
+//   immediate: false,
+// }).post(() => ({
+//   account: formData.value.account,
+//   password: md5(formData.value.password),
+// })).json()
+
+const { mutateAsync: login, error, isLoading: isFetching, status, data } = useMutation({
+  mutation: () => weilaFetch<LoginResponse>('/corp/auth/login', {
+    method: 'POST',
+    body: {
+      account: formData.value.account,
+      password: md5(formData.value.password),
+    },
+  }),
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
 })
 
 // 监听登录成功
-watch([data, isFinished, error], ([loginData, isFinished, error]) => {
-  console.log('loginData', loginData)
-  console.log('isFinished', isFinished)
-  console.log('error', error)
-  if (isFinished) {
+watch([data, status, error], ([loginData, status, error]) => {
+  if (status !== 'success') {
     return
   }
   if (error) {
     return
   }
   if (loginData) {
-    saveAuth(loginData.access_token, loginData.refresh_token)
+    saveAuth(loginData.access_token, loginData.refresh_token, loginData.expires_in)
     router.push('/')
   }
 })

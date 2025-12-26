@@ -71,6 +71,7 @@ export default defineConfig({
         './src/composables',
         './src/queries',
         './src/utils',
+        './src/shared',
       ],
       vueTemplate: true,
     }),
