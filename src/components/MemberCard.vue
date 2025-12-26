@@ -40,10 +40,10 @@ const onlineStatusMap = {
 // 轨迹类型映射
 const trackTypeMap = {
   0: { label: '关闭', color: 'bg-gray-100 text-gray-700' },
-  1: { label: '低频', color: 'bg-yellow-100 text-yellow-700' },
-  2: { label: '中频', color: 'bg-orange-100 text-orange-700' },
-  3: { label: '高频', color: 'bg-red-100 text-red-700' },
-  4: { label: '快速', color: 'bg-blue-100 text-blue-700' },
+  1: { label: '1 小时', color: 'bg-yellow-100 text-yellow-700' },
+  2: { label: '15 分钟', color: 'bg-orange-100 text-orange-700' },
+  3: { label: '5 分钟', color: 'bg-red-100 text-red-700' },
+  4: { label: '1 分钟', color: 'bg-blue-100 text-blue-700' },
 } as const
 
 // 位置共享映射

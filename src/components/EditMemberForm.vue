@@ -381,16 +381,16 @@ defineExpose({
           关闭
         </option>
         <option :value="1">
-          低频
+          1 小时
         </option>
         <option :value="2">
-          中频
+          15 分钟
         </option>
         <option :value="3">
-          高频
+          5 分钟
         </option>
         <option :value="4">
-          快速
+          1 分钟
         </option>
       </select>
       <div v-if="errors.track" class="mt-1 text-sm text-red-600">
