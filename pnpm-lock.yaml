@@ -58,8 +58,8 @@ importers:
         specifier: ^4.5.1
         version: 4.5.1(vue@3.5.16(typescript@5.8.3))
       weila-auth:
-        specifier: link:../weila-auth
-        version: link:../weila-auth
+        specifier: ^0.0.2
+        version: 0.0.2
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -3802,6 +3802,9 @@ packages:
 
   webpack-virtual-modules@0.6.2:
     resolution: {integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==}
+
+  weila-auth@0.0.2:
+    resolution: {integrity: sha512-H65mhrCg+qrcudCuPe0UbLqLhBjpSyjgBj2AWLy4PN9UzTG6T4Xr7rwH6vxWGppb4tuimxfyuHSD6/kyAcDeLQ==}
 
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
@@ -7886,6 +7889,32 @@ snapshots:
   webidl-conversions@7.0.0: {}
 
   webpack-virtual-modules@0.6.2: {}
+
+  weila-auth@0.0.2:
+    dependencies:
+      nanoid: 5.1.6
+      ofetch: 1.5.1
+      unstorage: 1.17.3
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@deno/kv'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@upstash/redis'
+      - '@vercel/blob'
+      - '@vercel/functions'
+      - '@vercel/kv'
+      - aws4fetch
+      - db0
+      - idb-keyval
+      - ioredis
+      - uploadthing
 
   whatwg-encoding@3.1.1:
     dependencies:
