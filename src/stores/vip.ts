@@ -13,7 +13,7 @@ export const useVipStore = defineStore('vip', () => {
     error.value = null
 
     try {
-      const { data, error: fetchError } = await useWeilaFetch<{ vip: VipInfo }>('/corp/busi/vip/get-my-vip')
+      const { data, error: fetchError } = await useWeilaFetch<{ vip: VipInfo }>('/corp/org/get-my-vip')
         .post()
         .json()
 
