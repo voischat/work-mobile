@@ -66,7 +66,7 @@ const stopLoginResultWatcher = watch([loginData, loginError], () => {
     return
   }
   if (loginData.value) {
-    saveAuth(loginData.value.access_token, loginData.value.refresh_token)
+    saveAuth(loginData.value.access_token, loginData.value.refresh_token, loginData.value.expires_in)
     stopLoginResultWatcher()
   }
 })
@@ -78,7 +78,7 @@ watch([refreshData, refreshError], () => {
     return
   }
   if (refreshData.value) {
-    saveAuth(refreshData.value.access_token, refreshData.value.refresh_token)
+    saveAuth(refreshData.value.access_token, refreshData.value.refresh_token, refreshData.value.expires_in)
   }
 })
 

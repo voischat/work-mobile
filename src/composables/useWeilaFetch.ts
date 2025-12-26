@@ -94,7 +94,7 @@ async function refreshAccessToken(): Promise<boolean> {
     }>
 
     if (apiResponse.errcode === 0 && apiResponse.data) {
-      saveAuth(apiResponse.data.access_token, apiResponse.data.refresh_token)
+      saveAuth(apiResponse.data.access_token, apiResponse.data.refresh_token, apiResponse.data.expires_in)
       return true
     }
 
