@@ -1,16 +1,23 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
 import { useForm } from '~/composables/useForm'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { useVipStore } from '~/stores/vip'
 
 const props = defineProps<{
   member: Member
 }>()
 
-// 不再需要 emit，所有逻辑由父组件处理
+const vipStore = useVipStore()
+
+onMounted(() => {
+  vipStore.fetchVipInfo()
+})
+
+const hasQuickSupport = computed(() => vipStore.hasQuickSupport('track'))
 
 // 编辑成员的 schema（成员和设备共用，但字段会根据 type 动态显示）
 const editMemberSchema = z.object({
@@ -389,8 +396,8 @@ defineExpose({
         <option :value="3">
           5 分钟
         </option>
-        <option :value="4">
-          1 分钟
+        <option :value="4" :disabled="!hasQuickSupport">
+          1 分钟{{ !hasQuickSupport ? ' (需要 VIP)' : '' }}
         </option>
       </select>
       <div v-if="errors.track" class="mt-1 text-sm text-red-600">

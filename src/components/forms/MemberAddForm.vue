@@ -3,13 +3,21 @@ import type { AddMemberForm } from '~/composables/useGenMember'
 import type { Dept, Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
 import md5 from 'md5'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useForm } from '~/composables/useForm'
 import { addMemberSchema, useGenerateMember } from '~/composables/useGenMember'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { useVipStore } from '~/stores/vip'
 
 const { showToast } = useToast()
+const vipStore = useVipStore()
+
+onMounted(() => {
+  vipStore.fetchVipInfo()
+})
+
+const hasQuickSupport = computed(() => vipStore.hasQuickSupport('track'))
 
 // 获取部门列表
 const {
@@ -343,8 +351,8 @@ defineExpose({
         <option :value="3">
           5 分钟
         </option>
-        <option :value="4">
-          1 分钟
+        <option :value="4" :disabled="!hasQuickSupport">
+          1 分钟{{ !hasQuickSupport ? ' (需要 VIP)' : '' }}
         </option>
       </select>
       <div v-if="errors.track" class="mt-1 text-sm text-red-600">
