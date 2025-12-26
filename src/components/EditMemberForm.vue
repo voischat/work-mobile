@@ -1,23 +1,16 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
 import { useForm } from '~/composables/useForm'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
-import { useVipStore } from '~/stores/vip'
 
 const props = defineProps<{
   member: Member
 }>()
 
-const vipStore = useVipStore()
-
-onMounted(() => {
-  vipStore.fetchVipInfo()
-})
-
-const hasQuickSupport = computed(() => vipStore.hasQuickSupport('track'))
+const { hasQuickSupport } = useVip()
 
 // 编辑成员的 schema（成员和设备共用，但字段会根据 type 动态显示）
 const editMemberSchema = z.object({

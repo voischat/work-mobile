@@ -1,21 +1,13 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { z } from 'zod'
-import AvatarUpload from '~/components/AvatarUpload.vue'
 import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
-import { useVipStore } from '~/stores/vip'
 
 const { showToast } = useToast()
-const vipStore = useVipStore()
-
-onMounted(() => {
-  vipStore.fetchVipInfo()
-})
-
-const hasQuickSupport = computed(() => vipStore.hasQuickSupport('track'))
+const { hasQuickSupport } = useVip()
 
 // 表单验证 schema
 const addDeviceSchema = z.object({

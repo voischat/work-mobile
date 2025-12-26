@@ -3,21 +3,14 @@ import type { AddMemberForm } from '~/composables/useGenMember'
 import type { Dept, Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
 import md5 from 'md5'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useForm } from '~/composables/useForm'
 import { addMemberSchema, useGenerateMember } from '~/composables/useGenMember'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
-import { useVipStore } from '~/stores/vip'
 
 const { showToast } = useToast()
-const vipStore = useVipStore()
-
-onMounted(() => {
-  vipStore.fetchVipInfo()
-})
-
-const hasQuickSupport = computed(() => vipStore.hasQuickSupport('track'))
+const { hasQuickSupport } = useVip()
 
 // 获取部门列表
 const {
