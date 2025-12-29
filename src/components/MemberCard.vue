@@ -1,91 +1,76 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
-import { ref } from 'vue'
-import Avatar from '~/components/Avatar.vue'
+import {
+  CollapsibleContent,
+  CollapsibleRoot,
+  CollapsibleTrigger,
+} from 'reka-ui'
+import { AvatarFallback, AvatarImage, AvatarRoot } from 'reka-ui'
 
 defineProps<{
   member: Member
   deptName?: string
 }>()
 
-// 展开/收缩状态，默认收缩
-const isExpanded = ref(false)
-
-// 切换展开/收缩
-function toggleExpand() {
-  isExpanded.value = !isExpanded.value
-}
-
-// 成员类型映射
 const memberTypeMap = {
-  0: { label: '成员', color: 'bg-gray-100 text-gray-700' },
-  1: { label: '设备', color: 'bg-gray-100 text-gray-700' },
-  2: { label: '管理员', color: 'bg-blue-100 text-blue-700' },
-  255: { label: '企业主', color: 'bg-purple-100 text-purple-700' },
+  0: { label: '成员' },
+  1: { label: '设备' },
+  2: { label: '管理员' },
+  255: { label: '企业主' },
 } as const
 
-// 状态映射（state: 0=启用, 1=停用）
-// const stateMap = {
-//   0: { label: '启用', color: 'bg-green-100 text-green-700' },
-//   1: { label: '停用', color: 'bg-gray-100 text-gray-700' },
-// } as const
-
-// 在线状态映射
 const onlineStatusMap = {
-  0: { label: '离线', color: 'bg-gray-100 text-gray-700' },
-  1: { label: '在线', color: 'bg-green-100 text-green-700' },
+  0: { label: '离线', icon: 'lucide:circle' },
+  1: { label: '在线', icon: 'lucide:circle' },
 } as const
 
-// 性别映射
 const sexMap = {
-  1: { icon: 'ph:gender-female-duotone', color: 'text-pink-500' }, // 女
-  2: { icon: 'ph:gender-male-duotone', color: 'text-blue-500' }, // 男
+  1: { icon: 'ph:gender-female-duotone', color: 'text-gray-500' },
+  2: { icon: 'ph:gender-male-duotone', color: 'text-gray-500' },
 } as const
 
-// 轨迹类型映射
 const trackTypeMap = {
-  0: { label: '关闭', color: 'bg-gray-100 text-gray-700' },
-  1: { label: '1 小时', color: 'bg-yellow-100 text-yellow-700' },
-  2: { label: '15 分钟', color: 'bg-orange-100 text-orange-700' },
-  3: { label: '5 分钟', color: 'bg-red-100 text-red-700' },
-  4: { label: '1 分钟', color: 'bg-blue-100 text-blue-700' },
+  0: { label: '关闭' },
+  1: { label: '1 小时' },
+  2: { label: '15 分钟' },
+  3: { label: '5 分钟' },
+  4: { label: '1 分钟' },
 } as const
 
-// 位置共享映射
 const locShareMap = {
-  0: { label: '关闭', color: 'bg-gray-100 text-gray-700' },
-  1: { label: '开启', color: 'bg-green-100 text-green-700' },
+  0: { label: '关闭' },
+  1: { label: '开启' },
 } as const
 
-// 格式化日期
 function formatDate(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleDateString('zh-CN')
 }
 </script>
 
 <template>
-  <div class="bg-white rounded-lg p-4 border border-gray-200">
-    <!-- 顶部：头像、姓名、类型、状态 -->
-    <div class="flex items-start space-x-3 mb-4">
-      <!-- 头像 -->
-      <Avatar
-        :src="member.avatar"
-        :alt="member.name"
-        size="md"
-        shape="rounded"
-      />
-      <!-- 基本信息 -->
-      <div
-        class="flex-1 min-w-0"
-        @click="toggleExpand"
-      >
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <h3 class="text-lg font-medium text-gray-900">
+  <CollapsibleRoot class="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+    <!-- Header Section -->
+    <div class="p-4">
+      <div class="flex items-start space-x-3">
+        <!-- Avatar using Reka UI -->
+        <AvatarRoot class="inline-flex h-12 w-12 shrink-0 select-none items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+          <AvatarImage
+            class="h-full w-full object-cover"
+            :src="member.avatar"
+            :alt="member.name"
+          />
+          <AvatarFallback class="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-medium text-gray-600">
+            {{ member.name?.slice(0, 2) || 'UN' }}
+          </AvatarFallback>
+        </AvatarRoot>
+
+        <!-- Basic Info -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center space-x-2 mb-1.5">
+            <h3 class="text-base font-medium text-gray-900">
               {{ member.name || '未命名' }}
             </h3>
-            <!-- 性别图标 -->
             <Icon
               v-if="member.sex && sexMap[member.sex as keyof typeof sexMap]"
               :icon="sexMap[member.sex as keyof typeof sexMap].icon"
@@ -93,142 +78,132 @@ function formatDate(timestamp: number): string {
               :class="sexMap[member.sex as keyof typeof sexMap].color"
             />
           </div>
-          <!-- 展开/收缩按钮 -->
-          <span
-            class="flex-shrink-0 ml-2 p-1 text-gray-500 rounded transition-colors"
-          >
-            <Icon
-              icon="lucide:chevron-down"
-              class="w-5 h-5 transition-transform duration-200"
-              :class="{ 'rotate-180': isExpanded }"
-            />
-          </span>
+
+          <div class="flex items-center flex-wrap space-x-2 text-xs text-gray-600">
+            <!-- Member Type Badge -->
+            <span
+              v-if="memberTypeMap[member.type as keyof typeof memberTypeMap]"
+              class="inline-flex items-center"
+            >
+              {{ memberTypeMap[member.type as keyof typeof memberTypeMap].label }}
+            </span>
+
+            <!-- Online Status -->
+            <span
+              v-if="member.online_status !== undefined"
+              class="inline-flex items-center space-x-1"
+            >
+              <Icon
+                :icon="onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.icon || 'lucide:circle'"
+                class="w-2 h-2"
+                :class="member.online_status === 1 ? 'text-green-600' : 'text-gray-400'"
+              />
+              {{ onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.label || '未知' }}
+            </span>
+
+            <!-- Department -->
+            <span v-if="deptName" class="inline-flex items-center">
+              {{ deptName }}
+            </span>
+          </div>
         </div>
-        <div class="flex items-center flex-wrap space-x-2">
-          <!-- 成员类型标签 -->
-          <span
-            v-if="memberTypeMap[member.type as keyof typeof memberTypeMap]"
-            class="px-2 py-0.5 rounded text-xs font-medium" :class="[memberTypeMap[member.type as keyof typeof memberTypeMap].color]"
-          >
-            {{ memberTypeMap[member.type as keyof typeof memberTypeMap].label }}
-          </span>
-          <!-- 在线状态 -->
-          <span
-            v-if="member.online_status !== undefined"
-            class="px-2 py-0.5 rounded text-xs font-medium" :class="[onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.color || 'bg-gray-100 text-gray-700']"
-          >
-            {{ onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.label || '未知' }}
-          </span>
-          <!-- 成员状态 -->
-          <!-- <span
-            class="px-2 py-0.5 rounded text-xs font-medium" :class="[stateMap[member.state as keyof typeof stateMap]?.color || 'bg-gray-100 text-gray-700']"
-          >
-            {{ stateMap[member.state as keyof typeof stateMap]?.label || '未知' }}
-          </span> -->
-        </div>
+
+        <!-- Expand/Collapse Trigger -->
+        <CollapsibleTrigger class="shrink-0 p-1 text-gray-400 hover:text-gray-600 rounded transition-colors">
+          <Icon
+            icon="lucide:chevron-down"
+            class="w-5 h-5 transition-transform duration-200 collapsible-chevron"
+          />
+        </CollapsibleTrigger>
       </div>
     </div>
 
-    <!-- 中间：详细信息表格（可展开/收缩） -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 max-h-0"
-      enter-to-class="opacity-100 max-h-[1000px]"
-      leave-active-class="transition-all duration-300 ease-in"
-      leave-from-class="opacity-100 max-h-[1000px]"
-      leave-to-class="opacity-0 max-h-0"
-    >
-      <div v-show="isExpanded" class="mb-4 overflow-hidden">
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-gray-100">
-            <tr v-if="member.job_num" class="hover:bg-gray-50">
-              <td class="py-2 pr-4 text-gray-500 w-20">
-                工号
-              </td>
-              <td class="py-2 text-gray-900">
-                {{ member.job_num }}
-              </td>
-            </tr>
-            <tr v-if="member.phone" class="hover:bg-gray-50">
-              <td class="py-2 pr-4 text-gray-500 w-20">
-                手机号
-              </td>
-              <td class="py-2 text-gray-900">
-                {{ member.phone }}
-              </td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="py-2 pr-4 text-gray-500 w-20">
-                微喇号
-              </td>
-              <td class="py-2 text-gray-900">
-                {{ member.user_num }}
-              </td>
-            </tr>
-            <tr v-if="deptName" class="hover:bg-gray-50">
-              <td class="py-2 pr-4 text-gray-500 w-20">
-                部门
-              </td>
-              <td class="py-2 text-gray-900">
-                {{ deptName }}
-              </td>
-            </tr>
-            <tr v-if="member.grp_cnt !== undefined && member.grp_lmt !== undefined" class="hover:bg-gray-50">
-              <td class="py-2 pr-4 text-gray-500 w-20">
-                群组
-              </td>
-              <td class="py-2" :class="[member.grp_cnt >= member.grp_lmt ? 'text-red-600 font-medium' : 'text-gray-900']">
-                {{ member.grp_cnt }} / {{ member.grp_lmt }}
-              </td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="py-2 pr-4 text-gray-500 w-20">
-                创建时间
-              </td>
-              <td class="py-2 text-gray-900">
-                {{ formatDate(member.created) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </Transition>
+    <!-- Collapsible Content -->
+    <CollapsibleContent class="collapsible-content">
+      <div class="px-4 pb-4 space-y-4">
+        <!-- Details Table -->
+        <div class="space-y-2 text-sm">
+          <div v-if="member.job_num" class="flex items-center">
+            <span class="w-20 text-gray-500">工号</span>
+            <span class="text-gray-900">{{ member.job_num }}</span>
+          </div>
+          <div v-if="member.phone" class="flex items-center">
+            <span class="w-20 text-gray-500">手机号</span>
+            <span class="text-gray-900">{{ member.phone }}</span>
+          </div>
+          <div class="flex items-center">
+            <span class="w-20 text-gray-500">微喇号</span>
+            <span class="text-gray-900">{{ member.user_num }}</span>
+          </div>
+          <div v-if="member.grp_cnt !== undefined && member.grp_lmt !== undefined" class="flex items-center">
+            <span class="w-20 text-gray-500">群组</span>
+            <span :class="[member.grp_cnt >= member.grp_lmt ? 'text-red-600 font-medium' : 'text-gray-900']">
+              {{ member.grp_cnt }} / {{ member.grp_lmt }}
+            </span>
+          </div>
+          <div class="flex items-center">
+            <span class="w-20 text-gray-500">创建时间</span>
+            <span class="text-gray-900">{{ formatDate(member.created) }}</span>
+          </div>
+        </div>
 
-    <!-- 底部：功能状态（可展开/收缩） -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 max-h-0"
-      enter-to-class="opacity-100 max-h-[200px]"
-      leave-active-class="transition-all duration-300 ease-in"
-      leave-from-class="opacity-100 max-h-[200px]"
-      leave-to-class="opacity-0 max-h-0"
-    >
-      <div v-show="isExpanded" class="flex items-center flex-wrap space-x-2 mb-4 pb-4 border-b border-gray-200 overflow-hidden">
-        <span
-          class="px-2 py-0.5 rounded text-xs font-medium" :class="[trackTypeMap[member.track as keyof typeof trackTypeMap]?.color || 'bg-gray-100 text-gray-700']"
-        >
-          轨迹: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || '未知' }}
-        </span>
-        <span
-          class="px-2 py-0.5 rounded text-xs font-medium" :class="[locShareMap[member.loc_share as keyof typeof locShareMap]?.color || 'bg-gray-100 text-gray-700']"
-        >
-          位置共享: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || '未知' }}
-        </span>
-      </div>
-    </Transition>
+        <!-- Feature Status -->
+        <div class="flex items-center flex-wrap space-x-3 text-xs text-gray-600 pt-3 border-t border-gray-100">
+          <span class="inline-flex items-center space-x-1.5">
+            <Icon icon="lucide:route" class="w-3.5 h-3.5" />
+            轨迹: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || '未知' }}
+          </span>
+          <span class="inline-flex items-center space-x-1.5">
+            <Icon icon="lucide:map-pin" class="w-3.5 h-3.5" />
+            位置共享: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || '未知' }}
+          </span>
+        </div>
 
-    <!-- 底部操作区域插槽（可展开/收缩） -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 max-h-0"
-      enter-to-class="opacity-100 max-h-[100px]"
-      leave-active-class="transition-all duration-300 ease-in"
-      leave-from-class="opacity-100 max-h-[100px]"
-      leave-to-class="opacity-0 max-h-0"
-    >
-      <div v-show="isExpanded" class="flex items-center justify-end space-x-3 pt-2 overflow-hidden">
-        <slot name="actions" />
+        <!-- Actions Slot -->
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-gray-100">
+          <slot name="actions" />
+        </div>
       </div>
-    </Transition>
-  </div>
+    </CollapsibleContent>
+  </CollapsibleRoot>
 </template>
+
+<style scoped>
+.collapsible-content {
+  overflow: hidden;
+}
+
+.collapsible-content[data-state='open'] {
+  animation: slideDown 300ms ease-out;
+}
+
+.collapsible-content[data-state='closed'] {
+  animation: slideUp 300ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--reka-collapsible-content-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--reka-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.collapsible-chevron {
+  transition: transform 200ms ease;
+}
+
+button[data-state='open'] .collapsible-chevron {
+  transform: rotate(180deg);
+}
+</style>

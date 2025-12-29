@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
-import { ref } from 'vue'
-import { useToast } from '~/composables/useToast'
+import { Icon } from '@iconify/vue'
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
+} from 'reka-ui'
 import EditMemberModal from './EditMemberModal.vue'
 import MemberStateToggle from './MemberStateToggle.vue'
 import Modal from './Modal.vue'
@@ -13,42 +19,33 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'refresh'): void
+  refresh: []
 }>()
 
 const { showToast } = useToast()
 
-// 删除确认模态框
 const showDeleteModal = ref(false)
-// 编辑成员弹窗
 const showEditModal = ref(false)
-// 重置密码弹窗
 const showResetPasswordModal = ref(false)
 
-// 处理编辑
 function handleEdit() {
   showEditModal.value = true
 }
 
-// 处理编辑成功
 function handleEditSuccess() {
   emit('refresh')
 }
 
-// 处理重置密码成功
 function handleResetPasswordSuccess() {
   // 密码重置成功，不需要刷新列表
 }
 
-// 处理删除确认
 async function handleDeleteConfirm() {
   try {
     if (props?.handleDelete) {
-      // 使用传入的删除函数
       await props?.handleDelete(props.member)
     }
     else {
-      // 默认的删除逻辑（向后兼容）
       await weilaApi.v2.fetch('/corp/address/delete-member', {
         body: {
           user_id: props.member.user_id,
@@ -56,7 +53,6 @@ async function handleDeleteConfirm() {
       })
     }
     showToast('注销成功')
-    // 通知父组件刷新数据
     emit('refresh')
   }
   catch (error) {
@@ -65,45 +61,69 @@ async function handleDeleteConfirm() {
   }
 }
 
-// 处理重置密码
 function handleResetPassword() {
   showResetPasswordModal.value = true
 }
 
-// 处理状态更新（不需要刷新列表，组件内部状态已更新）
 function handleStateUpdated(_updatedMember: Member) {
   // 状态更新后，组件内部状态已同步，无需刷新列表
 }
 </script>
 
 <template>
-  <div class="flex items-center justify-end space-x-3">
+  <div class="flex items-center space-x-2">
+    <!-- State Toggle -->
+    <MemberStateToggle v-if="member.type !== 255" :member="member" @updated="handleStateUpdated" />
+
+    <!-- Edit Button -->
     <button
       type="button"
-      class="px-3 py-1.5 text-sm text-blue-600 bg-white border-0 hover:text-blue-700 focus:outline-none"
+      class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
       @click="handleEdit"
     >
-      编辑
+      <Icon icon="lucide:edit" class="w-3.5 h-3.5" />
+      <span>编辑</span>
     </button>
-    <MemberStateToggle v-if="member.type !== 255" :member="member" @updated="handleStateUpdated" />
+
+    <!-- Reset Password Button -->
     <button
       v-if="member.type !== 255"
       type="button"
-      class="px-3 py-1.5 text-sm text-orange-600 bg-white border-0 hover:text-orange-700 focus:outline-none"
+      class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
       @click="handleResetPassword"
     >
-      重置密码
+      <Icon icon="lucide:key" class="w-3.5 h-3.5" />
+      <span>重置密码</span>
     </button>
-    <button
-      v-if="member.type !== 255"
-      type="button"
-      class="px-3 py-1.5 text-sm text-red-600 bg-white border-0 hover:text-red-700 focus:outline-none"
-      @click="showDeleteModal = true"
-    >
-      注销
-    </button>
+
+    <!-- More Actions Menu (Dangerous actions only) -->
+    <DropdownMenuRoot v-if="member.type !== 255">
+      <DropdownMenuTrigger
+        class="inline-flex items-center justify-center rounded p-1.5 text-gray-500 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 transition-colors"
+      >
+        <Icon icon="lucide:more-vertical" class="w-4 h-4" />
+      </DropdownMenuTrigger>
+
+      <DropdownMenuPortal>
+        <DropdownMenuContent
+          class="min-w-[140px] bg-white rounded-lg border border-gray-200 shadow-lg p-1 z-50"
+          :side-offset="5"
+          align="end"
+        >
+          <!-- Delete -->
+          <DropdownMenuItem
+            class="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 rounded cursor-pointer hover:bg-red-50 focus:bg-red-50 outline-none transition-colors"
+            @select="showDeleteModal = true"
+          >
+            <Icon icon="lucide:trash-2" class="w-4 h-4" />
+            <span>注销账号</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenuPortal>
+    </DropdownMenuRoot>
   </div>
 
+  <!-- Delete Confirmation Modal -->
   <Modal
     v-model:open="showDeleteModal"
     title="确认注销"
@@ -112,12 +132,14 @@ function handleStateUpdated(_updatedMember: Member) {
     :on-confirm="handleDeleteConfirm"
   />
 
+  <!-- Edit Member Modal -->
   <EditMemberModal
     v-model:open="showEditModal"
     :member="member"
     @success="handleEditSuccess"
   />
 
+  <!-- Reset Password Modal -->
   <ResetPasswordModal
     v-model:open="showResetPasswordModal"
     :member-id="member.user_id"
