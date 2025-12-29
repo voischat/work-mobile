@@ -244,7 +244,7 @@ function openAddMemberModal() {
         </div>
 
         <!-- 加载状态 -->
-        <div v-if="isMemberFetching && curPage === 0" class="flex items-center justify-center py-12">
+        <div v-if="isMemberFetching" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
             加载中...
           </div>
