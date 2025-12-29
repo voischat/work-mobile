@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { Dept, Member, MemberListResponse } from '~/types/management'
 import { refDebounced } from '@vueuse/core'
+import { useRouteParams } from '@vueuse/router'
 import { computed, ref, shallowRef, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
@@ -14,11 +15,10 @@ import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { isAtBottom } from '~/shared/states'
 
-const route = useRoute()
 const router = useRouter()
 const { showToast } = useToast()
 
-const deptId = computed(() => Number(route.params.id))
+const deptId = computed(() => Number(useRouteParams('id').value))
 
 const isAddMemberModalOpen = ref(false)
 const treeSelectorRef = ref<InstanceType<typeof DeptMemberTreeSelector> | null>(null)
