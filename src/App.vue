@@ -42,20 +42,13 @@ const {
   refresh_token: refreshToken.value!,
 })).json()
 
-const route = useRoute()
-
-watchEffect(() => {
-  console.log('route.query', route.query)
-  console.log('queryAccount.value', queryAccount.value)
-  console.log('queryPassword.value', queryPassword.value)
-})
-
-// 监听 URL 账号密码，触发一次登录
 const stopLoginWatcher = watch([queryAccount, queryPassword], ([account, password]) => {
   if (account && password) {
-    loginExecute()
     stopLoginWatcher()
     isLimitedWebview.value = true
+    loginExecute().then(() => {
+      isLimitedWebview.value = !loginError.value
+    })
   }
 }, { immediate: true })
 
