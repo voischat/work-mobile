@@ -31,9 +31,15 @@ const router = useRouter()
 function handleClick(steps: number) {
   router.go(-steps)
 }
+
+const isDev = import.meta.env.DEV
+const route = useRoute()
 </script>
 
 <template>
+  <div v-if="isDev" class="text-neutral-400 text-xs">
+    {{ route.fullPath }}
+  </div>
   <nav class="flex items-center space-x-2 text-sm text-gray-600">
     <template
       v-for="(item, index) in filterdItems " :key="index"
