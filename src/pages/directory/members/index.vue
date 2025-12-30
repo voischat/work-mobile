@@ -1,172 +1,112 @@
 <script setup lang="ts">
-import type { Dept, Member, MemberListResponse } from '~/types/management'
+import type { Dept, MemberListResponse } from '~/types/management'
 import { useQuery } from '@pinia/colada'
-import { refDebounced } from '@vueuse/core'
-import { computed, ref, shallowRef, watch } from 'vue'
-import BackLayout from '~/components/BackLayout.vue'
-import Breadcrumb from '~/components/Breadcrumb.vue'
-import DeviceAddForm from '~/components/forms/DeviceAddForm.vue'
-import MemberAddForm from '~/components/forms/MemberAddForm.vue'
-import MemberActions from '~/components/MemberActions.vue'
-import MemberCard from '~/components/MemberCard.vue'
-import Modal from '~/components/Modal.vue'
-import { usePage } from '~/composables/usePage'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { refDebounced, useInfiniteScroll } from '@vueuse/core'
+import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { weilaFetch } from '~/shared/instances'
-import { isAtBottom } from '~/shared/states'
 
-// 表单引用
-const memberAddFormRef = ref<InstanceType<typeof MemberAddForm>>()
-const deviceAddFormRef = ref<InstanceType<typeof DeviceAddForm>>()
+const memberAddFormRef = useTemplateRef('memberAddFormRef')
+const deviceAddFormRef = useTemplateRef('deviceAddFormRef')
 
-// 模态框可见性状态
 const isMemberModalOpen = ref(false)
 const isDeviceModalOpen = ref(false)
 
-// 搜索关键词（使用 shallowRef 用于防抖）
 const searchKey = shallowRef('')
 const debouncedSearchKey = refDebounced(searchKey, 1000)
 
-// 分页状态
-const { curPage, pageSize, reset } = usePage()
-const allMembers = ref<Member[]>([]) // 累积存储所有已加载的成员
-const isLoadingMore = ref(false) // 是否正在加载更多
+const currentPage = ref(0)
+const accumulatedMembers = ref<MemberListResponse['members']>([])
 
-// 动态构建 API URL
-const memberListUrl = computed(() => `/corp/address/get-member-list?page=${curPage.value}&size=${pageSize}`)
-
-// 获取成员列表
 const {
-  data: memberListData,
+  state: membersState,
+  asyncStatus,
   error: memberError,
-  isFetching: isMemberFetching,
-  execute: refetchMembers,
-} = useWeilaFetch<MemberListResponse>(memberListUrl)
-  .post(() => ({
-    key: debouncedSearchKey.value,
-  }))
-  .json()
+} = useQuery({
+  key: () => ['member', 'list', { key: debouncedSearchKey.value, page: currentPage.value }],
+  query: async () => {
+    const result = await weilaFetch<MemberListResponse>(
+      `/corp/address/get-member-list?page=${currentPage.value}&size=5`,
+      {
+        method: 'POST',
+        body: { key: debouncedSearchKey.value },
+      },
+    )
+    return result
+  },
+  placeholderData: previousData => previousData,
+})
 
-// 监听数据加载完成，填充 allMembers
-watch(memberListData, (newData) => {
-  if (newData?.members) {
-    if (curPage.value === 0) {
-      // 初始加载时，直接设置 allMembers
-      allMembers.value = [...newData.members]
+watch(() => membersState.value, (state) => {
+  if (state?.status === 'success' && state.data) {
+    if (currentPage.value === 0) {
+      accumulatedMembers.value = state.data.members || []
     }
     else {
-      // 加载更多时，追加到 allMembers
-      allMembers.value.push(...newData.members)
+      const newMembers = state.data.members || []
+      const existingIds = new Set(accumulatedMembers.value.map(m => m.user_id))
+      const uniqueNewMembers = newMembers.filter(m => !existingIds.has(m.user_id))
+      accumulatedMembers.value = [...accumulatedMembers.value, ...uniqueNewMembers]
     }
   }
-}, { immediate: true })
+})
 
-// 加载更多成员
-async function loadMoreMembers() {
-  // 防止重复加载
-  if (isLoadingMore.value || isMemberFetching.value) {
-    isAtBottom.value = false
-    return
-  }
+watch(debouncedSearchKey, () => {
+  currentPage.value = 0
+  accumulatedMembers.value = []
+})
 
-  // 检查是否还有更多数据
-  if (allMembers.value.length >= (memberListData.value?.count || 0)) {
-    isAtBottom.value = false
-    return
-  }
+const currentData = computed(() => membersState.value?.data)
 
-  isLoadingMore.value = true
-  curPage.value++
+const hasNextPage = computed(() => {
+  if (!currentData.value)
+    return false
+  const loadedCount = accumulatedMembers.value.length
+  return loadedCount < (currentData.value.count || 0)
+})
 
-  try {
-    await refetchMembers()
-    // 数据会在 watch 中自动追加
-    // 加载成功后重置 isAtBottom 状态
-    isAtBottom.value = false
-  }
-  catch (error) {
-    console.error('加载更多成员失败:', error)
-    // 加载失败时回退页码
-    curPage.value--
-  }
-  finally {
-    isLoadingMore.value = false
-  }
+function loadNextPage() {
+  if (hasNextPage.value && asyncStatus.value !== 'loading')
+    currentPage.value += 1
 }
 
-// 监听 isAtBottom 状态，当滚动到底部时加载更多数据
-watch(isAtBottom, (value) => {
-  if (value) {
-    loadMoreMembers()
-  }
-})
-
-// 监听防抖后的搜索关键词变化，重置分页并重新加载数据
-watch(debouncedSearchKey, () => {
-  reset()
-  allMembers.value = []
-  refetchMembers()
-})
-
-// 获取部门列表（用于显示部门名称）
 const { data: depts } = useQuery({
   key: ['dept', 'all'],
   query: () => weilaFetch<Dept[]>('/corp/address/get-all-dept', { method: 'POST' }),
 })
 
-// 根据部门ID获取部门名称
 function getDeptName(deptId: number): string {
   return depts.value?.find((d: Dept) => d.id === deptId)?.name || ''
 }
 
-// 处理刷新数据
-async function handleRefresh() {
-  // 重置到第一页并重新加载
-  reset()
-  allMembers.value = []
-  await refetchMembers()
-}
+const loadMoreEl = useTemplateRef('load-more')
+useInfiniteScroll(loadMoreEl, loadNextPage, { distance: 100 })
 
-// 处理创建成员 - 显示模态框
 function handleAddMember() {
   isMemberModalOpen.value = true
 }
 
-// 处理添加设备 - 显示模态框
 function handleAddDevice() {
   isDeviceModalOpen.value = true
 }
 
-// 处理创建成员模态框确认事件
 async function handleMemberConfirm() {
   const result = await memberAddFormRef.value?.submit()
-  if (result) {
-    // 表单提交成功，关闭模态框并刷新成员列表
+  if (result)
     isMemberModalOpen.value = false
-    await handleRefresh()
-  }
 }
 
-// 处理创建成员模态框取消事件
 function handleMemberCancel() {
-  // 模态框关闭时重置表单
   memberAddFormRef.value?.reset()
   isMemberModalOpen.value = false
 }
 
-// 处理添加设备模态框确认事件
 async function handleDeviceConfirm() {
   const result = await deviceAddFormRef.value?.submit()
-  if (result) {
-    // 表单提交成功，关闭模态框并刷新成员列表
+  if (result)
     isDeviceModalOpen.value = false
-    await handleRefresh()
-  }
 }
 
-// 处理添加设备模态框取消事件
 function handleDeviceCancel() {
-  // 模态框关闭时重置表单
   deviceAddFormRef.value?.reset()
   isDeviceModalOpen.value = false
 }
@@ -184,7 +124,6 @@ function handleDeviceCancel() {
     </template>
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
-        <!-- 搜索和按钮区域 -->
         <div class="mb-4 space-y-4">
           <div>
             <input
@@ -211,54 +150,49 @@ function handleDeviceCancel() {
           </div>
         </div>
 
-        <!-- 加载状态 -->
-        <div v-if="isMemberFetching" class="flex items-center justify-center py-12">
+        <div v-if="asyncStatus === 'loading' && accumulatedMembers.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
             加载中...
           </div>
         </div>
 
-        <!-- 错误状态 -->
         <div v-else-if="memberError" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
             <p>获取成员列表失败: {{ memberError.message }}</p>
           </div>
         </div>
 
-        <div v-if="allMembers.length === 0 && !isMemberFetching" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+        <div v-if="accumulatedMembers.length === 0 && asyncStatus !== 'loading'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无成员数据
         </div>
 
         <div v-else class="space-y-4">
           <MemberCard
-            v-for="member in allMembers"
+            v-for="member in accumulatedMembers"
             :key="member.user_id"
             :member
             :dept-name="getDeptName(member.dept_id)"
           >
             <template #actions>
-              <MemberActions :member="member" @refresh="handleRefresh" />
+              <MemberActions :member="member" />
             </template>
           </MemberCard>
         </div>
 
-        <!-- 加载更多状态 -->
-        <div v-if="isLoadingMore" class="mt-4 flex items-center justify-center py-4">
+        <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
             加载中...
           </div>
         </div>
 
-        <!-- 没有更多数据提示 -->
-        <div v-else-if="allMembers.length > 0 && allMembers.length >= (memberListData?.count || 0)" class="mt-4 flex items-center justify-center py-4">
+        <div v-else-if="accumulatedMembers.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ memberListData?.count || 0 }} 条）
+            已加载全部数据（共 {{ currentData?.count || 0 }} 条）
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 创建成员模态框 -->
     <Modal
       v-model:open="isMemberModalOpen"
       title="创建成员"
@@ -267,12 +201,9 @@ function handleDeviceCancel() {
       :on-confirm="handleMemberConfirm"
       :on-cancel="handleMemberCancel"
     >
-      <MemberAddForm
-        ref="memberAddFormRef"
-      />
+      <MemberAddForm ref="memberAddFormRef" />
     </Modal>
 
-    <!-- 添加设备模态框 -->
     <Modal
       v-model:open="isDeviceModalOpen"
       title="添加设备"
@@ -281,9 +212,7 @@ function handleDeviceCancel() {
       :on-confirm="handleDeviceConfirm"
       :on-cancel="handleDeviceCancel"
     >
-      <DeviceAddForm
-        ref="deviceAddFormRef"
-      />
+      <DeviceAddForm ref="deviceAddFormRef" />
     </Modal>
   </BackLayout>
 </template>
