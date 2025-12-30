@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { VipInfo } from '~/types/org'
+import { useQuery } from '@pinia/colada'
 import { computed } from 'vue'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 defineProps<{
   vip: VipInfo
@@ -22,7 +23,10 @@ interface LegalInfo {
 const {
   data: legalInfo,
   error: legalError,
-} = useWeilaFetch<LegalInfo>('corp/legal/get-legal').post().json()
+} = useQuery({
+  key: ['legal', 'info'],
+  query: () => weilaFetch<LegalInfo>('corp/legal/get-legal', { method: 'POST' }),
+})
 
 // 认证状态映射
 const authStatusMap = {

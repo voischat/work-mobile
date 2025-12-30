@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { UserInfo } from '~/types/auth'
+import { useQuery } from '@pinia/colada'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import HomeLayout from '~/components/HomeLayout.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useModal } from '~/composables/useModal'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 const { clearAuth } = useAuth()
@@ -15,8 +16,11 @@ const { clearAuth } = useAuth()
 const {
   data: userInfo,
   error: userError,
-  isFetching: isUserFetching,
-} = useWeilaFetch<UserInfo>('/corp/user/get-selfinfo').post().json()
+  isPending: isUserFetching,
+} = useQuery({
+  key: ['user', 'selfinfo'],
+  query: () => weilaFetch<UserInfo>('/corp/user/get-selfinfo', { method: 'POST' }),
+})
 
 // 计算属性
 const isLoading = computed(() => isUserFetching.value)

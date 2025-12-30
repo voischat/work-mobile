@@ -2,22 +2,23 @@
 import type { AddMemberForm } from '~/composables/useGenMember'
 import type { Dept, Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
+import { useQuery } from '@pinia/colada'
 import md5 from 'md5'
 import { computed, ref } from 'vue'
 import { useForm } from '~/composables/useForm'
 import { addMemberSchema, useGenerateMember } from '~/composables/useGenMember'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
 const { hasQuickSupport } = useVip()
 
 // 获取部门列表
-const {
-  data: depts,
-} = useWeilaFetch<Dept[]>('/corp/address/get-all-dept')
-  .post()
-  .json()
+const { data: depts } = useQuery({
+  key: ['dept', 'all'],
+  query: () => weilaFetch<Dept[]>('/corp/address/get-all-dept', { method: 'POST' }),
+})
 
 const form = ref<AddMemberForm>({
   name: '',

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
+import { useQuery } from '@pinia/colada'
 import { computed, ref, watch } from 'vue'
 import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
 import { useForm } from '~/composables/useForm'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
   member: Member
@@ -29,11 +31,10 @@ const editMemberSchema = z.object({
 type EditMemberForm = z.infer<typeof editMemberSchema>
 
 // 获取部门列表
-const {
-  data: depts,
-} = useWeilaFetch<Dept[]>('/corp/address/get-all-dept')
-  .post()
-  .json()
+const { data: depts } = useQuery({
+  key: ['dept', 'all'],
+  query: () => weilaFetch<Dept[]>('/corp/address/get-all-dept', { method: 'POST' }),
+})
 
 // 表单数据
 const formData = ref<EditMemberForm>({

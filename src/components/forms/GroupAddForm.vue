@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { Dept, Group } from '~/types/management'
+import { useQuery } from '@pinia/colada'
 import { computed, ref } from 'vue'
 import { z } from 'zod'
 import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
 
@@ -19,11 +21,10 @@ const addGroupSchema = z.object({
 type AddGroupForm = z.infer<typeof addGroupSchema>
 
 // 获取部门列表
-const {
-  data: depts,
-} = useWeilaFetch<Dept[]>('/corp/address/get-all-dept')
-  .post()
-  .json()
+const { data: depts } = useQuery({
+  key: ['dept', 'all'],
+  query: () => weilaFetch<Dept[]>('/corp/address/get-all-dept', { method: 'POST' }),
+})
 
 // 表单数据
 const formData = ref<AddGroupForm>({

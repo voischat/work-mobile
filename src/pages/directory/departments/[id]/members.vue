@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Dept, Member, MemberListResponse } from '~/types/management'
+import { useQuery } from '@pinia/colada'
 import { refDebounced } from '@vueuse/core'
 import { useRouteParams } from '@vueuse/router'
 import { computed, ref, shallowRef, watch } from 'vue'
@@ -13,6 +14,7 @@ import Modal from '~/components/Modal.vue'
 import { usePage } from '~/composables/usePage'
 import { useToast } from '~/composables/useToast'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
@@ -31,11 +33,10 @@ const { curPage, pageSize, reset } = usePage()
 const allMembers = ref<Member[]>([])
 const isLoadingMore = ref(false)
 
-const {
-  data: allDepts,
-} = useWeilaFetch<Dept[]>('/corp/address/get-my-manage-all-dept')
-  .post()
-  .json()
+const { data: allDepts } = useQuery({
+  key: ['dept', 'my-manage'],
+  query: () => weilaFetch<Dept[]>('/corp/address/get-my-manage-all-dept', { method: 'POST' }),
+})
 
 const memberListUrl = computed(() => `/corp/address/get-dept-member-list?page=${curPage.value}&size=${pageSize}`)
 

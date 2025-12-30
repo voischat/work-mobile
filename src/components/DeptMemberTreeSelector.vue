@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
+import { useQuery } from '@pinia/colada'
 import { computed, ref } from 'vue'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const props = withDefaults(defineProps<{
   existingMemberIds?: number[]
@@ -34,10 +36,11 @@ const loadingDeptIds = ref<Set<number>>(new Set())
 // 获取部门列表
 const {
   data: depts,
-  isFetching: isDeptsLoading,
-} = useWeilaFetch<Dept[]>('/corp/address/get-my-manage-all-dept')
-  .post()
-  .json()
+  isPending: isDeptsLoading,
+} = useQuery({
+  key: ['dept', 'my-manage'],
+  query: () => weilaFetch<Dept[]>('/corp/address/get-my-manage-all-dept', { method: 'POST' }),
+})
 
 // 切换部门展开/折叠
 function toggleDept(deptId: number) {

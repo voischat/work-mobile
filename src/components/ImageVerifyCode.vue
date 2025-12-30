@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { ImageVerifyCodeResponse } from '~/types/auth'
+import { useQuery } from '@pinia/colada'
 import { computed, ref, watch } from 'vue'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 interface Props {
   width?: number
@@ -26,13 +27,18 @@ const imageVerifyCode = ref<string>('')
 const verifyId = ref<string>('')
 const { showToast } = useToast()
 
-// 构建 API URL
-const apiUrl = computed(() => `/common/get-image-verifycode?width=${props.width}&height=${props.height}`)
+// 构建 query key (响应式)
+const queryKey = computed(() => ['verifycode', 'image', props.width, props.height])
 
 // 获取图形验证码（立即执行）
-const { data: imageVerifyCodeData, execute: fetchImageVerifyCode } = useWeilaFetch<ImageVerifyCodeResponse>(apiUrl, {
-  immediate: true,
-}).get().json()
+const { data: imageVerifyCodeData, refetch: fetchImageVerifyCode } = useQuery({
+  key: queryKey,
+  query: () => weilaFetch<ImageVerifyCodeResponse>(
+    `/common/get-image-verifycode?width=${props.width}&height=${props.height}`,
+    { method: 'GET' },
+  ),
+  staleTime: 0, // 验证码总是过期，每次都重新获取
+})
 
 // 监听图形验证码数据
 watch(imageVerifyCodeData, (data) => {

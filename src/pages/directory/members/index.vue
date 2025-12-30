@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Dept, Member, MemberListResponse } from '~/types/management'
+import { useQuery } from '@pinia/colada'
 import { refDebounced } from '@vueuse/core'
 import { computed, ref, shallowRef, watch } from 'vue'
 import BackLayout from '~/components/BackLayout.vue'
@@ -11,6 +12,7 @@ import MemberCard from '~/components/MemberCard.vue'
 import Modal from '~/components/Modal.vue'
 import { usePage } from '~/composables/usePage'
 import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 import { isAtBottom } from '~/shared/states'
 
 // 表单引用
@@ -107,11 +109,10 @@ watch(debouncedSearchKey, () => {
 })
 
 // 获取部门列表（用于显示部门名称）
-const {
-  data: depts,
-} = useWeilaFetch<Dept[]>('/corp/address/get-all-dept')
-  .post()
-  .json()
+const { data: depts } = useQuery({
+  key: ['dept', 'all'],
+  query: () => weilaFetch<Dept[]>('/corp/address/get-all-dept', { method: 'POST' }),
+})
 
 // 根据部门ID获取部门名称
 function getDeptName(deptId: number): string {
