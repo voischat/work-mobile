@@ -2,7 +2,7 @@
 import type { AddMemberForm } from '~/composables/useGenMember'
 import type { Dept, Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
-import { useMutation, useQuery } from '@pinia/colada'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import md5 from 'md5'
 import { computed, ref } from 'vue'
 import { useForm } from '~/composables/useForm'
@@ -59,6 +59,11 @@ const { mutateAsync: createMember, error } = useMutation({
       password: md5(payload.password),
     },
   }),
+  onSuccess: () => {
+    // Invalidate member queries on success
+    const queryCache = useQueryCache()
+    queryCache.invalidateQueries({ key: ['member'] })
+  },
 })
 
 const errorMessage = computed(() => {

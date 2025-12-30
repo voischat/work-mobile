@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
-import { useMutation, useQuery } from '@pinia/colada'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import { computed, ref } from 'vue'
 import { z } from 'zod'
 import { useForm } from '~/composables/useForm'
@@ -63,6 +63,11 @@ const { mutateAsync: addDevice, error } = useMutation({
       track: payload.track,
     },
   }),
+  onSuccess: () => {
+    // Invalidate member queries on success (devices are members with type=1)
+    const queryCache = useQueryCache()
+    queryCache.invalidateQueries({ key: ['member'] })
+  },
 })
 
 const errorMessage = computed(() => {

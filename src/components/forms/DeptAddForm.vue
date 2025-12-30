@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { Dept } from '~/types/management'
+import { useMutation, useQueryCache } from '@pinia/colada'
 import { computed, ref } from 'vue'
 import { z } from 'zod'
 import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
 
@@ -24,11 +25,19 @@ const formData = ref<AddDeptForm>({
 const { errors, validate } = useForm(addDeptSchema)
 
 // 调用创建部门 API
-const { error, data, execute: createDept } = useWeilaFetch<{ dept: Dept }>('/corp/address/create-dept', {
-  immediate: false,
-}).post(() => ({
-  name: formData.value.name,
-})).json()
+const { mutateAsync: createDept, error } = useMutation({
+  mutation: (payload: AddDeptForm) => weilaFetch<{ dept: Dept }>('/corp/address/create-dept', {
+    method: 'POST',
+    body: {
+      name: payload.name,
+    },
+  }),
+  onSuccess: () => {
+    // Invalidate dept queries on success
+    const queryCache = useQueryCache()
+    queryCache.invalidateQueries({ key: ['dept'] })
+  },
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
@@ -41,16 +50,16 @@ async function submit(): Promise<false | { dept: Dept }> {
   }
 
   try {
-    await createDept()
+    const result = await createDept(formData.value)
 
     if (error?.value) {
       showToast(error?.value?.message || '部门创建失败')
       return false
     }
 
-    if (data.value) {
+    if (result) {
       showToast('部门创建成功')
-      return data.value
+      return result
     }
 
     return false

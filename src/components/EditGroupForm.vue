@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { Dept, Group } from '~/types/management'
-import { useQuery } from '@pinia/colada'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import { computed, ref, watch } from 'vue'
 import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
 import { useForm } from '~/composables/useForm'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
@@ -55,14 +54,22 @@ watch(() => props.group, (newGroup) => {
 const { errors, validate } = useForm(editGroupSchema)
 
 // 调用编辑群组 API
-const { error, isFetching, isFinished, data, execute: editGroup } = useWeilaFetch<{ group: Group }>('/corp/group/change-group', {
-  immediate: false,
-}).post(() => ({
-  group_id: formData.value.group_id,
-  name: formData.value.name,
-  avatar: formData.value.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/100011/a/0e9763d6.jpg',
-  burst_mode: formData.value.burst_mode,
-})).json()
+const { mutate: editGroup, isLoading, error } = useMutation({
+  mutation: (payload: EditGroupForm) => weilaFetch<{ group: Group }>('/corp/group/change-group', {
+    method: 'POST',
+    body: {
+      group_id: payload.group_id,
+      name: payload.name,
+      avatar: payload.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/100011/a/0e9763d6.jpg',
+      burst_mode: payload.burst_mode,
+    },
+  }),
+  onSuccess: () => {
+    // Invalidate group queries on success
+    const queryCache = useQueryCache()
+    queryCache.invalidateQueries({ key: ['group'] })
+  },
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
@@ -70,46 +77,17 @@ const errorMessage = computed(() => {
 
 // 提交方法，返回 Promise
 async function submit(): Promise<void> {
-  // 如果正在提交中，直接返回
-  if (isFetching.value) {
-    return Promise.resolve()
-  }
-
   if (!validate(formData.value)) {
     throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
 
-  return new Promise((resolve, reject) => {
-    // 监听编辑结果
-    const stopWatcher = watch([data, isFinished, error], ([result, finished, err]) => {
-      if (!finished)
-        return
-
-      // 停止监听
-      stopWatcher()
-
-      if (err) {
-        reject(err)
-        return
-      }
-
-      if (result !== undefined) {
-        resolve()
-      }
-      else {
-        reject(new Error('提交失败'))
-      }
-    })
-
-    // 执行提交
-    editGroup()
-  })
+  await editGroup(formData.value)
 }
 
-// 暴露 submit 方法和 isFetching 状态供父组件调用
+// 暴露 submit 方法和 isLoading 状态供父组件调用
 defineExpose({
   submit,
-  isFetching,
+  isLoading,
 })
 </script>
 
@@ -131,7 +109,7 @@ defineExpose({
         placeholder="请输入群组名称"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.name ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
       <div v-if="errors.name" class="mt-1 text-sm text-red-600">
         {{ errors.name }}
@@ -148,7 +126,7 @@ defineExpose({
         v-model.number="formData.dept_id"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.dept_id ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
         <option :value="0">
           无部门
@@ -184,7 +162,7 @@ defineExpose({
         v-model.number="formData.burst_mode"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.burst_mode ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
         <option :value="0">
           排麦

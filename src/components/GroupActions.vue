@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Group } from '~/types/management'
+import { useMutation, useQueryCache } from '@pinia/colada'
 import { ref } from 'vue'
 import { useToast } from '~/composables/useToast'
+import { weilaFetch } from '~/shared/instances'
 import EditGroupModal from './EditGroupModal.vue'
 import Modal from './Modal.vue'
 
@@ -9,43 +11,44 @@ const props = defineProps<{
   group: Group
 }>()
 
-const emit = defineEmits<{
-  (e: 'refresh'): void
-}>()
-
 const { showToast } = useToast()
+const queryCache = useQueryCache()
 
 // 删除确认模态框
 const showDeleteModal = ref(false)
 // 编辑群组弹窗
 const showEditModal = ref(false)
 
+// 删除群组 API
+const { mutate: deleteGroup } = useMutation({
+  mutation: (groupId: number) => weilaFetch('/corp/group/delete-group', {
+    method: 'POST',
+    body: { group_id: groupId },
+  }),
+  onSuccess: () => {
+    showToast('删除成功')
+    // Invalidate all group-related queries
+    queryCache.invalidateQueries({ key: ['group'] })
+  },
+  onError: (error) => {
+    console.error('删除失败:', error)
+    showToast('删除失败')
+  },
+})
+
 // 处理编辑
 function handleEdit() {
   showEditModal.value = true
 }
 
-// 处理编辑成功
+// 处理编辑成功 - invalidate queries instead of emitting refresh
 function handleEditSuccess() {
-  emit('refresh')
+  queryCache.invalidateQueries({ key: ['group'] })
 }
 
 // 处理删除确认
 async function handleDeleteConfirm() {
-  try {
-    await weilaApi.v2.fetch('/corp/group/delete-group', {
-      body: {
-        group_id: props.group.id,
-      },
-    })
-    showToast('删除成功')
-    // 通知父组件刷新数据
-    emit('refresh')
-  }
-  catch (error) {
-    console.error('删除失败:', error)
-    showToast('删除失败')
-  }
+  await deleteGroup(props.group.id)
 }
 </script>
 

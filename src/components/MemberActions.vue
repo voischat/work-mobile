@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
+import { useMutation, useQueryCache } from '@pinia/colada'
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -8,6 +9,7 @@ import {
   DropdownMenuRoot,
   DropdownMenuTrigger,
 } from 'reka-ui'
+import { weilaFetch } from '~/shared/instances'
 import EditMemberModal from './EditMemberModal.vue'
 import MemberStateToggle from './MemberStateToggle.vue'
 import Modal from './Modal.vue'
@@ -18,22 +20,37 @@ const props = defineProps<{
   handleDelete?: (member: Member) => Promise<void>
 }>()
 
-const emit = defineEmits<{
-  refresh: []
-}>()
-
 const { showToast } = useToast()
+const queryCache = useQueryCache()
 
 const showDeleteModal = ref(false)
 const showEditModal = ref(false)
 const showResetPasswordModal = ref(false)
 
+// 删除成员 API (only used if handleDelete is not provided)
+const { mutate: deleteMember } = useMutation({
+  mutation: (userId: number) => weilaFetch('/corp/address/delete-member', {
+    method: 'POST',
+    body: { user_id: userId },
+  }),
+  onSuccess: () => {
+    showToast('注销成功')
+    // Invalidate all member-related queries
+    queryCache.invalidateQueries({ key: ['member'] })
+  },
+  onError: (error) => {
+    console.error('删除失败:', error)
+    showToast('注销失败')
+  },
+})
+
 function handleEdit() {
   showEditModal.value = true
 }
 
+// 处理编辑成功 - invalidate queries instead of emitting refresh
 function handleEditSuccess() {
-  emit('refresh')
+  queryCache.invalidateQueries({ key: ['member'] })
 }
 
 function handleResetPasswordSuccess() {
@@ -41,23 +58,15 @@ function handleResetPasswordSuccess() {
 }
 
 async function handleDeleteConfirm() {
-  try {
-    if (props?.handleDelete) {
-      await props?.handleDelete(props.member)
-    }
-    else {
-      await weilaApi.v2.fetch('/corp/address/delete-member', {
-        body: {
-          user_id: props.member.user_id,
-        },
-      })
-    }
-    showToast('注销成功')
-    emit('refresh')
+  if (props?.handleDelete) {
+    // Use custom delete handler if provided
+    await props.handleDelete(props.member)
+    // Still invalidate queries after custom delete
+    queryCache.invalidateQueries({ key: ['member'] })
   }
-  catch (error) {
-    console.error('删除失败:', error)
-    showToast('注销失败')
+  else {
+    // Use default delete mutation
+    await deleteMember(props.member.user_id)
   }
 }
 

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Dept } from '~/types/management'
+import { useMutation, useQueryCache } from '@pinia/colada'
 import { ref } from 'vue'
 import { useToast } from '~/composables/useToast'
+import { weilaFetch } from '~/shared/instances'
 import EditDeptModal from './EditDeptModal.vue'
 import Modal from './Modal.vue'
 
@@ -9,44 +11,44 @@ const props = defineProps<{
   dept: Dept
 }>()
 
-const emit = defineEmits<{
-  (e: 'refresh'): void
-}>()
-
 const { showToast } = useToast()
+const queryCache = useQueryCache()
 
-// 删除确认模态框
-const showDeleteModal = ref(false)
 // 编辑部门弹窗
 const showEditModal = ref(false)
+// 删除确认模态框
+const showDeleteModal = ref(false)
 
 // 删除部门 API
-// const { execute: deleteDept, error: deleteDeptError } = useWeilaFetch('/corp/address/delete-dept', {
-//   immediate: false,
-// }).post(() => ({
-//   dept_id: props.dept.id,
-// })).json()
+const { mutate: deleteDept } = useMutation({
+  mutation: (deptId: number) => weilaFetch('/corp/address/delete-dept', {
+    method: 'POST',
+    body: { dept_id: deptId },
+  }),
+  onSuccess: () => {
+    showToast('删除成功')
+    // Invalidate all dept-related queries
+    queryCache.invalidateQueries({ key: ['dept'] })
+  },
+  onError: (error) => {
+    console.error('删除失败:', error)
+    showToast('删除失败')
+  },
+})
 
 // 处理编辑
 function handleEdit() {
   showEditModal.value = true
 }
 
-// 处理编辑成功
+// 处理编辑成功 - invalidate queries instead of emitting refresh
 function handleEditSuccess() {
-  emit('refresh')
+  queryCache.invalidateQueries({ key: ['dept'] })
 }
 
 // 处理删除确认
 async function handleDeleteConfirm() {
-  await weilaApi.v2.fetch('/corp/address/delete-dept', {
-    body: {
-      dept_id: props.dept.id,
-    },
-  })
-  showToast('删除成功')
-  // 通知父组件刷新数据
-  emit('refresh')
+  await deleteDept(props.dept.id)
 }
 </script>
 

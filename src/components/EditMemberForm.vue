@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
-import { useMutation, useQuery } from '@pinia/colada'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import { computed, ref, watch } from 'vue'
 import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
@@ -74,27 +74,21 @@ const isDevice = computed(() => props.member?.type === 1)
 const { errors, validate } = useForm(editMemberSchema)
 
 // 调用编辑成员 API
-const { mutate: editMember, isLoading: isFetching, error } = useMutation({
-  mutation: (payload: EditMemberForm) => {
-    const body: any = {
+const { mutate: editMember, isLoading, error } = useMutation({
+  mutation: (payload: EditMemberForm) => weilaFetch<{ member: Member }>('/corp/address/change-member', {
+    method: 'POST',
+    body: {
       user_id: payload.user_id,
       name: payload.name,
-      job_num: payload.job_num || '',
+      no: payload.job_num,
+      avatar: payload.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/100011/a/0e9763d6.jpg',
       dept_id: payload.dept_id,
-      sex: payload.sex || 0,
-      avatar: payload.avatar || '',
-      phone: payload.phone || '',
-      loc_share: payload.loc_share || 0,
-      track: payload.track || 0,
-    }
-    // 只有成员（非设备）才需要 is_dept_admin 字段
-    if (!isDevice.value) {
-      body.is_dept_admin = payload.is_dept_admin || 0
-    }
-    return weilaFetch<{ member: Member }>('/corp/address/change-member', {
-      method: 'POST',
-      body,
-    })
+    },
+  }),
+  onSuccess: () => {
+    // Invalidate member queries on success
+    const queryCache = useQueryCache()
+    queryCache.invalidateQueries({ key: ['member'] })
   },
 })
 
@@ -104,10 +98,6 @@ const errorMessage = computed(() => {
 
 // 提交方法，返回 Promise
 async function submit(): Promise<void> {
-  if (isFetching.value) {
-    return Promise.resolve()
-  }
-
   if (!validate(formData.value)) {
     throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
@@ -115,10 +105,10 @@ async function submit(): Promise<void> {
   await editMember(formData.value)
 }
 
-// 暴露 submit 方法和 isFetching 状态供父组件调用
+// 暴露 submit 方法和 isLoading 状态供父组件调用
 defineExpose({
   submit,
-  isFetching,
+  isLoading,
 })
 </script>
 
@@ -140,7 +130,7 @@ defineExpose({
         placeholder="请输入名称"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.name ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
       <div v-if="errors.name" class="mt-1 text-sm text-red-600">
         {{ errors.name }}
@@ -174,7 +164,7 @@ defineExpose({
         placeholder="请输入工号（可选）"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.job_num ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
       <div v-if="errors.job_num" class="mt-1 text-sm text-red-600">
         {{ errors.job_num }}
@@ -191,7 +181,7 @@ defineExpose({
         v-model.number="formData.dept_id"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.dept_id ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
         <option :value="0">
           无部门
@@ -219,7 +209,7 @@ defineExpose({
         v-model.number="formData.sex"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.sex ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
         <option :value="0">
           未知
@@ -248,7 +238,7 @@ defineExpose({
         placeholder="请输入手机号（可选）"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.phone ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
       <div v-if="errors.phone" class="mt-1 text-sm text-red-600">
         {{ errors.phone }}
@@ -273,7 +263,7 @@ defineExpose({
         v-model.number="formData.is_dept_admin"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.is_dept_admin ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
         <option :value="0">
           否
@@ -330,7 +320,7 @@ defineExpose({
         v-model.number="formData.loc_share"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.loc_share ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
         <option :value="0">
           关闭
@@ -354,7 +344,7 @@ defineExpose({
         v-model.number="formData.track"
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.track ? 'border-red-500' : 'border-gray-300'"
-        :disabled="isFetching"
+        :disabled="isLoading"
       >
         <option :value="0">
           关闭

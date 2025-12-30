@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
-import { useMutation } from '@pinia/colada'
+import { useMutation, useQueryCache } from '@pinia/colada'
 import { computed, ref, watch } from 'vue'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
@@ -14,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const { showToast } = useToast()
+const queryCache = useQueryCache()
 
 // 使用 ref 管理状态（0=启用, 1=停用）
 const state = ref(props.member.state)
@@ -32,6 +33,10 @@ const { mutate: changeState, isLoading: isFetching } = useMutation({
     method: 'POST',
     body: payload,
   }),
+  onSuccess: () => {
+    // Invalidate member queries on success
+    queryCache.invalidateQueries({ key: ['member'] })
+  },
 })
 
 async function handleToggle() {

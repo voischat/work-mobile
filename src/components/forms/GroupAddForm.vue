@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { Dept, Group } from '~/types/management'
-import { useQuery } from '@pinia/colada'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import { computed, ref } from 'vue'
 import { z } from 'zod'
 import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
@@ -38,14 +37,22 @@ const formData = ref<AddGroupForm>({
 const { errors, validate } = useForm(addGroupSchema)
 
 // 调用创建群组 API
-const { error, data, execute: createGroup } = useWeilaFetch<{ group: Group }>('/corp/group/create-group', {
-  immediate: false,
-}).post(() => ({
-  name: formData.value.name,
-  dept_id: formData.value.dept_id,
-  avatar: formData.value.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/100011/a/0e9763d6.jpg',
-  burst_mode: formData.value.burst_mode,
-})).json()
+const { mutateAsync: createGroup, error } = useMutation({
+  mutation: (payload: AddGroupForm) => weilaFetch<{ group: Group }>('/corp/group/create-group', {
+    method: 'POST',
+    body: {
+      name: payload.name,
+      dept_id: payload.dept_id,
+      avatar: payload.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/100011/a/0e9763d6.jpg',
+      burst_mode: payload.burst_mode,
+    },
+  }),
+  onSuccess: () => {
+    // Invalidate group queries on success
+    const queryCache = useQueryCache()
+    queryCache.invalidateQueries({ key: ['group'] })
+  },
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
@@ -58,16 +65,16 @@ async function submit(): Promise<false | { group: Group }> {
   }
 
   try {
-    await createGroup()
+    const result = await createGroup(formData.value)
 
     if (error.value) {
       showToast(error.value.message || '群组创建失败')
       return false
     }
 
-    if (data.value) {
+    if (result) {
       showToast('群组创建成功')
-      return data.value
+      return result
     }
 
     return false
