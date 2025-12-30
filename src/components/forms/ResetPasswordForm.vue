@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { useMutation } from '@pinia/colada'
 import md5 from 'md5'
 import { computed, ref } from 'vue'
 import { z } from 'zod'
 import { useForm } from '~/composables/useForm'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
   memberId: number
@@ -30,12 +31,12 @@ const formData = ref<ResetPasswordForm>({
 const { errors, validate } = useForm(resetPasswordSchema)
 
 // 调用重置密码 API
-const { error, isFetching, isFinished, data, execute: resetPassword } = useWeilaFetch('/corp/address/reset-member-password', {
-  immediate: false,
-}).post(() => ({
-  user_id: props.memberId,
-  password: md5(formData.value.password),
-})).json()
+const { mutate: resetPassword, isLoading: isFetching, error } = useMutation({
+  mutation: (payload: { user_id: number, password: string }) => weilaFetch('/corp/address/reset-member-password', {
+    method: 'POST',
+    body: payload,
+  }),
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
@@ -51,30 +52,9 @@ async function submit(): Promise<void> {
     throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
 
-  return new Promise((resolve, reject) => {
-    // 监听重置密码结果
-    const stopWatcher = watch([data, isFinished, error], ([result, finished, err]) => {
-      if (!finished)
-        return
-
-      // 停止监听
-      stopWatcher()
-
-      if (err) {
-        reject(err)
-        return
-      }
-
-      if (result !== undefined) {
-        resolve()
-      }
-      else {
-        reject(new Error('重置密码失败'))
-      }
-    })
-
-    // 执行提交
-    resetPassword()
+  await resetPassword({
+    user_id: props.memberId,
+    password: md5(formData.value.password),
   })
 }
 

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
+import { useMutation } from '@pinia/colada'
 import { computed, ref, watch } from 'vue'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
   member: Member
@@ -26,24 +27,25 @@ watch(() => props.member.state, (newState) => {
 const newState = computed(() => state.value === 0 ? 1 : 0)
 
 // 调用修改状态 API
-const { isFetching, execute: changeState } = useWeilaFetch('/corp/address/change-member-state', {
-  immediate: false,
-}).post(() => ({
-  user_id: props.member.user_id,
-  state: newState.value,
-})).json()
+const { mutate: changeState, isLoading: isFetching } = useMutation({
+  mutation: (payload: { user_id: number, state: number }) => weilaFetch('/corp/address/change-member-state', {
+    method: 'POST',
+    body: payload,
+  }),
+})
 
 async function handleToggle() {
   if (isFetching.value) {
     return
   }
   try {
-    const result = await changeState()
-    if (result) {
-      state.value = newState.value
-      showToast(state.value === 0 ? '已启用' : '已停用')
-      emit('updated', { ...props.member, state: state.value })
-    }
+    await changeState({
+      user_id: props.member.user_id,
+      state: newState.value,
+    })
+    state.value = newState.value
+    showToast(state.value === 0 ? '已启用' : '已停用')
+    emit('updated', { ...props.member, state: state.value })
   }
   catch (error) {
     console.error('修改状态失败:', error)

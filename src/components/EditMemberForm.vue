@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
-import { useQuery } from '@pinia/colada'
+import { useMutation, useQuery } from '@pinia/colada'
 import { computed, ref, watch } from 'vue'
 import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
 import { useForm } from '~/composables/useForm'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
@@ -75,26 +74,29 @@ const isDevice = computed(() => props.member?.type === 1)
 const { errors, validate } = useForm(editMemberSchema)
 
 // 调用编辑成员 API
-const { error, isFetching, isFinished, data, execute: editMember } = useWeilaFetch<{ member: Member }>('/corp/address/change-member', {
-  immediate: false,
-}).post(() => {
-  const payload: any = {
-    user_id: formData.value.user_id,
-    name: formData.value.name,
-    job_num: formData.value.job_num || '',
-    dept_id: formData.value.dept_id,
-    sex: formData.value.sex || 0,
-    avatar: formData.value.avatar || '',
-    phone: formData.value.phone || '',
-    loc_share: formData.value.loc_share || 0,
-    track: formData.value.track || 0,
-  }
-  // 只有成员（非设备）才需要 is_dept_admin 字段
-  if (!isDevice.value) {
-    payload.is_dept_admin = formData.value.is_dept_admin || 0
-  }
-  return payload
-}).json()
+const { mutate: editMember, isLoading: isFetching, error } = useMutation({
+  mutation: (payload: EditMemberForm) => {
+    const body: any = {
+      user_id: payload.user_id,
+      name: payload.name,
+      job_num: payload.job_num || '',
+      dept_id: payload.dept_id,
+      sex: payload.sex || 0,
+      avatar: payload.avatar || '',
+      phone: payload.phone || '',
+      loc_share: payload.loc_share || 0,
+      track: payload.track || 0,
+    }
+    // 只有成员（非设备）才需要 is_dept_admin 字段
+    if (!isDevice.value) {
+      body.is_dept_admin = payload.is_dept_admin || 0
+    }
+    return weilaFetch<{ member: Member }>('/corp/address/change-member', {
+      method: 'POST',
+      body,
+    })
+  },
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
@@ -110,31 +112,7 @@ async function submit(): Promise<void> {
     throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
   }
 
-  return new Promise((resolve, reject) => {
-    // 监听编辑结果
-    const stopWatcher = watch([data, isFinished, error], ([result, finished, err]) => {
-      if (!finished)
-        return
-
-      // 停止监听
-      stopWatcher()
-
-      if (err) {
-        reject(err)
-        return
-      }
-
-      if (result !== undefined) {
-        resolve()
-      }
-      else {
-        reject(new Error('提交失败'))
-      }
-    })
-
-    // 执行提交
-    editMember()
-  })
+  await editMember(formData.value)
 }
 
 // 暴露 submit 方法和 isFetching 状态供父组件调用

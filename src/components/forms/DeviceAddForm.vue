@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { Dept, Member } from '~/types/management'
-import { useQuery } from '@pinia/colada'
+import { useMutation, useQuery } from '@pinia/colada'
 import { computed, ref } from 'vue'
 import { z } from 'zod'
 import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
@@ -50,18 +49,21 @@ const { errors, validate } = useForm(addDeviceSchema)
 const isLoading = ref(false)
 
 // 调用添加设备 API
-const { error, data, execute: addDevice } = useWeilaFetch<{ member: Member }>('/corp/address/add-device', {
-  immediate: false,
-}).post(() => ({
-  name: formData.value.name,
-  dept_id: formData.value.dept_id,
-  job_num: formData.value.job_num || '',
-  verifycode: formData.value.verifycode,
-  phone: formData.value.phone || '',
-  avatar: formData.value.avatar || 'http://favicon.weila.hk/default/group.png',
-  loc_share: formData.value.loc_share,
-  track: formData.value.track,
-})).json()
+const { mutateAsync: addDevice, error } = useMutation({
+  mutation: (payload: AddDeviceForm) => weilaFetch<{ member: Member }>('/corp/address/add-device', {
+    method: 'POST',
+    body: {
+      name: payload.name,
+      dept_id: payload.dept_id,
+      job_num: payload.job_num || '',
+      verifycode: payload.verifycode,
+      phone: payload.phone || '',
+      avatar: payload.avatar || 'http://favicon.weila.hk/default/group.png',
+      loc_share: payload.loc_share,
+      track: payload.track,
+    },
+  }),
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
@@ -76,16 +78,16 @@ async function submit(): Promise<false | { member: Member }> {
   isLoading.value = true
 
   try {
-    await addDevice()
+    const result = await addDevice(formData.value)
 
     if (error.value) {
       showToast(error.value.message || '设备添加失败')
       return false
     }
 
-    if (data.value) {
+    if (result) {
       showToast('设备添加成功')
-      return data.value
+      return result
     }
 
     return false

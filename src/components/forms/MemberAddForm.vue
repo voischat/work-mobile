@@ -2,13 +2,12 @@
 import type { AddMemberForm } from '~/composables/useGenMember'
 import type { Dept, Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
-import { useQuery } from '@pinia/colada'
+import { useMutation, useQuery } from '@pinia/colada'
 import md5 from 'md5'
 import { computed, ref } from 'vue'
 import { useForm } from '~/composables/useForm'
 import { addMemberSchema, useGenerateMember } from '~/composables/useGenMember'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
@@ -44,20 +43,23 @@ const {
 } = useGenerateMember(form)
 
 // 调用创建成员 API
-const { error, data, execute: createMember } = useWeilaFetch<{ member: Member }>('/corp/address/create-member', {
-  immediate: false,
-}).post(() => ({
-  name: form.value.name,
-  job_num: form.value.job_num || '',
-  dept_id: form.value.dept_id,
-  sex: form.value.sex,
-  avatar: form.value.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/default/user.png',
-  phone: form.value.phone || '',
-  is_dept_admin: form.value.is_dept_admin,
-  loc_share: form.value.loc_share,
-  track: form.value.track,
-  password: md5(form.value.password),
-})).json()
+const { mutateAsync: createMember, error } = useMutation({
+  mutation: (payload: AddMemberForm) => weilaFetch<{ member: Member }>('/corp/address/create-member', {
+    method: 'POST',
+    body: {
+      name: payload.name,
+      job_num: payload.job_num || '',
+      dept_id: payload.dept_id,
+      sex: payload.sex,
+      avatar: payload.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/default/user.png',
+      phone: payload.phone || '',
+      is_dept_admin: payload.is_dept_admin,
+      loc_share: payload.loc_share,
+      track: payload.track,
+      password: md5(payload.password),
+    },
+  }),
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
@@ -81,16 +83,16 @@ async function submit(): Promise<false | { member: Member }> {
   }
 
   try {
-    await createMember()
+    const result = await createMember(form.value)
 
     if (error.value) {
       showToast(error.value.message || '成员创建失败')
       return false
     }
 
-    if (data.value) {
+    if (result) {
       showToast('成员创建成功')
-      return data.value
+      return result
     }
 
     return false
