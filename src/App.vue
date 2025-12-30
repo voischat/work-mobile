@@ -42,12 +42,15 @@ const {
   refresh_token: refreshToken.value!,
 })).json()
 
+const router = useRouter()
+
 const stopLoginWatcher = watch([queryAccount, queryPassword], ([account, password]) => {
   if (account && password) {
     stopLoginWatcher()
     isLimitedWebview.value = true
     loginExecute().then(() => {
       isLimitedWebview.value = !loginError.value
+      router.replace('/login')
     })
   }
 }, { immediate: true })
