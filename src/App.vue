@@ -14,13 +14,6 @@ const queryAccount = useRouteQuery('account', '')
 const queryPassword = useRouteQuery('password', '')
 const queryCountryCode = useRouteQuery('country-code', '')
 
-if (queryAccount.value
-  && queryPassword.value
-  && queryCountryCode.value
-) {
-  isLimitedWebview.value = true
-}
-
 // 登录 fetch（非立即执行）
 const {
   data: loginData,
@@ -49,11 +42,20 @@ const {
   refresh_token: refreshToken.value!,
 })).json()
 
+const route = useRoute()
+
+watchEffect(() => {
+  console.log('route.query', route.query)
+  console.log('queryAccount.value', queryAccount.value)
+  console.log('queryPassword.value', queryPassword.value)
+})
+
 // 监听 URL 账号密码，触发一次登录
 const stopLoginWatcher = watch([queryAccount, queryPassword], ([account, password]) => {
   if (account && password) {
     loginExecute()
     stopLoginWatcher()
+    isLimitedWebview.value = true
   }
 }, { immediate: true })
 
