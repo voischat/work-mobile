@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Dept, DeptListResponse } from '~/types/management'
-import { computed, ref, watch } from 'vue'
+import { useQuery } from '@pinia/colada'
+import { useInfiniteScroll } from '@vueuse/core'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
@@ -8,124 +10,82 @@ import Breadcrumb from '~/components/Breadcrumb.vue'
 import DeptActions from '~/components/DeptActions.vue'
 import DeptAddForm from '~/components/forms/DeptAddForm.vue'
 import Modal from '~/components/Modal.vue'
-import { usePage } from '~/composables/usePage'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
-import { isAtBottom } from '~/shared/states'
+import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 
-// 表单引用
 const deptAddFormRef = ref<InstanceType<typeof DeptAddForm>>()
-
-// 模态框可见性状态
 const isDeptModalOpen = ref(false)
 
-// 分页状态
-const { curPage, pageSize } = usePage()
-const allDepts = ref<Dept[]>([]) // 累积存储所有已加载的部门
-const isLoadingMore = ref(false) // 是否正在加载更多
-const lastPageItemCount = ref(0) // 最后一次返回的列表长度，用于判断是否还有更多数据
+const currentPage = ref(0)
+const accumulatedDepts = ref<Dept[]>([])
+const pageSize = 10
 
-// 动态构建 API URL
-const deptListUrl = computed(() => `/corp/address/get-my-manage-dept-list?page=${curPage.value}&size=${pageSize}`)
-
-// 获取部门列表
 const {
-  data: deptListData,
-  error: deptError,
-  isFetching: isDeptFetching,
-  execute: refetchDepts,
-} = useWeilaFetch<DeptListResponse>(deptListUrl)
-  .post()
-  .json()
+  data,
+  status,
+  error,
+} = useQuery({
+  key: () => ['dept', 'list', { page: currentPage.value }],
+  query: async () => {
+    return await weilaFetch<DeptListResponse>(
+      `/corp/address/get-my-manage-dept-list?page=${currentPage.value}&size=${pageSize}`,
+      { method: 'POST' },
+    )
+  },
+})
 
-// 监听初始数据加载完成，填充 allDepts
-watch(deptListData, (newData) => {
-  if (newData?.depts) {
-    const depts = newData.depts || []
-    lastPageItemCount.value = depts.length
-
-    if (curPage.value === 0) {
-      // 初始加载时，直接设置 allDepts
-      allDepts.value = [...depts]
+watch(data, (newData) => {
+  if (newData) {
+    if (currentPage.value === 0) {
+      accumulatedDepts.value = newData.depts || []
     }
     else {
-      // 加载更多时，追加到 allDepts
-      allDepts.value.push(...depts)
+      const newDepts = newData.depts || []
+      const existingIds = new Set(accumulatedDepts.value.map(d => d.id))
+      const uniqueNewDepts = newDepts.filter(d => !existingIds.has(d.id))
+      accumulatedDepts.value = [...accumulatedDepts.value, ...uniqueNewDepts]
     }
   }
 }, { immediate: true })
 
-// 加载更多部门
-async function loadMoreDepts() {
-  // 防止重复加载
-  if (isLoadingMore.value || isDeptFetching.value) {
-    isAtBottom.value = false
-    return
-  }
-
-  // 检查是否还有更多数据（通过最后一次返回的列表长度判断）
-  if (lastPageItemCount.value > 0 && lastPageItemCount.value < pageSize) {
-    isAtBottom.value = false
-    return
-  }
-
-  isLoadingMore.value = true
-  curPage.value++
-
-  try {
-    await refetchDepts()
-    // 加载成功后重置 isAtBottom 状态
-    isAtBottom.value = false
-  }
-  catch (error) {
-    console.error('加载更多部门失败:', error)
-    // 加载失败时回退页码
-    curPage.value--
-  }
-  finally {
-    isLoadingMore.value = false
-  }
-}
-
-// 监听 isAtBottom 状态，当滚动到底部时加载更多数据
-watch(isAtBottom, (value) => {
-  if (value) {
-    loadMoreDepts()
-  }
+const hasNextPage = computed(() => {
+  if (!data.value)
+    return false
+  const lastPageSize = data.value.depts?.length || 0
+  return lastPageSize >= pageSize
 })
 
-// 处理刷新数据
-async function handleRefresh() {
-  // 重置到第一页并重新加载
-  curPage.value = 0
-  allDepts.value = []
-  await refetchDepts()
+function loadNextPage() {
+  if (hasNextPage.value)
+    currentPage.value += 1
 }
 
-// 处理创建部门 - 显示模态框
+const loadMoreEl = useTemplateRef('load-more')
+useInfiniteScroll(loadMoreEl, loadNextPage, { distance: 100 })
+
+async function handleRefresh() {
+  currentPage.value = 0
+  accumulatedDepts.value = []
+}
+
 function handleAddDept() {
   isDeptModalOpen.value = true
 }
 
-// 处理创建部门模态框确认事件
 async function handleDeptConfirm() {
   const result = await deptAddFormRef.value?.submit()
-  console.log('result', result)
   if (result) {
     isDeptModalOpen.value = false
     await handleRefresh()
   }
 }
 
-// 处理创建部门模态框取消事件
 function handleDeptCancel() {
-  // 模态框关闭时重置表单
   deptAddFormRef.value?.reset()
   isDeptModalOpen.value = false
 }
 
-// 处理部门卡片点击，跳转到部门成员列表
 function handleDeptClick(deptId: number) {
   router.push(`/directory/departments/${deptId}/members`)
 }
@@ -153,24 +113,25 @@ function handleDeptClick(deptId: number) {
           </button>
         </div>
 
-        <!-- 加载状态 -->
-        <div v-if="isDeptFetching" class="flex items-center justify-center py-12">
+        <div v-if="status === 'pending' && accumulatedDepts.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
             加载中...
           </div>
         </div>
 
-        <!-- 错误状态 -->
-        <div v-else-if="deptError" class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取部门列表失败: {{ deptError.message }}</p>
+            <p>获取部门列表失败: {{ error.message }}</p>
           </div>
         </div>
 
-        <!-- 部门列表 -->
-        <div v-else-if="allDepts?.length" class="space-y-4">
+        <div v-if="accumulatedDepts.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+          暂无部门数据
+        </div>
+
+        <div v-else class="space-y-4">
           <div
-            v-for="dept in allDepts"
+            v-for="dept in accumulatedDepts"
             :key="dept.id"
             class="bg-white rounded-lg p-4 border border-gray-200"
           >
@@ -201,22 +162,17 @@ function handleDeptClick(deptId: number) {
           </div>
         </div>
 
-        <!-- 空数据状态 -->
-        <div v-else class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
-          暂无部门数据
-        </div>
-
-        <!-- 加载更多状态 -->
-        <div v-if="isLoadingMore" class="mt-4 flex items-center justify-center py-4">
+        <!-- 加载更多指示器 -->
+        <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
             加载中...
           </div>
         </div>
 
-        <!-- 没有更多数据提示 -->
-        <div v-else-if="allDepts.length > 0 && lastPageItemCount > 0 && lastPageItemCount < pageSize" class="mt-4 flex items-center justify-center py-4">
+        <!-- 已加载完成 -->
+        <div v-else-if="accumulatedDepts.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ allDepts.length }} 条）
+            已加载全部数据（共 {{ accumulatedDepts.length }} 条）
           </div>
         </div>
       </div>

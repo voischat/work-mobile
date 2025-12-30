@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { Dept, Member, MemberListResponse } from '~/types/management'
-import { useQuery } from '@pinia/colada'
-import { refDebounced } from '@vueuse/core'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
+import { refDebounced, useInfiniteScroll } from '@vueuse/core'
 import { useRouteParams } from '@vueuse/router'
-import { computed, ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
@@ -11,13 +11,11 @@ import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
 import MemberActions from '~/components/MemberActions.vue'
 import MemberCard from '~/components/MemberCard.vue'
 import Modal from '~/components/Modal.vue'
-import { usePage } from '~/composables/usePage'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
 import { weilaFetch } from '~/shared/instances'
-import { isAtBottom } from '~/shared/states'
 
 const router = useRouter()
+const queryCache = useQueryCache()
 const { showToast } = useToast()
 
 const deptId = computed(() => Number(useRouteParams('id').value))
@@ -29,85 +27,76 @@ const selectedMemberIds = ref(new Set<number>())
 const searchKey = shallowRef('')
 const debouncedSearchKey = refDebounced(searchKey, 1000)
 
-const { curPage, pageSize, reset } = usePage()
-const allMembers = ref<Member[]>([])
-const isLoadingMore = ref(false)
+const currentPage = ref(0)
+const accumulatedMembers = ref<Member[]>([])
+const pageSize = 10
 
 const { data: allDepts } = useQuery({
   key: ['dept', 'my-manage'],
   query: () => weilaFetch<Dept[]>('/corp/address/get-my-manage-all-dept', { method: 'POST' }),
 })
 
-const memberListUrl = computed(() => `/corp/address/get-dept-member-list?page=${curPage.value}&size=${pageSize}`)
-
 const {
-  data: memberListData,
-  error: memberError,
-  isFetching: isMemberFetching,
-  execute: refetchMembers,
-} = useWeilaFetch<MemberListResponse>(memberListUrl)
-  .post(() => ({
-    dept_id: deptId.value,
-    member_types: [],
-    key: debouncedSearchKey.value,
-  }))
-  .json()
+  data,
+  status,
+  error,
+} = useQuery({
+  key: () => ['dept', deptId.value, 'members', 'list', { key: debouncedSearchKey.value, page: currentPage.value }],
+  query: async () => {
+    const result = await weilaFetch<MemberListResponse>(
+      `/corp/address/get-dept-member-list?page=${currentPage.value}&size=${pageSize}`,
+      {
+        method: 'POST',
+        body: {
+          dept_id: deptId.value,
+          member_types: [],
+          key: debouncedSearchKey.value,
+        },
+      },
+    )
+    return result
+  },
+  placeholderData: previousData => previousData,
+})
 
-watch(memberListData, (newData) => {
-  if (newData?.members) {
-    if (curPage.value === 0) {
-      allMembers.value = [...newData.members]
+watch(data, (newData) => {
+  if (newData) {
+    if (currentPage.value === 0) {
+      accumulatedMembers.value = newData.members || []
     }
     else {
-      allMembers.value.push(...newData.members)
+      const newMembers = newData.members || []
+      const existingIds = new Set(accumulatedMembers.value.map(m => m.user_id))
+      const uniqueNewMembers = newMembers.filter(m => !existingIds.has(m.user_id))
+      accumulatedMembers.value = [...accumulatedMembers.value, ...uniqueNewMembers]
     }
   }
 }, { immediate: true })
 
 watch(deptId, () => {
-  reset()
-  allMembers.value = []
-  refetchMembers()
+  currentPage.value = 0
+  accumulatedMembers.value = []
 })
 
 watch(debouncedSearchKey, () => {
-  reset()
-  allMembers.value = []
-  refetchMembers()
+  currentPage.value = 0
+  accumulatedMembers.value = []
 })
 
-async function loadMoreMembers() {
-  if (isLoadingMore.value || isMemberFetching.value) {
-    isAtBottom.value = false
-    return
-  }
+const hasNextPage = computed(() => {
+  if (!data.value)
+    return false
+  const loadedCount = accumulatedMembers.value.length
+  return loadedCount < (data.value.count || 0)
+})
 
-  if (allMembers.value.length >= (memberListData.value?.count || 0)) {
-    isAtBottom.value = false
-    return
-  }
-
-  isLoadingMore.value = true
-  curPage.value++
-
-  try {
-    await refetchMembers()
-    isAtBottom.value = false
-  }
-  catch (error) {
-    console.error('加载更多成员失败:', error)
-    curPage.value--
-  }
-  finally {
-    isLoadingMore.value = false
-  }
+function loadNextPage() {
+  if (hasNextPage.value)
+    currentPage.value += 1
 }
 
-watch(isAtBottom, (value) => {
-  if (value) {
-    loadMoreMembers()
-  }
-})
+const loadMoreEl = useTemplateRef('load-more')
+useInfiniteScroll(loadMoreEl, loadNextPage, { distance: 100 })
 
 function getDeptName(deptId: number): string {
   return allDepts.value?.find((d: Dept) => d.id === deptId)?.name || ''
@@ -122,20 +111,30 @@ function handleDeptChange(event: Event) {
 }
 
 async function handleRefresh() {
-  reset()
-  allMembers.value = []
-  await refetchMembers()
+  currentPage.value = 0
+  accumulatedMembers.value = []
 }
 
-// 处理删除部门成员
-async function handleDeleteDeptMember(member: Member) {
-  await weilaApi.v2.fetch('/corp/address/delete-dept-members', {
-    body: {
-      dept_id: deptId.value,
-      user_id: member.user_id,
-    },
-  })
-}
+const { mutate: addMembersToDept, isPending: isAddingMembers } = useMutation({
+  mutation: (userIds: number[]) =>
+    weilaFetch('/corp/address/add-dept-members', {
+      method: 'POST',
+      body: {
+        dept_id: deptId.value,
+        user_ids: userIds,
+      },
+    }),
+  async onSuccess() {
+    showToast('添加成员成功')
+    isAddMemberModalOpen.value = false
+    treeSelectorRef.value?.clearSelection()
+    await queryCache.invalidateQueries({ key: ['dept', deptId.value, 'members'] })
+  },
+  onError(error) {
+    console.error('添加成员失败:', error)
+    showToast('添加成员失败')
+  },
+})
 
 async function handleAddMembersConfirm() {
   if (selectedMemberIds.value.size === 0) {
@@ -143,47 +142,20 @@ async function handleAddMembersConfirm() {
     return
   }
 
-  try {
-    const {
-      execute: addMembersToDept,
-    } = useWeilaFetch('/corp/address/add-dept-members', {
-      immediate: false,
-    })
-      .post(() => ({
-        dept_id: deptId.value,
-        user_ids: Array.from(selectedMemberIds.value),
-      }))
-      .json()
-
-    await addMembersToDept()
-    showToast('添加成员成功')
-    isAddMemberModalOpen.value = false
-    treeSelectorRef.value?.clearSelection()
-    await handleRefresh()
-  }
-  catch (error) {
-    console.error('添加成员失败:', error)
-    showToast('添加成员失败')
-  }
+  addMembersToDept(Array.from(selectedMemberIds.value))
 }
 
-const { data: deptAllMembers, execute: refreshDeptAllMembers } = useWeilaFetch<
-  MemberListResponse
->('/corp/address/get-dept-all-member', {
-  immediate: false,
-})
-  .post(() => ({
-    dept_id: deptId.value,
-  }))
-  .json()
-
-watch(isAddMemberModalOpen, (open) => {
-  if (open) {
-    refreshDeptAllMembers()
-  }
+const { data: deptAllMembers } = useQuery({
+  key: () => ['dept', deptId.value, 'all-members'],
+  query: () =>
+    weilaFetch<MemberListResponse>('/corp/address/get-dept-all-member', {
+      method: 'POST',
+      body: { dept_id: deptId.value },
+    }),
+  enabled: computed(() => isAddMemberModalOpen.value),
 })
 
-const existingMemberIds = computed(() => deptAllMembers.value.map((i: any) => i.user_id))
+const existingMemberIds = computed(() => deptAllMembers.value?.members?.map((i: Member) => i.user_id) || [])
 
 function openAddMemberModal() {
   isAddMemberModalOpen.value = true
@@ -244,29 +216,25 @@ function openAddMemberModal() {
           </div>
         </div>
 
-        <!-- 加载状态 -->
-        <div v-if="isMemberFetching" class="flex items-center justify-center py-12">
+        <div v-if="status === 'pending' && accumulatedMembers.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
             加载中...
           </div>
         </div>
 
-        <!-- 错误状态 -->
-        <div v-else-if="memberError" class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取成员列表失败: {{ memberError.message }}</p>
+            <p>获取成员列表失败: {{ error.message }}</p>
           </div>
         </div>
 
-        <!-- 空数据状态 -->
-        <div v-else-if="allMembers.length === 0 && !isMemberFetching" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+        <div v-if="accumulatedMembers.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无成员数据
         </div>
 
-        <!-- 成员列表 -->
         <div v-else class="space-y-4">
           <MemberCard
-            v-for="member in allMembers"
+            v-for="member in accumulatedMembers"
             :key="member.user_id"
             :member
             :dept-name="getDeptName(member.dept_id)"
@@ -274,24 +242,21 @@ function openAddMemberModal() {
             <template #actions>
               <MemberActions
                 :member="member"
-                :handle-delete="handleDeleteDeptMember"
                 @refresh="handleRefresh"
               />
             </template>
           </MemberCard>
         </div>
 
-        <!-- 加载更多状态 -->
-        <div v-if="isLoadingMore" class="mt-4 flex items-center justify-center py-4">
+        <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
             加载中...
           </div>
         </div>
 
-        <!-- 没有更多数据提示 -->
-        <div v-else-if="allMembers.length > 0 && allMembers.length >= (memberListData?.count || 0)" class="mt-4 flex items-center justify-center py-4">
+        <div v-else-if="accumulatedMembers.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ memberListData?.count || 0 }} 条）
+            已加载全部数据（共 {{ data?.count || 0 }} 条）
           </div>
         </div>
       </div>
@@ -324,10 +289,11 @@ function openAddMemberModal() {
             </button>
             <button
               type="button"
-              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              @click="() => handleAddMembersConfirm()"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="isAddingMembers"
+              @click="handleAddMembersConfirm"
             >
-              确认添加
+              {{ isAddingMembers ? '添加中...' : '确认添加' }}
             </button>
           </div>
         </div>

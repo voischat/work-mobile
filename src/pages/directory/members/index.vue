@@ -18,9 +18,9 @@ const currentPage = ref(0)
 const accumulatedMembers = ref<MemberListResponse['members']>([])
 
 const {
-  state: membersState,
-  asyncStatus,
-  error: memberError,
+  data,
+  status,
+  error,
 } = useQuery({
   key: () => ['member', 'list', { key: debouncedSearchKey.value, page: currentPage.value }],
   query: async () => {
@@ -36,36 +36,34 @@ const {
   placeholderData: previousData => previousData,
 })
 
-watch(() => membersState.value, (state) => {
-  if (state?.status === 'success' && state.data) {
+watch(data, (newData) => {
+  if (newData) {
     if (currentPage.value === 0) {
-      accumulatedMembers.value = state.data.members || []
+      accumulatedMembers.value = newData.members || []
     }
     else {
-      const newMembers = state.data.members || []
+      const newMembers = newData.members || []
       const existingIds = new Set(accumulatedMembers.value.map(m => m.user_id))
       const uniqueNewMembers = newMembers.filter(m => !existingIds.has(m.user_id))
       accumulatedMembers.value = [...accumulatedMembers.value, ...uniqueNewMembers]
     }
   }
-})
+}, { immediate: true })
 
 watch(debouncedSearchKey, () => {
   currentPage.value = 0
   accumulatedMembers.value = []
 })
 
-const currentData = computed(() => membersState.value?.data)
-
 const hasNextPage = computed(() => {
-  if (!currentData.value)
+  if (!data.value)
     return false
   const loadedCount = accumulatedMembers.value.length
-  return loadedCount < (currentData.value.count || 0)
+  return loadedCount < (data.value.count || 0)
 })
 
 function loadNextPage() {
-  if (hasNextPage.value && asyncStatus.value !== 'loading')
+  if (hasNextPage.value)
     currentPage.value += 1
 }
 
@@ -150,19 +148,19 @@ function handleDeviceCancel() {
           </div>
         </div>
 
-        <div v-if="asyncStatus === 'loading' && accumulatedMembers.length === 0" class="flex items-center justify-center py-12">
+        <div v-if="status === 'pending' && accumulatedMembers.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
             加载中...
           </div>
         </div>
 
-        <div v-else-if="memberError" class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取成员列表失败: {{ memberError.message }}</p>
+            <p>获取成员列表失败: {{ error.message }}</p>
           </div>
         </div>
 
-        <div v-if="accumulatedMembers.length === 0 && asyncStatus !== 'loading'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+        <div v-if="accumulatedMembers.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无成员数据
         </div>
 
@@ -187,7 +185,7 @@ function handleDeviceCancel() {
 
         <div v-else-if="accumulatedMembers.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ currentData?.count || 0 }} 条）
+            已加载全部数据（共 {{ data?.count || 0 }} 条）
           </div>
         </div>
       </div>

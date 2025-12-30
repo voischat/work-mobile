@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Group, GroupListResponse } from '~/types/management'
-import { computed, ref, watch } from 'vue'
+import { useQuery } from '@pinia/colada'
+import { useInfiniteScroll } from '@vueuse/core'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
@@ -8,116 +10,78 @@ import Breadcrumb from '~/components/Breadcrumb.vue'
 import GroupAddForm from '~/components/forms/GroupAddForm.vue'
 import GroupActions from '~/components/GroupActions.vue'
 import Modal from '~/components/Modal.vue'
-import { usePage } from '~/composables/usePage'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
-import { isAtBottom } from '~/shared/states'
+import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 
-// 表单引用
 const groupAddFormRef = ref<InstanceType<typeof GroupAddForm>>()
-
-// 模态框可见性状态
 const isGroupModalOpen = ref(false)
 
-// 分页状态
-const { curPage, pageSize } = usePage()
-const allGroups = ref<Group[]>([]) // 累积存储所有已加载的群组
-const isLoadingMore = ref(false) // 是否正在加载更多
+const currentPage = ref(0)
+const accumulatedGroups = ref<Group[]>([])
+const pageSize = 10
 
-// 动态构建 API URL
-const groupListUrl = computed(() => `/corp/group/get-my-manage-group-list?page=${curPage.value}&size=${pageSize}`)
-
-// 获取群组列表
 const {
-  data: groupListData,
-  error: groupError,
-  isFetching: isGroupFetching,
-  execute: refetchGroups,
-} = useWeilaFetch<GroupListResponse>(groupListUrl)
-  .post()
-  .json()
+  data,
+  status,
+} = useQuery({
+  key: () => ['group', 'list', { page: currentPage.value }],
+  query: async () => {
+    return await weilaFetch<GroupListResponse>(
+      `/corp/group/get-my-manage-group-list?page=${currentPage.value}&size=${pageSize}`,
+      { method: 'POST' },
+    )
+  },
+  placeholderData: previousData => previousData,
+})
 
-// 监听数据加载完成，填充 allGroups
-watch(groupListData, (newData) => {
-  if (newData?.groups) {
-    if (curPage.value === 0) {
-      // 初始加载时，直接设置 allGroups
-      allGroups.value = [...newData.groups]
+watch(data, (newData) => {
+  if (newData) {
+    if (currentPage.value === 0) {
+      accumulatedGroups.value = newData.groups || []
     }
     else {
-      // 加载更多时，追加到 allGroups
-      allGroups.value.push(...newData.groups)
+      const newGroups = newData.groups || []
+      const existingIds = new Set(accumulatedGroups.value.map(g => g.id))
+      const uniqueNewGroups = newGroups.filter(g => !existingIds.has(g.id))
+      accumulatedGroups.value = [...accumulatedGroups.value, ...uniqueNewGroups]
     }
   }
 }, { immediate: true })
 
-// 加载更多群组
-async function loadMoreGroups() {
-  // 防止重复加载
-  if (isLoadingMore.value || isGroupFetching.value) {
-    isAtBottom.value = false
-    return
-  }
-
-  // 检查是否还有更多数据
-  if (allGroups.value.length >= (groupListData.value?.count || 0)) {
-    isAtBottom.value = false
-    return
-  }
-
-  isLoadingMore.value = true
-  curPage.value++
-
-  try {
-    await refetchGroups()
-    // 数据会在 watch 中自动追加
-    // 加载成功后重置 isAtBottom 状态
-    isAtBottom.value = false
-  }
-  catch (error) {
-    console.error('加载更多群组失败:', error)
-    // 加载失败时回退页码
-    curPage.value--
-  }
-  finally {
-    isLoadingMore.value = false
-  }
-}
-
-// 监听 isAtBottom 状态，当滚动到底部时加载更多数据
-watch(isAtBottom, (value) => {
-  if (value) {
-    loadMoreGroups()
-  }
+const hasNextPage = computed(() => {
+  if (!data.value)
+    return false
+  const loadedCount = accumulatedGroups.value.length
+  return loadedCount < (data.value.count || 0)
 })
 
-// 处理刷新数据
-async function handleRefresh() {
-  // 重置到第一页并重新加载
-  curPage.value = 0
-  allGroups.value = []
-  await refetchGroups()
+function loadNextPage() {
+  if (hasNextPage.value)
+    currentPage.value += 1
 }
 
-// 处理创建群组 - 显示模态框
+const loadMoreEl = useTemplateRef('load-more')
+useInfiniteScroll(loadMoreEl, loadNextPage, { distance: 100 })
+
+async function handleRefresh() {
+  currentPage.value = 0
+  accumulatedGroups.value = []
+}
+
 function handleAddGroup() {
   isGroupModalOpen.value = true
 }
 
-// 处理创建群组模态框确认事件
 async function handleGroupConfirm() {
   const result = await groupAddFormRef.value?.submit()
   if (result) {
-    // 表单提交成功，刷新数据列表
     await handleRefresh()
     isGroupModalOpen.value = false
   }
 }
 
-// 处理创建群组模态框取消事件
 function handleGroupCancel() {
-  // 模态框关闭时重置表单
   groupAddFormRef.value?.reset()
   isGroupModalOpen.value = false
 }
@@ -135,7 +99,6 @@ function handleGroupCancel() {
     </template>
     <div class="p-4">
       <div class="max-w-4xl mx-auto">
-        <!-- 按钮区域 -->
         <div class="mb-4">
           <button
             class="bg-blue-600 text-white px-4 py-2 rounded"
@@ -145,38 +108,31 @@ function handleGroupCancel() {
           </button>
         </div>
 
-        <!-- 加载状态 -->
-        <div v-if="isGroupFetching" class="flex items-center justify-center py-12">
+        <div v-if="status === 'pending' && accumulatedGroups.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
             加载中...
           </div>
         </div>
 
-        <!-- 错误状态 -->
-        <div v-else-if="groupError" class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div class="text-red-800">
-            <p>获取群组列表失败: {{ groupError.message }}</p>
-          </div>
+        <div v-if="accumulatedGroups.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+          暂无群组数据
         </div>
 
-        <!-- 群组列表 -->
-        <div v-else-if="allGroups.length" class="space-y-4">
+        <div v-else class="space-y-4">
           <div
-            v-for="group in allGroups"
+            v-for="group in accumulatedGroups"
             :key="group.id"
             class="bg-white rounded-lg p-4 border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
             @click="router.push(`/directory/groups/${group.id}/members`)"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4 flex-1 min-w-0">
-                <!-- 头像 -->
                 <Avatar
                   :src="group.avatar"
                   :alt="group.name"
                   size="md"
                   shape="rounded"
                 />
-                <!-- 信息 -->
                 <div class="flex-1 min-w-0">
                   <h3 class="text-lg font-medium text-gray-900 mb-1 truncate">
                     {{ group.name }}
@@ -193,28 +149,20 @@ function handleGroupCancel() {
           </div>
         </div>
 
-        <!-- 空数据状态 -->
-        <div v-else class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
-          暂无群组数据
-        </div>
-
-        <!-- 加载更多状态 -->
-        <div v-if="isLoadingMore" class="mt-4 flex items-center justify-center py-4">
+        <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
             加载中...
           </div>
         </div>
 
-        <!-- 没有更多数据提示 -->
-        <div v-else-if="allGroups.length > 0 && allGroups.length >= (groupListData?.count || 0)" class="mt-4 flex items-center justify-center py-4">
+        <div v-else-if="accumulatedGroups.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ groupListData?.count || 0 }} 条）
+            已加载全部数据（共 {{ data?.count || 0 }} 条）
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 创建群组模态框 -->
     <Modal
       v-model:open="isGroupModalOpen"
       title="创建群组"

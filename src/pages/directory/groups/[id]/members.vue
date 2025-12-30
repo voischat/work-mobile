@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Dept, Group, GroupListResponse, Member, MemberListResponse } from '~/types/management'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
+import { useInfiniteScroll } from '@vueuse/core'
 import { useRouteParams } from '@vueuse/router'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
@@ -9,12 +11,11 @@ import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
 import MemberActions from '~/components/MemberActions.vue'
 import MemberCard from '~/components/MemberCard.vue'
 import Modal from '~/components/Modal.vue'
-import { usePage } from '~/composables/usePage'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
-import { isAtBottom } from '~/shared/states'
+import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
+const queryCache = useQueryCache()
 const { showToast } = useToast()
 
 const groupId = computed(() => Number(useRouteParams('id').value))
@@ -23,15 +24,14 @@ const isAddMemberModalOpen = ref(false)
 const treeSelectorRef = ref<InstanceType<typeof DeptMemberTreeSelector> | null>(null)
 const selectedMemberIds = ref(new Set<number>())
 
-const { curPage, pageSize, reset } = usePage()
-const allMembers = ref<Member[]>([])
-const isLoadingMore = ref(false)
+const currentPage = ref(0)
+const accumulatedMembers = ref<Member[]>([])
+const pageSize = 10
 
-const {
-  data: groupInfo,
-} = useWeilaFetch<GroupListResponse>(`/corp/group/get-my-manage-group-list?page=0&size=1000`)
-  .post()
-  .json()
+const { data: groupInfo } = useQuery({
+  key: ['group', 'my-manage'],
+  query: () => weilaFetch<GroupListResponse>('/corp/group/get-my-manage-group-list?page=0&size=1000', { method: 'POST' }),
+})
 
 const groupName = computed(() => {
   if (groupInfo.value?.groups) {
@@ -41,94 +41,93 @@ const groupName = computed(() => {
   return ''
 })
 
-const memberListUrl = computed(() => `/corp/group/get-group-member-list?page=${curPage.value}&size=${pageSize}`)
-
 const {
-  data: memberListData,
-  error: memberError,
-  isFetching: isMemberFetching,
-  execute: refetchMembers,
-} = useWeilaFetch<MemberListResponse>(memberListUrl)
-  .post(() => ({
-    group_id: groupId.value,
-  }))
-  .json()
+  data,
+  status,
+  error,
+} = useQuery({
+  key: () => ['group', groupId.value, 'members', 'list', { page: currentPage.value }],
+  query: async () => {
+    const result = await weilaFetch<MemberListResponse>(
+      `/corp/group/get-group-member-list?page=${currentPage.value}&size=${pageSize}`,
+      {
+        method: 'POST',
+        body: { group_id: groupId.value },
+      },
+    )
+    return result
+  },
+  placeholderData: previousData => previousData,
+})
 
-watch(memberListData, (newData) => {
-  if (newData?.members) {
-    if (curPage.value === 0) {
-      allMembers.value = [...newData.members]
+watch(data, (newData) => {
+  if (newData) {
+    if (currentPage.value === 0) {
+      accumulatedMembers.value = newData.members || []
     }
     else {
-      allMembers.value.push(...newData.members)
+      const newMembers = newData.members || []
+      const existingIds = new Set(accumulatedMembers.value.map(m => m.user_id))
+      const uniqueNewMembers = newMembers.filter(m => !existingIds.has(m.user_id))
+      accumulatedMembers.value = [...accumulatedMembers.value, ...uniqueNewMembers]
     }
   }
 }, { immediate: true })
 
 watch(groupId, () => {
-  reset()
-  allMembers.value = []
-  refetchMembers()
+  currentPage.value = 0
+  accumulatedMembers.value = []
 })
 
-async function loadMoreMembers() {
-  if (isLoadingMore.value || isMemberFetching.value) {
-    isAtBottom.value = false
-    return
-  }
+const hasNextPage = computed(() => {
+  if (!data.value)
+    return false
+  const loadedCount = accumulatedMembers.value.length
+  return loadedCount < (data.value.count || 0)
+})
 
-  if (allMembers.value.length >= (memberListData.value?.count || 0)) {
-    isAtBottom.value = false
-    return
-  }
-
-  isLoadingMore.value = true
-  curPage.value++
-
-  try {
-    await refetchMembers()
-    isAtBottom.value = false
-  }
-  catch (error) {
-    console.error('加载更多成员失败:', error)
-    curPage.value--
-  }
-  finally {
-    isLoadingMore.value = false
-  }
+function loadNextPage() {
+  if (hasNextPage.value)
+    currentPage.value += 1
 }
 
-watch(isAtBottom, (value) => {
-  if (value) {
-    loadMoreMembers()
-  }
-})
+const loadMoreEl = useTemplateRef('load-more')
+useInfiniteScroll(loadMoreEl, loadNextPage, { distance: 100 })
 
-const {
-  data: allDepts,
-} = useWeilaFetch<Dept[]>('/corp/address/get-my-manage-all-dept')
-  .post()
-  .json()
+const { data: allDepts } = useQuery({
+  key: ['dept', 'my-manage'],
+  query: () => weilaFetch<Dept[]>('/corp/address/get-my-manage-all-dept', { method: 'POST' }),
+})
 
 function getDeptName(deptId: number): string {
   return allDepts.value?.find((d: Dept) => d.id === deptId)?.name || ''
 }
 
 async function handleRefresh() {
-  reset()
-  allMembers.value = []
-  await refetchMembers()
+  currentPage.value = 0
+  accumulatedMembers.value = []
 }
 
-// 处理删除群组成员
-async function handleDeleteGroupMember(member: Member) {
-  await weilaApi.v2.fetch('/corp/group/delete-group-member', {
-    body: {
-      group_id: groupId.value,
-      user_id: member.user_id,
-    },
-  })
-}
+const { mutate: addMembersToGroup, isPending: isAddingMembers } = useMutation({
+  mutation: (userIds: number[]) =>
+    weilaFetch('/corp/group/add-group-members', {
+      method: 'POST',
+      body: {
+        group_id: groupId.value,
+        user_ids: userIds,
+      },
+    }),
+  async onSuccess() {
+    showToast('添加成员成功')
+    isAddMemberModalOpen.value = false
+    treeSelectorRef.value?.clearSelection()
+    await queryCache.invalidateQueries({ key: ['group', groupId.value, 'members'] })
+  },
+  onError(error) {
+    console.error('添加成员失败:', error)
+    showToast('添加成员失败')
+  },
+})
 
 async function handleAddMembersConfirm() {
   if (selectedMemberIds.value.size === 0) {
@@ -136,47 +135,20 @@ async function handleAddMembersConfirm() {
     return
   }
 
-  try {
-    const {
-      execute: addMembersToGroup,
-    } = useWeilaFetch('/corp/group/add-group-members', {
-      immediate: false,
-    })
-      .post(() => ({
-        group_id: groupId.value,
-        user_ids: Array.from(selectedMemberIds.value),
-      }))
-      .json()
-
-    await addMembersToGroup()
-    showToast('添加成员成功')
-    isAddMemberModalOpen.value = false
-    treeSelectorRef.value?.clearSelection()
-    await handleRefresh()
-  }
-  catch (error) {
-    console.error('添加成员失败:', error)
-    showToast('添加成员失败')
-  }
+  addMembersToGroup(Array.from(selectedMemberIds.value))
 }
 
-const { data: groupAllMembers, execute: refreshGroupAllMembers } = useWeilaFetch<
-  MemberListResponse
->('/corp/group/get-group-all-member', {
-  immediate: false,
-})
-  .post(() => ({
-    group_id: groupId.value,
-  }))
-  .json()
-
-watch(isAddMemberModalOpen, (open) => {
-  if (open) {
-    refreshGroupAllMembers()
-  }
+const { data: groupAllMembers } = useQuery({
+  key: () => ['group', groupId.value, 'all-members'],
+  query: () =>
+    weilaFetch<MemberListResponse>('/corp/group/get-group-all-member', {
+      method: 'POST',
+      body: { group_id: groupId.value },
+    }),
+  enabled: computed(() => isAddMemberModalOpen.value),
 })
 
-const existingMemberIds = computed(() => groupAllMembers.value.map((i: any) => i.user_id))
+const existingMemberIds = computed(() => groupAllMembers.value?.members?.map((i: Member) => i.user_id) || [])
 
 function handleGroupChange(event: Event) {
   const target = event.target as HTMLSelectElement
@@ -188,6 +160,16 @@ function handleGroupChange(event: Event) {
 
 function openAddMemberModal() {
   isAddMemberModalOpen.value = true
+}
+
+async function handleDeleteGroupMember(member: Member) {
+  await weilaFetch('/corp/group/delete-group-member', {
+    method: 'POST',
+    body: {
+      group_id: groupId.value,
+      user_id: member.user_id,
+    },
+  })
 }
 </script>
 
@@ -236,29 +218,26 @@ function openAddMemberModal() {
           </div>
         </div>
 
-        <!-- 加载状态 -->
-        <div v-if="isMemberFetching" class="flex items-center justify-center py-12">
+        <div v-if="status === 'pending' && accumulatedMembers.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
             加载中...
           </div>
         </div>
 
-        <!-- 错误状态 -->
-        <div v-else-if="memberError" class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取成员列表失败: {{ memberError.message }}</p>
+            <p>获取成员列表失败: {{ error.message }}</p>
           </div>
         </div>
 
-        <!-- 空数据状态 -->
-        <div v-else-if="allMembers.length === 0 && !isMemberFetching" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
+        <div v-if="accumulatedMembers.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
           暂无成员数据
         </div>
 
         <!-- 成员列表 -->
         <div v-else class="space-y-4">
           <MemberCard
-            v-for="member in allMembers"
+            v-for="member in accumulatedMembers"
             :key="member.user_id"
             :member
             :dept-name="getDeptName(member.dept_id)"
@@ -273,17 +252,16 @@ function openAddMemberModal() {
           </MemberCard>
         </div>
 
-        <!-- 加载更多状态 -->
-        <div v-if="isLoadingMore" class="mt-4 flex items-center justify-center py-4">
+        <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
             加载中...
           </div>
         </div>
 
         <!-- 没有更多数据提示 -->
-        <div v-else-if="allMembers.length > 0 && allMembers.length >= (memberListData?.count || 0)" class="mt-4 flex items-center justify-center py-4">
+        <div v-else-if="accumulatedMembers.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ memberListData?.count || 0 }} 条）
+            已加载全部数据（共 {{ data?.count || 0 }} 条）
           </div>
         </div>
       </div>
@@ -316,10 +294,11 @@ function openAddMemberModal() {
             </button>
             <button
               type="button"
-              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              @click="() => handleAddMembersConfirm()"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="isAddingMembers"
+              @click="handleAddMembersConfirm"
             >
-              确认添加
+              {{ isAddingMembers ? '添加中...' : '确认添加' }}
             </button>
           </div>
         </div>

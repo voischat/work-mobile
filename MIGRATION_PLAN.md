@@ -37,7 +37,7 @@
 > 这些是最简单的迁移，使用 useQuery 即可，预计 10 分钟
 
 #### 1.1 组织信息页面
-- [ ] **pages/index.vue**
+- [x] **pages/index.vue**
   - Endpoints:
     - `/corp/org/get-my-org` - 获取组织信息
     - `/corp/org/get-my-vip` - 获取 VIP 信息
@@ -60,7 +60,7 @@
 - `hasNextPage` computed 判断是否有更多数据
 
 #### 2.1 部门列表
-- [ ] **pages/directory/departments/index.vue**
+- [x] **pages/directory/departments/index.vue**
   - Endpoints:
     - `/corp/address/get-my-manage-dept-list?page={page}&size=20` - 分页获取部门
   - Current: 手动管理 `curPage.value++`, `allDepts.value.push(...)`
@@ -122,7 +122,7 @@
     ```
 
 #### 2.2 分组列表
-- [ ] **pages/directory/groups/index.vue**
+- [x] **pages/directory/groups/index.vue**
   - Endpoints:
     - `/corp/group/get-my-manage-group-list?page={page}&size=20` - 分页获取分组
   - Pattern: 完全照搬 2.1 的模式

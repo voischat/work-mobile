@@ -1,27 +1,31 @@
 <script setup lang="ts">
 import type { OrgInfo, VipInfo } from '~/types/org'
+import { useQuery } from '@pinia/colada'
 import { computed } from 'vue'
 import HomeLayout from '~/components/HomeLayout.vue'
 import OrgCard from '~/components/OrgCard.vue'
 import VipCard from '~/components/VipCard.vue'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
-// 获取组织信息（pickWeilaData 会自动提取 org 字段）
 const {
   data: org,
   error: orgError,
-  isFetching: isOrgFetching,
-} = useWeilaFetch<OrgInfo>('/corp/org/get-my-org').post().json()
+  status: orgStatus,
+} = useQuery({
+  key: ['org'],
+  query: () => weilaFetch<OrgInfo>('/corp/org/get-my-org', { method: 'POST' }),
+})
 
-// 获取 VIP 信息（pickWeilaData 会自动提取 vip 字段）
 const {
   data: vip,
   error: vipError,
-  isFetching: isVipFetching,
-} = useWeilaFetch<VipInfo>('/corp/org/get-my-vip').post().json()
+  status: vipStatus,
+} = useQuery({
+  key: ['vip'],
+  query: () => weilaFetch<VipInfo>('/corp/org/get-my-vip', { method: 'POST' }),
+})
 
-// 计算属性
-const isLoading = computed(() => isOrgFetching.value || isVipFetching.value)
+const isLoading = computed(() => orgStatus.value === 'loading' || vipStatus.value === 'loading')
 const hasError = computed(() => !!orgError.value || !!vipError.value)
 </script>
 

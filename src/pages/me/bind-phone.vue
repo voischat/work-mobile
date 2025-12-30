@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { BindPhoneRequest, SendSmsVerifyCodeRequest } from '~/types/auth'
-import { computed, ref, watch } from 'vue'
+import { useMutation } from '@pinia/colada'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import BackLayout from '~/components/BackLayout.vue'
@@ -9,9 +10,8 @@ import CountDownButton from '~/components/CountDownButton.vue'
 import ImageVerifyCode from '~/components/ImageVerifyCode.vue'
 import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
-// 表单验证 schema
 const bindPhoneSchema = z.object({
   phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号'),
   country_code: z.string().min(1, '国家代码不能为空'),
@@ -24,7 +24,6 @@ type BindPhoneForm = z.infer<typeof bindPhoneSchema>
 const router = useRouter()
 const { showToast } = useToast()
 
-// 表单数据
 const formData = ref<BindPhoneForm>({
   phone: '',
   country_code: '86',
@@ -32,84 +31,63 @@ const formData = ref<BindPhoneForm>({
   verifycode: '',
 })
 
-// 组件引用
 const imageVerifyCodeRef = ref<InstanceType<typeof ImageVerifyCode> | null>(null)
 const countDownButtonRef = ref<InstanceType<typeof CountDownButton> | null>(null)
 
-// 表单验证
 const { errors, validate } = useForm(bindPhoneSchema)
 
-// 发送短信验证码
-const {
-  error: sendSmsError,
-  isFetching: isSendingSms,
-  execute: sendSmsVerifyCode,
-} = useWeilaFetch('/common/send-sms-verifycode', {
-  immediate: false,
-}).post(() => ({
-  phone: formData.value.phone,
-  countrycode: formData.value.country_code,
-  verify_id: imageVerifyCodeRef.value?.verifyId || '',
-  verify_answer: formData.value.imageVerifyAnswer,
-  smstype: 'work-bind',
-} as SendSmsVerifyCodeRequest)).json()
+const { mutate: sendSmsVerifyCode, isPending: isSendingSms } = useMutation({
+  mutation: (params: SendSmsVerifyCodeRequest) =>
+    weilaFetch('/common/send-sms-verifycode', {
+      method: 'POST',
+      body: params,
+    }),
+  onSuccess() {
+    showToast('验证码已发送')
+    countDownButtonRef.value?.startCountdown()
+  },
+  onError(error) {
+    showToast(error.message || '发送验证码失败')
+    imageVerifyCodeRef.value?.refresh()
+  },
+})
 
-// 调用绑定手机 API
-const { error, isFetching, isFinished, data, execute: bindPhone } = useWeilaFetch('/corp/user/bind-phone', {
-  immediate: false,
-}).post(() => ({
-  phone: formData.value.phone,
-  country_code: formData.value.country_code,
-  verifycode: formData.value.verifycode,
-} as BindPhoneRequest)).json()
+const { mutate: bindPhone, isPending: isFetching, error } = useMutation({
+  mutation: (params: BindPhoneRequest) =>
+    weilaFetch('/corp/user/bind-phone', {
+      method: 'POST',
+      body: params,
+    }),
+  onSuccess() {
+    showToast('手机号绑定成功')
+    router.back()
+  },
+})
 
 const errorMessage = computed(() => {
   return error.value?.message || ''
 })
 
-// 监听发送短信验证码错误，使用 toast 显示
-watch(sendSmsError, (err) => {
-  if (err) {
-    showToast(err.message || '发送验证码失败')
-    // 如果图形验证码错误，刷新图形验证码
-    imageVerifyCodeRef.value?.refresh()
-  }
-})
-
-// 发送短信验证码函数
 async function handleSendSmsVerifyCode() {
-  // 验证手机号
   if (!formData.value.phone || !/^1[3-9]\d{9}$/.test(formData.value.phone)) {
     showToast('请输入正确的手机号')
     return
   }
 
-  // 验证图形验证码
   if (!formData.value.imageVerifyAnswer) {
     showToast('请输入图形验证码')
     return
   }
 
-  try {
-    await sendSmsVerifyCode()
-    // 如果执行到这里且没有错误，说明发送成功
-    if (!sendSmsError.value) {
-      showToast('验证码已发送')
-      // 通知组件开始倒计时
-      countDownButtonRef.value?.startCountdown()
-    }
-  }
-  catch (err) {
-    // 错误会通过 watch sendSmsError 来处理并显示 toast
-    // 如果 watch 没有触发（异常被抛出但 error 未设置），这里也显示 toast
-    if (!sendSmsError.value) {
-      showToast(err instanceof Error ? err.message : '发送验证码失败')
-      imageVerifyCodeRef.value?.refresh()
-    }
-  }
+  sendSmsVerifyCode({
+    phone: formData.value.phone,
+    countrycode: formData.value.country_code,
+    verify_id: imageVerifyCodeRef.value?.verifyId || '',
+    verify_answer: formData.value.imageVerifyAnswer,
+    smstype: 'work-bind',
+  })
 }
 
-// 是否可以发送验证码
 const canSendSms = computed(() => {
   return formData.value.phone
     && /^1[3-9]\d{9}$/.test(formData.value.phone)
@@ -117,23 +95,15 @@ const canSendSms = computed(() => {
     && !isSendingSms.value
 })
 
-// 监听绑定手机成功
-watch([data, isFinished, error], ([result, finished, err]) => {
-  if (!finished)
-    return
-  if (err)
-    return
-  if (result !== undefined) {
-    showToast('手机号绑定成功')
-    router.back()
-  }
-})
-
 function handleSubmit() {
   if (!validate(formData.value)) {
     return
   }
-  bindPhone()
+  bindPhone({
+    phone: formData.value.phone,
+    country_code: formData.value.country_code,
+    verifycode: formData.value.verifycode,
+  })
 }
 </script>
 
