@@ -116,5 +116,14 @@ export interface SendSmsVerifyCodeRequest {
   countrycode: string
   verify_id: string
   verify_answer: string
-  smstype: string
+  smstype: 'work-login' | 'work-regist' | 'work-bind-phone' | 'work-reset-password' | 'work-add-device' | 'work-unregist'
+}
+
+// 发送邮箱验证码请求参数
+export interface SendEmailVerifyCodeRequest {
+  email: string
+  countrycode: string
+  verify_id: string
+  verify_answer: string
+  emailtype: 'work-bind' | 'work-unregist'
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BindPhoneRequest, SendSmsVerifyCodeRequest } from '~/types/auth'
+import { Icon } from '@iconify/vue'
 import { useMutation } from '@pinia/colada'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -14,7 +15,6 @@ import { weilaFetch } from '~/shared/instances'
 
 const bindPhoneSchema = z.object({
   phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号'),
-  country_code: z.string().min(1, '国家代码不能为空'),
   imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
   verifycode: z.string().min(4, '验证码至少4位'),
 })
@@ -26,7 +26,6 @@ const { showToast } = useToast()
 
 const formData = ref<BindPhoneForm>({
   phone: '',
-  country_code: '86',
   imageVerifyAnswer: '',
   verifycode: '',
 })
@@ -36,7 +35,7 @@ const countDownButtonRef = ref<InstanceType<typeof CountDownButton> | null>(null
 
 const { errors, validate } = useForm(bindPhoneSchema)
 
-const { mutate: sendSmsVerifyCode, isPending: isSendingSms } = useMutation({
+const { mutate: sendSmsVerifyCode, isLoading: isSendingSms } = useMutation({
   mutation: (params: SendSmsVerifyCodeRequest) =>
     weilaFetch('/common/send-sms-verifycode', {
       method: 'POST',
@@ -52,7 +51,7 @@ const { mutate: sendSmsVerifyCode, isPending: isSendingSms } = useMutation({
   },
 })
 
-const { mutate: bindPhone, isPending: isFetching, error } = useMutation({
+const { mutate: bindPhone, isLoading, error } = useMutation({
   mutation: (params: BindPhoneRequest) =>
     weilaFetch('/corp/user/bind-phone', {
       method: 'POST',
@@ -81,27 +80,39 @@ async function handleSendSmsVerifyCode() {
 
   sendSmsVerifyCode({
     phone: formData.value.phone,
-    countrycode: formData.value.country_code,
+    countrycode: '86',
     verify_id: imageVerifyCodeRef.value?.verifyId || '',
     verify_answer: formData.value.imageVerifyAnswer,
-    smstype: 'work-bind',
+    smstype: 'work-bind-phone',
   })
 }
 
 const canSendSms = computed(() => {
-  return formData.value.phone
-    && /^1[3-9]\d{9}$/.test(formData.value.phone)
-    && formData.value.imageVerifyAnswer
-    && !isSendingSms.value
+  const hasPhone = !!formData.value.phone
+  const isPhoneValid = /^1[3-9]\d{9}$/.test(formData.value.phone)
+  const hasImageVerify = !!formData.value.imageVerifyAnswer
+  const notSending = !isSendingSms.value
+
+  console.log('canSendSms check:', {
+    hasPhone,
+    phone: formData.value.phone,
+    isPhoneValid,
+    hasImageVerify,
+    imageVerifyAnswer: formData.value.imageVerifyAnswer,
+    notSending,
+  })
+
+  return hasPhone && isPhoneValid && hasImageVerify && notSending
 })
 
 function handleSubmit() {
   if (!validate(formData.value)) {
+    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
     return
   }
   bindPhone({
     phone: formData.value.phone,
-    country_code: formData.value.country_code,
+    country_code: '86',
     verifycode: formData.value.verifycode,
   })
 }
@@ -121,39 +132,26 @@ function handleSubmit() {
       <div class="max-w-md mx-auto">
         <div class="bg-white rounded-lg shadow-md p-6">
           <form class="space-y-4" @submit.prevent="handleSubmit">
-            <!-- 国家代码输入框 -->
-            <div>
-              <label for="country_code" class="block text-sm font-medium text-gray-700 mb-1">
-                国家代码
-              </label>
-              <input
-                id="country_code"
-                v-model="formData.country_code"
-                type="text"
-                placeholder="请输入国家代码（如：86）"
-                class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                :class="errors.country_code ? 'border-red-500' : 'border-gray-300'"
-                :disabled="isFetching"
-              >
-              <div v-if="errors.country_code" class="mt-1 text-sm text-red-600">
-                {{ errors.country_code }}
-              </div>
-            </div>
-
-            <!-- 手机号输入框 -->
+            <!-- 手机号输入框（带国家代码） -->
             <div>
               <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
                 手机号
               </label>
-              <input
-                id="phone"
-                v-model="formData.phone"
-                type="tel"
-                placeholder="请输入手机号"
-                class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                :class="errors.phone ? 'border-red-500' : 'border-gray-300'"
-                :disabled="isFetching"
-              >
+              <div class="flex items-center">
+                <div class="flex items-center px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md">
+                  <span class="text-gray-700">+86</span>
+                  <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 ml-1" />
+                </div>
+                <input
+                  id="phone"
+                  v-model="formData.phone"
+                  type="tel"
+                  placeholder="请输入手机号"
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  :class="errors.phone ? 'border-red-500' : 'border-gray-300'"
+                  :disabled="isLoading"
+                >
+              </div>
               <div v-if="errors.phone" class="mt-1 text-sm text-red-600">
                 {{ errors.phone }}
               </div>
@@ -169,7 +167,7 @@ function handleSubmit() {
                 v-model="formData.imageVerifyAnswer"
                 :width="120"
                 :height="60"
-                :disabled="isFetching"
+                :disabled="isLoading"
                 :error="!!errors.imageVerifyAnswer"
               />
               <div v-if="errors.imageVerifyAnswer" class="mt-1 text-sm text-red-600">
@@ -191,12 +189,13 @@ function handleSubmit() {
                   v-model="formData.verifycode"
                   type="text"
                   placeholder="请输入短信验证码"
-                  class="flex-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="errors.verifycode ? 'border-red-500' : 'border-gray-300'"
-                  :disabled="isFetching"
+                  :disabled="isLoading"
                 >
                 <CountDownButton
                   ref="countDownButtonRef"
+                  class="flex-shrink-0"
                   :disabled="!canSendSms"
                   :loading="isSendingSms"
                   storage-key="send-sms-time"
@@ -224,7 +223,7 @@ function handleSubmit() {
               <button
                 type="button"
                 class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-md font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                :disabled="isFetching"
+                :disabled="isLoading"
                 @click="router.back()"
               >
                 取消
@@ -232,9 +231,9 @@ function handleSubmit() {
               <button
                 type="submit"
                 class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                :disabled="isFetching"
+                :disabled="isLoading"
               >
-                {{ isFetching ? '绑定中...' : '确认绑定' }}
+                {{ isLoading ? '绑定中...' : '确认绑定' }}
               </button>
             </div>
           </form>
