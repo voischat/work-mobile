@@ -1028,3 +1028,68 @@ localhost:8090/v2/common/send-email-verifycode?appid=102036&et=1741491127&sign=e
     "verify_answer": "JTsv", //验证码回答
 	"smstype": "work-regist" //work-regist 企业账号注册 work-login 企业账号登录 work-bind 企业版手机绑定 work-unbind 企业版手机号解绑
 }
+
+http://localhost:8090/v2/corp/legal/get-legal?appid=102036&et=1741491127&sign=e056a1e5&token=d9e8fbb065dc78244d5a4eb66fc9afdb
+{
+	"errcode": 0,
+	"errmsg": "请求成功",
+	"data": {
+		"legal": {
+			"id": 4,
+			"org_num": 100055,
+			"category": 0,
+			"name": "微喇",
+			"identify": "b23456789012345678",
+			"business_license": "http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/legalc/100055/f4c2_lcbl.png?v=1752564412",
+			"state": 0,
+			"updated": "2025-07-15 15:26:52"
+		}
+	}
+}
+
+http://localhost:8090/v2/corp/legal/add-corp-legal?appid=102036&et=1741491127&sign=e056a1e5&token=d9e8fbb065dc78244d5a4eb66fc9afdb
+{
+    "name": "沃特",
+    "identify": "a23456789012345678", //统一社会信用代码
+    "business_license": "http://weilaavatar.oss-cn-shenzhen.aliyuncs.com/default/session.png" //企业营业执照
+}
+{
+	"errcode": 0,
+	"errmsg": "请求成功",
+	"data": {
+		"legal": {
+			"id": 4,
+			"org_num": 100055,
+			"category": 0,
+			"name": "沃特",
+			"identify": "a23456789012345678",
+			"business_license": "http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/legalc/100055/f4c2_lcbl.png?v=1752564343",
+			"state": 0,
+			"updated": "2025-07-15 15:25:43"
+		}
+	}
+}
+
+http://localhost:8090/v2/corp/legal/add-corp-legal?appid=102036&et=1741491127&sign=e056a1e5&token=d9e8fbb065dc78244d5a4eb66fc9afdb
+{
+    "id": 4,
+    "name": "微喇",
+    "identify": "b23456789012345678", //身份证号
+    "business_license": "http://weilaavatar.oss-cn-shenzhen.aliyuncs.com/default/session.png" //企业营业执照
+}
+{
+	"errcode": 0,
+	"errmsg": "请求成功",
+	"data": {
+		"legal": {
+			"id": 4,
+			"org_num": 100055,
+			"category": 0,
+			"name": "微喇",
+			"identify": "b23456789012345678",
+			"business_license": "http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/legalc/100055/f4c2_lcbl.png?v=1752564412",
+			"state": 0,
+			"updated": "2025-07-15 15:26:52"
+		}
+	}
+}

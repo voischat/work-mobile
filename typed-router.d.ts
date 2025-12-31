@@ -30,6 +30,7 @@ declare module 'vue-router/auto-routes' {
     '/me/bind-email': RouteRecordInfo<'/me/bind-email', '/me/bind-email', Record<never, never>, Record<never, never>>,
     '/me/bind-phone': RouteRecordInfo<'/me/bind-phone', '/me/bind-phone', Record<never, never>, Record<never, never>>,
     '/me/change-password': RouteRecordInfo<'/me/change-password', '/me/change-password', Record<never, never>, Record<never, never>>,
+    '/me/corp-legal': RouteRecordInfo<'/me/corp-legal', '/me/corp-legal', Record<never, never>, Record<never, never>>,
     '/me/unregist': RouteRecordInfo<'/me/unregist', '/me/unregist', Record<never, never>, Record<never, never>>,
     '/me/UnregistEmail': RouteRecordInfo<'/me/UnregistEmail', '/me/UnregistEmail', Record<never, never>, Record<never, never>>,
     '/me/UnregistPhone': RouteRecordInfo<'/me/UnregistPhone', '/me/UnregistPhone', Record<never, never>, Record<never, never>>,

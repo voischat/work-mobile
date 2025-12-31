@@ -125,6 +125,13 @@ function formatDate(timestamp: number) {
           <div class="space-y-3 pt-4 border-t">
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
+              @click="router.push('/me/corp-legal')"
+            >
+              <span class="text-gray-900 font-medium">企业认证</span>
+              <span class="text-gray-400">›</span>
+            </button>
+            <button
+              class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/change-password')"
             >
               <span class="text-gray-900 font-medium">修改密码</span>
