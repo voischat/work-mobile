@@ -31,11 +31,11 @@ const sexMap = {
 } as const
 
 const trackTypeMap = {
-  0: { label: '关闭' },
-  1: { label: '1 小时' },
-  2: { label: '15 分钟' },
-  3: { label: '5 分钟' },
-  4: { label: '1 分钟' },
+  0: { label: '关闭', speed: '' },
+  1: { label: '1 小时', speed: '慢' },
+  2: { label: '15 分钟', speed: '中' },
+  3: { label: '5 分钟', speed: '快' },
+  4: { label: '1 分钟', speed: '极快' },
 } as const
 
 const locShareMap = {
@@ -49,26 +49,26 @@ function formatDate(timestamp: number): string {
 </script>
 
 <template>
-  <CollapsibleRoot class="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+  <CollapsibleRoot class="bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200">
     <!-- Header Section -->
-    <div class="p-4">
-      <div class="flex items-start space-x-3">
+    <div class="p-5">
+      <div class="flex items-start space-x-3.5">
         <!-- Avatar using Reka UI -->
-        <AvatarRoot class="inline-flex h-12 w-12 shrink-0 select-none items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+        <AvatarRoot class="inline-flex h-14 w-14 shrink-0 select-none items-center justify-center overflow-hidden rounded-xl bg-gray-100 ring-1 ring-gray-200/50">
           <AvatarImage
             class="h-full w-full object-cover"
             :src="member.avatar"
             :alt="member.name"
           />
-          <AvatarFallback class="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-medium text-gray-600">
+          <AvatarFallback class="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-semibold text-gray-600">
             {{ member.name?.slice(0, 2) || 'UN' }}
           </AvatarFallback>
         </AvatarRoot>
 
         <!-- Basic Info -->
         <div class="flex-1 min-w-0">
-          <div class="flex items-center space-x-2 mb-1.5">
-            <h3 class="text-base font-medium text-gray-900">
+          <div class="flex items-center space-x-2 mb-2">
+            <h3 class="text-base font-semibold text-gray-900 tracking-tight">
               {{ member.name || '未命名' }}
             </h3>
             <Icon
@@ -79,11 +79,11 @@ function formatDate(timestamp: number): string {
             />
           </div>
 
-          <div class="flex items-center flex-wrap space-x-2 text-xs text-gray-600">
+          <div class="flex items-center flex-wrap space-x-2">
             <!-- Member Type Badge -->
             <span
               v-if="memberTypeMap[member.type as keyof typeof memberTypeMap]"
-              class="inline-flex items-center"
+              class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200"
             >
               {{ memberTypeMap[member.type as keyof typeof memberTypeMap].label }}
             </span>
@@ -91,28 +91,32 @@ function formatDate(timestamp: number): string {
             <!-- Online Status -->
             <span
               v-if="member.online_status !== undefined"
-              class="inline-flex items-center space-x-1"
+              class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-md text-xs font-medium border"
+              :class="member.online_status === 1
+                ? 'bg-green-50 text-green-700 border-green-200'
+                : 'bg-gray-50 text-gray-600 border-gray-200'"
             >
               <Icon
                 :icon="onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.icon || 'lucide:circle'"
                 class="w-2 h-2"
-                :class="member.online_status === 1 ? 'text-green-600' : 'text-gray-400'"
+                :class="member.online_status === 1 ? 'text-green-600 fill-current' : 'text-gray-400'"
               />
-              {{ onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.label || '未知' }}
+              <span>{{ onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.label || '未知' }}</span>
             </span>
 
             <!-- Department -->
-            <span v-if="deptName" class="inline-flex items-center">
-              {{ deptName }}
+            <span v-if="deptName" class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+              <Icon icon="lucide:building-2" class="w-3 h-3" />
+              <span>{{ deptName }}</span>
             </span>
           </div>
         </div>
 
         <!-- Expand/Collapse Trigger -->
-        <CollapsibleTrigger class="shrink-0 p-1 text-gray-400 hover:text-gray-600 rounded transition-colors ">
+        <CollapsibleTrigger class="shrink-0 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all">
           <Icon
             icon="lucide:chevron-down"
-            class="size-10 transition-transform duration-200 collapsible-chevron"
+            class="size-5 transition-transform duration-200 collapsible-chevron"
           />
         </CollapsibleTrigger>
       </div>
@@ -120,42 +124,46 @@ function formatDate(timestamp: number): string {
 
     <!-- Collapsible Content -->
     <CollapsibleContent class="collapsible-content">
-      <div class="px-4 pb-4 space-y-4">
+      <div class="px-5 pb-5 space-y-4 border-t border-gray-100">
         <!-- Details Table -->
-        <div class="space-y-2 text-sm">
+        <div class="space-y-2.5 text-sm pt-4">
           <div v-if="member.job_num" class="flex items-center">
-            <span class="w-20 text-gray-500">工号</span>
-            <span class="text-gray-900">{{ member.job_num }}</span>
+            <span class="w-20 text-gray-500 font-medium">工号</span>
+            <span class="text-gray-900 font-medium">{{ member.job_num }}</span>
           </div>
           <div v-if="member.phone" class="flex items-center">
-            <span class="w-20 text-gray-500">手机号</span>
+            <span class="w-20 text-gray-500 font-medium">手机号</span>
             <span class="text-gray-900">{{ member.phone }}</span>
           </div>
           <div class="flex items-center">
-            <span class="w-20 text-gray-500">微喇号</span>
+            <span class="w-20 text-gray-500 font-medium">微喇号</span>
             <span class="text-gray-900">{{ member.user_num }}</span>
           </div>
           <div v-if="member.grp_cnt !== undefined && member.grp_lmt !== undefined" class="flex items-center">
-            <span class="w-20 text-gray-500">群组</span>
-            <span :class="[member.grp_cnt >= member.grp_lmt ? 'text-red-600 font-medium' : 'text-gray-900']">
+            <span class="w-20 text-gray-500 font-medium">群组</span>
+            <span
+              :class="member.grp_cnt >= member.grp_lmt
+                ? 'bg-red-50 text-red-700 border border-red-200'
+                : 'text-gray-900'"
+            >
               {{ member.grp_cnt }} / {{ member.grp_lmt }}
             </span>
           </div>
           <div class="flex items-center">
-            <span class="w-20 text-gray-500">创建时间</span>
-            <span class="text-gray-900">{{ formatDate(member.created) }}</span>
+            <span class="w-20 text-gray-500 font-medium">创建时间</span>
+            <span class="text-gray-600">{{ formatDate(member.created) }}</span>
           </div>
         </div>
 
         <!-- Feature Status -->
-        <div class="flex items-center flex-wrap space-x-3 text-xs text-gray-600 pt-3 border-t border-gray-100">
-          <span class="inline-flex items-center space-x-1.5">
+        <div class="flex items-center flex-wrap space-x-2 pt-3 border-t border-gray-100">
+          <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
             <Icon icon="lucide:route" class="w-3.5 h-3.5" />
-            轨迹: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || '未知' }}
+            <span>轨迹: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || '未知' }}</span>
           </span>
-          <span class="inline-flex items-center space-x-1.5">
+          <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
             <Icon icon="lucide:map-pin" class="w-3.5 h-3.5" />
-            位置共享: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || '未知' }}
+            <span>位置共享: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || '未知' }}</span>
           </span>
         </div>
 
