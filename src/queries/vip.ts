@@ -1,22 +1,14 @@
 import type { VipInfo, VipSupport } from '~/types/org'
 import { defineQuery, useQuery } from '@pinia/colada'
 import { computed } from 'vue'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 async function fetchVipInfo(): Promise<VipInfo> {
-  const { data, error: fetchError } = await useWeilaFetch<{ vip: VipInfo }>('/corp/org/get-my-vip')
-    .post()
-    .json()
+  const response = await weilaFetch<{ vip: VipInfo }>('/corp/org/get-my-vip', {
+    method: 'POST',
+  })
 
-  if (fetchError.value) {
-    throw new Error(fetchError.value.message || '获取 VIP 信息失败')
-  }
-
-  if (!data.value) {
-    throw new Error('获取 VIP 信息失败')
-  }
-
-  return data.value.vip
+  return response.vip
 }
 
 export const useVip = defineQuery(() => {

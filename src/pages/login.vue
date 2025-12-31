@@ -28,7 +28,7 @@ const formData = ref<LoginForm>({
 
 const { errors, validate } = useForm(loginSchema)
 
-const { mutate: login, isPending: isFetching } = useMutation({
+const { mutate: login, isLoading: isFetching } = useMutation({
   mutation: () => weilaFetch<LoginResponse>('/corp/auth/login', {
     method: 'POST',
     body: {

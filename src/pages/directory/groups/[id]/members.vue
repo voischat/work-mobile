@@ -108,7 +108,7 @@ async function handleRefresh() {
   accumulatedMembers.value = []
 }
 
-const { mutate: addMembersToGroup, isPending: isAddingMembers } = useMutation({
+const { mutate: addMembersToGroup, isLoading: isAddingMembers } = useMutation({
   mutation: (userIds: number[]) =>
     weilaFetch('/corp/group/add-group-members', {
       method: 'POST',

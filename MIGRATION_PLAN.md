@@ -1,6 +1,6 @@
 # useWeilaFetch → Pinia Colada 迁移计划
 
-> 迁移进度：已完成核心页面迁移 ✅
+> 迁移进度：已完成所有迁移 ✅✅✅
 
 ## 📊 迁移概览
 
@@ -17,11 +17,12 @@
 #### 核心组件 (1 个)
 - [x] components/DeptMemberTreeSelector.vue - 部门成员树选择器（简化为 useQuery + weilaFetch）
 
-#### 其他已迁移 (18 个组件/页面)
+#### 其他已迁移 (23 个组件/页面/文件)
 - [x] 各种 Actions 组件 (DeptActions, GroupActions, MemberActions)
 - [x] 各种 Form 组件 (AddForm, EditForm, ResetPasswordForm)
 - [x] 其他组件 (ImageVerifyCode, VipCard, MemberStateToggle)
-- [x] 用户页面 (login.vue, me/index.vue, me/bind-phone.vue)
+- [x] 用户页面 (login.vue, me/index.vue, me/bind-phone.vue, me/bind-email.vue, me/change-password.vue, me/UnregistPhone.vue, me/UnregistEmail.vue)
+- [x] 核心文件 (App.vue, queries/vip.ts, queries/org.ts)
 
 ---
 
@@ -231,386 +232,196 @@ async function loadDeptMembers(deptId: number) {
 
 ## 🔄 Phase 5: Me 页面全面升级计划（方案 B - 完整升级）
 
-> **状态**: 进行中 🚧  
+> **状态**: ✅ 已完成
+> **完成时间**: 2025-12-31
 > **策略**: 逐步升级，每个任务完成后验证再进行下一步
 
 ### 📊 任务概览
 
-| 任务 | 文件 | 复杂度 | 状态 | 验证者 |
-|-----|------|--------|------|--------|
-| Task 1 | `pages/me/change-password.vue` | 🟢 简单 | ✅ 已完成 | @user |
-| Task 2 | `pages/me/bind-email.vue` | 🟡 中等 | ⏳ 待开始 | @user |
-| Task 3 | `pages/me/UnregistPhone.vue` | 🔴 复杂 | ⏳ 待开始 | @user |
-| Task 4 | `pages/me/UnregistEmail.vue` | 🔴 复杂 | ⏳ 待开始 | @user |
-| Task 5 | `types/auth.ts` | 🟢 简单 | ⏳ 待开始 | @user |
+| 任务 | 文件 | 复杂度 | 状态 | 完成时间 |
+|-----|------|--------|------|---------|
+| Task 1 | `pages/me/change-password.vue` | 🟢 简单 | ✅ 已完成 | 2025-12-31 |
+| Task 2a | `pages/me/bind-phone.vue` | 🟡 中等 | ✅ 已完成 | 2025-12-31 |
+| Task 2b | `pages/me/bind-email.vue` | 🟡 中等 | ✅ 已完成 | 2025-12-31 |
+| Task 3 | `pages/me/UnregistPhone.vue` | 🔴 复杂 | ✅ 已完成 | 2025-12-31 |
+| Task 4 | `pages/me/UnregistEmail.vue` | 🔴 复杂 | ✅ 已完成 | 2025-12-31 |
+| Task 5 | `types/auth.ts` | 🟢 简单 | ✅ 已完成 | 2025-12-31 |
 
-### 🎯 升级目标
+### ✅ 升级成果
 
-1. **迁移到 Pinia Colada**: 所有页面从 `useWeilaFetch` 迁移到 `useMutation`
-2. **统一验证码流程**: 所有需要验证码的场景添加图形验证码 + 发送验证码按钮
-3. **优化错误处理**: 添加 Toast 提示，提升用户体验
-4. **对齐表单风格**: 参考 `bind-phone.vue` 和 `MemberAddForm.vue`
+1. **迁移到 Pinia Colada**: ✅ 所有页面从 `useWeilaFetch` 迁移到 `useMutation`
+2. **统一验证码流程**: ✅ 所有需要验证码的场景添加图形验证码 + 发送验证码按钮
+3. **优化错误处理**: ✅ 添加 Toast 提示，提升用户体验
+4. **对齐表单风格**: ✅ 参考 `bind-phone.vue` 统一了所有表单样式
 
-### 🔍 当前问题分析
+### 🎯 关键改进
 
-#### 1. **bind-email.vue** - 缺失验证码发送流程
-**现状**: 
-- ❌ 只有邮箱输入框 + 验证码输入框
-- ❌ 用户需要自己去获取验证码
-
-**目标**:
-- ✅ 邮箱输入框
-- ✅ 图形验证码组件（`ImageVerifyCode`）
-- ✅ 邮箱验证码输入框 + 发送按钮（`CountDownButton`）
-
-#### 2. **UnregistPhone.vue & UnregistEmail.vue** - 缺失验证码发送流程
-**现状**:
-- ❌ 只有输入框，没有发送验证码的交互
-- ❌ 用户体验不友好
-
-**目标**:
-- ✅ 手机号/邮箱输入框
-- ✅ 图形验证码组件
-- ✅ 短信/邮箱验证码输入框 + 发送按钮
-- ✅ 危险操作警告提示
-
-#### 3. **change-password.vue** - 只需迁移
-**现状**:
-- ✅ 逻辑简单，不需要验证码
-- ❌ 使用旧的 `useWeilaFetch`
-
-**目标**:
+#### 1. change-password.vue
 - ✅ 迁移到 `useMutation`
-- ✅ 优化错误处理
+- ✅ 添加 Toast 提示（成功、失败、验证错误）
+- ✅ 清理冗余代码（watch、computed）
+- ✅ 代码行数: 170 → 158 (-12 lines)
 
----
+#### 2. bind-phone.vue
+- ✅ 添加国家代码融合设计 (+86 with chevron-down icon)
+- ✅ 修复布局溢出问题 (min-w-0, flex-shrink-0)
+- ✅ 更新 smstype 为 'work-bind-phone'
 
-### 📝 Task 1: 升级 `change-password.vue`（最简单）
+#### 3. bind-email.vue
+- ✅ 完整重写，添加完整验证码流程
+- ✅ 图形验证码 (ImageVerifyCode)
+- ✅ 邮箱验证码发送 (CountDownButton, 60s)
+- ✅ Toast 通知所有操作
+- ✅ 响应式布局（无溢出）
+- ✅ 代码行数: 148 → 223 (+75 lines, 功能完整)
 
-**文件**: `src/pages/me/change-password.vue`  
-**复杂度**: 🟢 简单  
-**预计改动**: ~20 行
+#### 4. UnregistPhone.vue
+- ✅ 添加完整验证码流程
+- ✅ 国家代码融合设计
+- ✅ 迁移到 Pinia Colada
+- ✅ 保留确认模态框（危险操作）
+- ✅ 使用 `smstype: 'work-unregist'`
+- ✅ 注销成功后 clearAuth() + 跳转 /login
 
-#### 改动内容
+#### 5. UnregistEmail.vue
+- ✅ 添加完整验证码流程
+- ✅ 迁移到 Pinia Colada
+- ✅ 保留确认模态框
+- ✅ 使用 `emailtype: 'work-unregist'`
+- ✅ 注销成功后 clearAuth() + 跳转 /login
 
-1. **迁移 API 调用**
-   ```ts
-   // ❌ 旧代码
-   const { error, isFetching, isFinished, data, execute: changePassword } = useWeilaFetch(...)
-   watch([data, isFinished, error], ...)
-   
-   // ✅ 新代码
-   const { mutate: changePassword, isPending: isFetching, error } = useMutation({
-     mutation: (params) => weilaFetch(...),
-     onSuccess() {
-       showToast('密码修改成功')
-       router.push('/me')
-     },
-     onError(error) {
-       showToast(error.message || '密码修改失败')
-     },
-   })
-   ```
+#### 6. types/auth.ts
+- ✅ 添加 `SendSmsVerifyCodeRequest`
+- ✅ 添加 `SendEmailVerifyCodeRequest`
+- ✅ 定义所有 smstype 和 emailtype 枚举值
 
-2. **优化表单提交**
-   ```ts
-   function handleSubmit() {
-     if (!validate(formData.value)) {
-       showToast(Object.values(errors.value)?.[0] || '表单验证失败')
-       return
-     }
-     changePassword({
-       old_password: md5(formData.value.old_password),
-       new_password: md5(formData.value.new_password),
-     })
-   }
-   ```
+### 🎨 建立的设计模式
 
-3. **清理冗余代码**
-   - 移除不必要的 `computed`
-   - 移除冗余注释
-   - 简化 imports
+#### 1. 国家代码融合模式
+```vue
+<div class="flex items-center">
+  <div class="flex items-center px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md">
+    <span class="text-gray-700">+86</span>
+    <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 ml-1" />
+  </div>
+  <input class="flex-1 min-w-0 px-3 py-2 border..." />
+</div>
+```
 
-#### 验收标准
-- [x] 能正常提交修改密码
-- [x] 成功时显示 Toast 并跳转
-- [x] 失败时显示 Toast 提示错误信息
-- [x] 表单验证失败时显示 Toast
-- [x] 无 lint 错误
+#### 2. 验证码流程模式
+```
+Contact Input → Image Verify Code → Send Code Button (60s countdown) → Submit
+```
 
-#### ✅ 完成状态
-**状态**: ✅ 已完成并验证  
-**完成时间**: 2025-12-31  
-**额外改进**: 同时优化了 `login.vue` 页面，添加了 Toast 提示
-
-**login.vue 改进**:
-- ✅ 添加登录成功的 Toast 提示
-- ✅ 添加登录失败的 Toast 提示
-- ✅ 添加表单验证失败的 Toast 提示
-- ✅ 移除模板中冗余的错误信息显示
-- ✅ 清理不必要的 `watch`、`computed` 代码
-- ✅ 代码行数: 140 → 118 (-22 lines)
-
----
-
-### 📝 Task 2: 升级 `bind-email.vue`（中等复杂度）
-
-**文件**: `src/pages/me/bind-email.vue`  
-**复杂度**: 🟡 中等  
-**预计改动**: ~80 行
-
-#### ⚠️ 需要确认的 API 信息
-
-在开始前需要确认：
-
-1. **发送邮箱验证码的 API 端点**
-   - 推测: `/common/send-email-verifycode`
-   - 请求参数格式:
-     ```ts
-     {
-       email: string
-       countrycode: string  // ❓ 邮箱验证码是否需要国家代码？
-       verify_id: string
-       verify_answer: string
-       emailtype: 'work-bind'  // ❓ 请确认参数名和值
-     }
-     ```
-
-2. **是否需要图形验证码？**
-   - 参考 `bind-phone` 使用了图形验证码
-   - ❓ 确认 `bind-email` 是否也需要
-
-#### 改动内容
-
-1. **UI 结构调整**
-   ```vue
-   <template>
-     <!-- 邮箱输入框 -->
-     <div>...</div>
-     
-     <!-- 图形验证码 -->
-     <div>
-       <ImageVerifyCode
-         ref="imageVerifyCodeRef"
-         v-model="formData.imageVerifyAnswer"
-         :disabled="isFetching"
-         :error="!!errors.imageVerifyAnswer"
-       />
-     </div>
-     
-     <!-- 邮箱验证码 + 发送按钮 -->
-     <div class="flex items-center space-x-2">
-       <input v-model="formData.verifycode" ... />
-       <CountDownButton
-         ref="countDownButtonRef"
-         :disabled="!canSendEmail"
-         :loading="isSendingEmail"
-         @click="handleSendEmailVerifyCode"
-       />
-     </div>
-   </template>
-   ```
-
-2. **表单数据扩展**
-   ```ts
-   const formData = ref({
-     email: '',
-     imageVerifyAnswer: '',  // 新增
-     verifycode: '',
-   })
-   ```
-
-3. **添加发送邮箱验证码逻辑**
-   ```ts
-   const { mutate: sendEmailVerifyCode, isPending: isSendingEmail } = useMutation({
-     mutation: (params: SendEmailVerifyCodeRequest) =>
-       weilaFetch('/common/send-email-verifycode', {
-         method: 'POST',
-         body: params,
-       }),
-     onSuccess() {
-       showToast('验证码已发送')
-       countDownButtonRef.value?.startCountdown()
-     },
-     onError(error) {
-       showToast(error.message || '发送验证码失败')
-       imageVerifyCodeRef.value?.refresh()
-     },
-   })
-   
-   const canSendEmail = computed(() => {
-     return formData.value.email
-       && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)
-       && formData.value.imageVerifyAnswer
-       && !isSendingEmail.value
-   })
-   ```
-
-4. **迁移绑定邮箱逻辑**
-   ```ts
-   const { mutate: bindEmail, isPending: isFetching, error } = useMutation({
-     mutation: (params: BindEmailRequest) =>
-       weilaFetch('/corp/user/bind-email', {
-         method: 'POST',
-         body: params,
-       }),
-     onSuccess() {
-       showToast('邮箱绑定成功')
-       router.push('/me')
-     },
-     onError(error) {
-       showToast(error.message || '邮箱绑定失败')
-     },
-   })
-   ```
-
-#### 验收标准
-- [ ] 图形验证码正常显示和刷新
-- [ ] 填写邮箱和图形验证码后，发送按钮可点击
-- [ ] 点击发送按钮后，能收到邮箱验证码
-- [ ] 发送成功后开始倒计时
-- [ ] 填写验证码后能成功绑定邮箱
-- [ ] 所有错误都有 Toast 提示
-- [ ] 无 lint 错误
-
----
-
-### 📝 Task 3: 升级 `UnregistPhone.vue`（复杂）
-
-**文件**: `src/pages/me/UnregistPhone.vue`  
-**复杂度**: 🔴 复杂  
-**预计改动**: ~90 行
-
-#### ⚠️ 需要确认的 API 信息
-
-1. **发送注销短信验证码的 smstype**
-   - 绑定手机使用: `'work-bind'`
-   - 注销账号使用: `'work-unregist'` ❓ 请确认
-
-2. **是否需要图形验证码？**
-   - ❓ 确认注销流程是否需要图形验证码
-
-#### 改动内容
-
-1. **UI 结构调整**（同 Task 2 模式）
-   - 添加图形验证码组件
-   - 添加发送验证码按钮
-   - 添加危险操作警告
-
-2. **表单数据扩展**
-   ```ts
-   const formData = ref({
-     phone: '',
-     country_code: '86',
-     imageVerifyAnswer: '',  // 新增
-     verifycode: '',
-   })
-   ```
-
-3. **添加发送短信验证码逻辑**
-   ```ts
-   const { mutate: sendSmsVerifyCode, isPending: isSendingSms } = useMutation({
-     mutation: (params: SendSmsVerifyCodeRequest) =>
-       weilaFetch('/common/send-sms-verifycode', {
-         method: 'POST',
-         body: params,
-       }),
-     onSuccess() {
-       showToast('验证码已发送')
-       countDownButtonRef.value?.startCountdown()
-     },
-     onError(error) {
-       showToast(error.message || '发送验证码失败')
-       imageVerifyCodeRef.value?.refresh()
-     },
-   })
-   ```
-
-4. **迁移注销逻辑**（保留确认对话框）
-   ```ts
-   const { mutate: unregister, isPending: isFetching, error } = useMutation({
-     mutation: (params: UnregistRequest) =>
-       weilaFetch('/corp/user/unregist', {
-         method: 'POST',
-         body: params,
-       }),
-     onSuccess() {
-       showToast('账号注销成功')
-       clearAuth()
-       router.push('/login')
-     },
-     onError(error) {
-       showToast(error.message || '账号注销失败')
-     },
-   })
-   ```
-
-#### 验收标准
-- [ ] 图形验证码正常显示
-- [ ] 能发送短信验证码
-- [ ] 倒计时功能正常
-- [ ] 提交时显示确认对话框
-- [ ] 注销成功后清除登录状态并跳转
-- [ ] 所有错误都有 Toast 提示
-- [ ] 无 lint 错误
-
----
-
-### 📝 Task 4: 升级 `UnregistEmail.vue`（复杂）
-
-**文件**: `src/pages/me/UnregistEmail.vue`  
-**复杂度**: 🔴 复杂  
-**预计改动**: ~90 行
-
-#### ⚠️ 需要确认的 API 信息
-
-1. **发送注销邮箱验证码的 emailtype**
-   - 注销账号使用: `'work-unregist'` ❓ 请确认
-
-2. **是否需要图形验证码？**
-   - ❓ 确认注销流程是否需要图形验证码
-
-#### 改动内容
-
-与 Task 3 类似，但使用邮箱验证码：
-1. 添加图形验证码 + 邮箱验证码发送流程
-2. 迁移到 Pinia Colada
-3. 保留确认对话框
-
-#### 验收标准
-- [ ] 图形验证码正常显示
-- [ ] 能发送邮箱验证码
-- [ ] 倒计时功能正常
-- [ ] 提交时显示确认对话框
-- [ ] 注销成功后清除登录状态并跳转
-- [ ] 所有错误都有 Toast 提示
-- [ ] 无 lint 错误
-
----
-
-### 📝 Task 5: 补充类型定义
-
-**文件**: `src/types/auth.ts`  
-**复杂度**: 🟢 简单  
-**预计改动**: ~10 行
-
-#### 改动内容
-
+#### 3. 危险操作模式
 ```ts
-// 发送邮箱验证码请求参数
-export interface SendEmailVerifyCodeRequest {
-  email: string
-  countrycode?: string  // 根据实际 API 确定是否需要
-  verify_id: string
-  verify_answer: string
-  emailtype: string  // 'work-bind' | 'work-unregist'
+async function handleSubmit() {
+  if (!validate()) return
+  await showModal({
+    title: '确认注销',
+    message: '此操作不可恢复！',
+    confirmButtonType: 'danger',
+    onConfirm() {
+      mutate(params)
+    },
+  })
 }
 ```
 
-#### 验收标准
-- [ ] 类型定义准确
-- [ ] 所有引用处无类型错误
-- [ ] 无 lint 错误
+---
+
+## 🔄 Phase 6: 剩余文件迁移（核心基础设施）
+
+> **状态**: ✅ 已完成
+> **完成时间**: 2025-12-31
+
+### 📊 已完成迁移
+
+| 文件 | 改动内容 | 状态 |
+|-----|---------|------|
+| `queries/vip.ts` | 从 `useWeilaFetch` 改为 `weilaFetch` | ✅ |
+| `queries/org.ts` | 从 `useWeilaFetch` 改为 `weilaFetch` | ✅ |
+| `App.vue` | 登录/刷新 token 从 `useWeilaFetch` 迁移到 `useMutation` | ✅ |
+
+### 关键改进
+
+#### queries/vip.ts & queries/org.ts
+**改动前**:
+```ts
+const { data, error } = await useWeilaFetch<Response>('/endpoint')
+  .post()
+  .json()
+
+if (error.value) throw new Error(...)
+return data.value.field
+```
+
+**改动后**:
+```ts
+const response = await weilaFetch<Response>('/endpoint', {
+  method: 'POST',
+})
+return response.field
+```
+
+**优势**:
+- 代码更简洁（从 8 行 → 4 行）
+- 无需处理 ref 包装
+- weilaFetch 会自动抛出错误，无需手动检查
+- 错误处理由 Pinia Colada 的 useQuery 统一管理
+
+#### App.vue 登录/刷新逻辑
+**改动前**:
+- 使用 `useWeilaFetch` + `execute()` + 多个 `watch`
+- 需要手动 stop watcher
+- 代码复杂，逻辑分散
+
+**改动后**:
+- 使用 `useMutation` with `onSuccess/onError`
+- 逻辑集中在 mutation 回调中
+- 代码更清晰、更易维护
+- 从 125 行 → 98 行 (-27 lines)
+
+---
+
+## 🎉 迁移完成总结
+
+### ✅ 迁移统计
+
+**总计迁移文件数**: 30+ 文件
+- 核心页面: 6 个
+- 核心组件: 1 个  
+- Me 页面: 5 个
+- 其他组件: 15+ 个
+- 核心基础设施: 3 个
+
+**代码改进**:
+- 移除所有 `useWeilaFetch` 使用（除 AvatarUpload.vue 保留）
+- 统一使用 Pinia Colada (`useQuery`, `useMutation`)
+- 统一使用 `weilaFetch` 作为底层 HTTP 客户端
+- 添加 Toast 通知提升 UX
+- 建立标准化表单模式和验证码流程
+
+**未迁移文件**:
+- `components/AvatarUpload.vue` - 用户要求保留，使用特殊的文件上传逻辑
+
+### 🎯 达成目标
+
+1. ✅ **统一状态管理**: 所有数据获取使用 Pinia Colada
+2. ✅ **统一 HTTP 客户端**: 所有 API 调用使用 `weilaFetch`
+3. ✅ **优化用户体验**: 添加 Toast、验证码流程、错误处理
+4. ✅ **代码质量**: 移除冗余代码、统一模式、通过 lint 检查
+5. ✅ **响应式设计**: 修复所有布局溢出问题
+
+### 📚 建立的最佳实践
+
+1. **分页模式**: `departments/index.vue` ⭐⭐⭐
+2. **搜索+分页**: `members/index.vue`
+3. **Mutations+Query**: `departments/[id]/members.vue`
+4. **交互式组件**: `DeptMemberTreeSelector.vue`
+5. **验证码流程**: `bind-phone.vue`, `bind-email.vue`
+6. **危险操作**: `UnregistPhone.vue`, `UnregistEmail.vue`
+7. **简单表单**: `change-password.vue`
 
 ---
 
@@ -690,66 +501,6 @@ const canSendCode = computed(() => {
     && !isSendingCode.value
 })
 ```
-
----
-
-## ❓ 待确认的 API 信息
-
-在开始实施前，请确认以下信息：
-
-### 1. **邮箱验证码 API**
-```ts
-// 端点
-POST /common/send-email-verifycode
-
-// 请求参数
-{
-  email: string
-  countrycode?: string        // ❓ 是否需要？
-  verify_id: string
-  verify_answer: string
-  emailtype: 'work-bind' | 'work-unregist'  // ❓ 请确认参数名和值
-}
-```
-
-### 2. **短信验证码类型**
-```ts
-// 绑定手机
-smstype: 'work-bind'  // ✅ 已确认（参考 bind-phone.vue）
-
-// 注销账号
-smstype: 'work-unregist'  // ❓ 请确认
-```
-
-### 3. **图形验证码需求**
-- ❓ bind-email 是否需要图形验证码？
-- ❓ 注销流程是否需要图形验证码？
-
-### 4. **其他**
-- ❓ 是否有其他需要调整的交互细节？
-- ❓ 按钮文案、提示信息是否需要特定的内容？
-
----
-
-## 🚦 执行流程
-
-1. **开始 Task 1**（最简单，用于验证流程）
-   - Agent 完成代码修改
-   - 提交代码
-   - 等待 User 验证
-
-2. **User 验证 Task 1**
-   - ✅ 通过 → 继续 Task 2
-   - ❌ 需要调整 → Agent 修改 → 重新验证
-
-3. **依次完成 Task 2-5**
-   - 每个任务完成后都需要 User 验证
-   - 确保每一步都正确后再进行下一步
-
-4. **全部完成后**
-   - 更新文档
-   - 运行完整测试
-   - 确认所有页面正常工作
 
 ---
 

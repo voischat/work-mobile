@@ -25,7 +25,7 @@ const {
   query: () => weilaFetch<VipInfo>('/corp/org/get-my-vip', { method: 'POST' }),
 })
 
-const isLoading = computed(() => orgStatus.value === 'loading' || vipStatus.value === 'loading')
+const isLoading = computed(() => orgStatus.value === 'pending' || vipStatus.value === 'pending')
 const hasError = computed(() => !!orgError.value || !!vipError.value)
 </script>
 

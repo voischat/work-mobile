@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { LoginResponse } from '~/types/auth'
+import { useMutation } from '@pinia/colada'
 import { useRouteQuery } from '@vueuse/router'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
 import { isLimitedWebview } from './shared/const'
+import { weilaFetch } from './shared/instances'
 
 const { showToast } = useToast()
 
@@ -14,76 +16,66 @@ const queryAccount = useRouteQuery('account', '')
 const queryPassword = useRouteQuery('password', '')
 const queryCountryCode = useRouteQuery('country-code', '')
 
-// 登录 fetch（非立即执行）
-const {
-  data: loginData,
-  error: loginError,
-  execute: loginExecute,
-} = useWeilaFetch<LoginResponse>('/corp/auth/login', {
-  immediate: false,
-}).post(() => ({
-  country_code: queryCountryCode.value,
-  account: queryAccount.value,
-  password: queryPassword.value,
-})).json()
-
-// 刷新 token 的 fetch（非立即执行）
-const {
-  data: refreshData,
-  error: refreshError,
-  execute: refreshTokenExecute,
-} = useWeilaFetch<{
-  access_token: string
-  expires_in: number
-  refresh_token: string
-}>('/corp/auth/refresh', {
-  immediate: false,
-}).post(() => ({
-  refresh_token: refreshToken.value!,
-})).json()
-
 const router = useRouter()
 
-const stopLoginWatcher = watch([queryAccount, queryPassword], ([account, password]) => {
-  if (account && password) {
-    stopLoginWatcher()
+// 登录 mutation
+const { mutate: login } = useMutation({
+  mutation: (params: { country_code: string, account: string, password: string }) =>
+    weilaFetch<LoginResponse>('/corp/auth/login', {
+      method: 'POST',
+      body: params,
+    }),
+  onSuccess(data) {
+    saveAuth(data.access_token, data.refresh_token, data.expires_in)
     isLimitedWebview.value = true
-    loginExecute().then(() => {
-      isLimitedWebview.value = !loginError.value
-      router.replace('/login')
+    router.replace('/login')
+  },
+  onError(error) {
+    showToast(error.message)
+    clearAuth()
+    isLimitedWebview.value = false
+    router.replace('/login')
+  },
+})
+
+// 刷新 token mutation
+const { mutate: refreshTokenMutate } = useMutation({
+  mutation: (params: { refresh_token: string }) =>
+    weilaFetch<{
+      access_token: string
+      expires_in: number
+      refresh_token: string
+    }>('/corp/auth/refresh', {
+      method: 'POST',
+      body: params,
+    }),
+  onSuccess(data) {
+    saveAuth(data.access_token, data.refresh_token, data.expires_in)
+  },
+  onError() {
+    clearAuth()
+  },
+})
+
+// 监听 URL query 参数，自动登录
+watch([queryAccount, queryPassword], ([account, password]) => {
+  if (account && password) {
+    isLimitedWebview.value = true
+    login({
+      country_code: queryCountryCode.value,
+      account,
+      password,
     })
   }
 }, { immediate: true })
 
-// 监听登录结果
-const stopLoginResultWatcher = watch([loginData, loginError], () => {
-  if (loginError.value) {
-    showToast(loginError.value.message)
-    clearAuth()
-    stopLoginResultWatcher()
-    return
-  }
-  if (loginData.value) {
-    saveAuth(loginData.value.access_token, loginData.value.refresh_token, loginData.value.expires_in)
-    stopLoginResultWatcher()
-  }
-})
-
-// 监听刷新结果
-watch([refreshData, refreshError], () => {
-  if (refreshError.value) {
-    clearAuth()
-    return
-  }
-  if (refreshData.value) {
-    saveAuth(refreshData.value.access_token, refreshData.value.refresh_token, refreshData.value.expires_in)
-  }
-})
-
 // 刷新 token 的函数
 function refreshAccessToken() {
-  if (refreshToken.value)
-    refreshTokenExecute()
+  if (refreshToken.value) {
+    refreshTokenMutate({
+      refresh_token: refreshToken.value,
+    })
+  }
 }
 
 // 使用 useIntervalFn 每 3 分钟刷新一次 token

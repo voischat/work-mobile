@@ -1,22 +1,14 @@
 import type { OrgInfo } from '~/types/org'
 import { defineQuery, useQuery } from '@pinia/colada'
 import { computed } from 'vue'
-import { useWeilaFetch } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 async function fetchOrgInfo(): Promise<OrgInfo> {
-  const { data, error: fetchError } = await useWeilaFetch<{ org: OrgInfo }>('/corp/org/get-my-org')
-    .post()
-    .json()
+  const response = await weilaFetch<{ org: OrgInfo }>('/corp/org/get-my-org', {
+    method: 'POST',
+  })
 
-  if (fetchError.value) {
-    throw new Error(fetchError.value.message || '获取组织信息失败')
-  }
-
-  if (!data.value) {
-    throw new Error('获取组织信息失败')
-  }
-
-  return data.value.org
+  return response.org
 }
 
 export const useOrg = defineQuery(() => {
