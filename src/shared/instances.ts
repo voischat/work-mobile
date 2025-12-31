@@ -1,9 +1,12 @@
 import type { RefreshTokenResult } from 'weila-auth'
 import { getRootUrl } from '@kvoon/utils'
+import md5 from 'md5'
+import { nanoid } from 'nanoid'
 import { createStorage } from 'unstorage'
 import localStorage from 'unstorage/drivers/localstorage'
 import { createWeilaFetch } from 'weila-auth'
 import { useAuth } from '~/composables/useAuth'
+import { appid, appkey } from '~/shared/const'
 import { name } from '../../package.json'
 
 export const storage = createStorage({
@@ -13,6 +16,34 @@ export const storage = createStorage({
 })
 
 const { refreshToken, saveAuth, clearAuth } = useAuth()
+
+function getMd5Middle8Chars(md5Str: string): string {
+  return md5Str.slice(12, 20)
+}
+
+function genUUID(appName: string): string {
+  const uuidKey = `__${appName}-uuid__`
+  let uuid = window.localStorage.getItem(uuidKey)
+  if (!uuid) {
+    uuid = nanoid()
+    window.localStorage.setItem(uuidKey, uuid)
+  }
+  return uuid
+}
+
+function generateV2Query(): Record<string, string> {
+  const timestamp = Date.now() || -1
+  const et = Math.floor(timestamp / 1000)
+  const app_sign = md5(`${et}${appkey.value}`)
+  const app_sign_v2 = getMd5Middle8Chars(app_sign)
+  const uuid = genUUID('weila-work-webview')
+  return {
+    appid: appid.value,
+    et: String(et),
+    sign: app_sign_v2,
+    uuid,
+  }
+}
 
 export const weilaFetch = createWeilaFetch({
   appId: appid.value,
@@ -24,7 +55,13 @@ export const weilaFetch = createWeilaFetch({
       throw new Error('No refresh token available')
     }
 
-    const response = await fetch(`${getRootUrl(window.location.href)}/v2/corp/auth/refresh`, {
+    const queryParams = generateV2Query()
+    const urlObj = new URL(`${getRootUrl(window.location.href)}/v2/corp/auth/refresh`)
+    Object.entries(queryParams).forEach(([key, value]) => {
+      urlObj.searchParams.set(key, value)
+    })
+
+    const response = await fetch(urlObj.toString(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
