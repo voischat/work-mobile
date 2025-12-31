@@ -10,6 +10,10 @@ body,
   height: 100%;
 }
 
+* {
+  outline: 0;
+}
+
 /* reset */
 button {
   background: transparent;
