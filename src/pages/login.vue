@@ -2,13 +2,14 @@
 import type { LoginResponse } from '~/types/auth'
 import { useMutation } from '@pinia/colada'
 import md5 from 'md5'
-import { computed, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { useAuth } from '~/composables/useAuth'
 import { useForm } from '~/composables/useForm'
+import { useToast } from '~/composables/useToast'
+import { weilaFetch } from '~/shared/instances'
 
-// 表单验证 schema
 const loginSchema = z.object({
   account: z.string().min(1, '账号不能为空'),
   password: z.string().min(1, '密码不能为空'),
@@ -18,25 +19,16 @@ type LoginForm = z.infer<typeof loginSchema>
 
 const router = useRouter()
 const { saveAuth } = useAuth()
+const { showToast } = useToast()
 
-// 表单数据
 const formData = ref<LoginForm>({
   account: '19225302194',
   password: '123456',
 })
 
-// 表单验证
 const { errors, validate } = useForm(loginSchema)
 
-// 调用登录 API（非立即执行）
-// const { error, isFetching, isFinished, data, execute: login } = useWeilaFetch<LoginResponse>('/corp/auth/login', {
-//   immediate: false,
-// }).post(() => ({
-//   account: formData.value.account,
-//   password: md5(formData.value.password),
-// })).json()
-
-const { mutateAsync: login, error, isLoading: isFetching, status, data } = useMutation({
+const { mutate: login, isPending: isFetching } = useMutation({
   mutation: () => weilaFetch<LoginResponse>('/corp/auth/login', {
     method: 'POST',
     body: {
@@ -44,28 +36,19 @@ const { mutateAsync: login, error, isLoading: isFetching, status, data } = useMu
       password: md5(formData.value.password),
     },
   }),
-})
-
-const errorMessage = computed(() => {
-  return error.value?.message || ''
-})
-
-// 监听登录成功
-watch([data, status, error], ([loginData, status, error]) => {
-  if (status !== 'success') {
-    return
-  }
-  if (error) {
-    return
-  }
-  if (loginData) {
+  onSuccess(loginData) {
+    showToast('登录成功')
     saveAuth(loginData.access_token, loginData.refresh_token, loginData.expires_in)
     router.push('/')
-  }
+  },
+  onError(error) {
+    showToast(error.message || '登录失败')
+  },
 })
 
 function handleLogin() {
   if (!validate(formData.value)) {
+    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
     return
   }
   login()
@@ -117,11 +100,6 @@ function handleLogin() {
             <div v-if="errors.password" class="mt-1 text-sm text-red-600">
               {{ errors.password }}
             </div>
-          </div>
-
-          <!-- 错误提示 -->
-          <div v-if="errorMessage" class="text-sm text-red-600">
-            {{ errorMessage }}
           </div>
 
           <!-- 登录按钮 -->

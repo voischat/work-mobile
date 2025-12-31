@@ -1,590 +1,778 @@
 # useWeilaFetch → Pinia Colada 迁移计划
 
-> 迁移进度：18/29 文件已迁移 (62%)
+> 迁移进度：已完成核心页面迁移 ✅
 
 ## 📊 迁移概览
 
-### ✅ 已完成迁移 (18 文件)
+### ✅ 已完成迁移
 
-#### Components (15 个组件)
-- [x] DeptActions.vue - useMutation for delete
-- [x] DeptMemberTreeSelector.vue - useQuery (部分，需完成)
-- [x] EditDeptForm.vue - useMutation + useQueryCache
-- [x] EditGroupForm.vue - useMutation + useQuery
-- [x] EditMemberForm.vue - useMutation + useQuery
-- [x] GroupActions.vue - useMutation for delete
-- [x] ImageVerifyCode.vue - useQuery for image
-- [x] MemberActions.vue - useMutation for delete
-- [x] MemberStateToggle.vue - useMutation
-- [x] VipCard.vue - useQuery
-- [x] forms/DeptAddForm.vue - useMutation
-- [x] forms/DeviceAddForm.vue - useMutation + useQuery
-- [x] forms/GroupAddForm.vue - useMutation + useQuery
-- [x] forms/MemberAddForm.vue - useMutation + useQuery
-- [x] forms/ResetPasswordForm.vue - useMutation
+#### 核心页面 (6 个)
+- [x] pages/index.vue - 组织和 VIP 信息
+- [x] pages/directory/departments/index.vue - 部门列表（分页）
+- [x] pages/directory/groups/index.vue - 群组列表（分页）
+- [x] pages/directory/members/index.vue - 成员列表（分页 + 搜索）
+- [x] pages/directory/departments/[id]/members.vue - 部门成员（分页 + 搜索 + mutations）
+- [x] pages/directory/groups/[id]/members.vue - 群组成员（分页 + mutations）
 
-#### Pages (3 个页面)
-- [x] pages/login.vue - useMutation
-- [x] pages/me/index.vue - useQuery
-- [x] pages/directory/members/index.vue - useQuery
+#### 核心组件 (1 个)
+- [x] components/DeptMemberTreeSelector.vue - 部门成员树选择器（简化为 useQuery + weilaFetch）
+
+#### 其他已迁移 (18 个组件/页面)
+- [x] 各种 Actions 组件 (DeptActions, GroupActions, MemberActions)
+- [x] 各种 Form 组件 (AddForm, EditForm, ResetPasswordForm)
+- [x] 其他组件 (ImageVerifyCode, VipCard, MemberStateToggle)
+- [x] 用户页面 (login.vue, me/index.vue, me/bind-phone.vue)
 
 ---
 
-## 🚀 待迁移任务
+## 🎯 正确的 Pinia Colada 模式
 
-### Phase 1: 简单 POST 请求迁移 (优先级：高 ⭐⭐⭐)
+### 核心原则
 
-> 这些是最简单的迁移，使用 useQuery 即可，预计 10 分钟
+1. **watch data 添加 immediate: true**
+   ```ts
+   watch(data, (newData) => {
+     if (newData) {
+       // 处理数据
+     }
+   }, { immediate: true })
+   ```
 
-#### 1.1 组织信息页面
-- [x] **pages/index.vue**
-  - Endpoints:
-    - `/corp/org/get-my-org` - 获取组织信息
-    - `/corp/org/get-my-vip` - 获取 VIP 信息
-  - Pattern: `useWeilaFetch().post().json()` → `useQuery()` with weilaFetch
-  - 参考：`pages/directory/members/index.vue` 的 depts query 写法
-  - 注意：虽然是 POST 请求，但语义上是查询操作
+2. **status 使用 'pending' 不是 'loading'**
+   ```ts
+   // ✅ 正确
+   if (status.value === 'pending') { }
+   
+   // ❌ 错误
+   if (status.value === 'loading') { }
+   ```
 
----
+3. **loadNextPage 不检查 status**
+   ```ts
+   // ✅ 正确
+   function loadNextPage() {
+     if (hasNextPage.value)
+       currentPage.value += 1
+   }
+   
+   // ❌ 错误
+   function loadNextPage() {
+     if (hasNextPage.value && status.value !== 'loading')
+       currentPage.value += 1
+   }
+   ```
 
-### Phase 2: 简单分页列表 (优先级：高 ⭐⭐⭐)
+### 标准分页模式（参考 departments/index.vue）
 
-> 使用 useQuery + 手动累积模式（参考 members/index.vue），预计每个 20-30 分钟
-
-**📌 分页标准模式**（照搬 `pages/directory/members/index.vue`）：
-- `useQuery` + `currentPage` ref + `accumulatedData` ref
-- `placeholderData: previousData => previousData` 保持旧数据
-- watch `state.value` 手动累积数据（去重）
-- watch `debouncedSearchKey` 重置分页
-- `useInfiniteScroll` 触发 `loadNextPage()`
-- `hasNextPage` computed 判断是否有更多数据
-
-#### 2.1 部门列表
-- [x] **pages/directory/departments/index.vue**
-  - Endpoints:
-    - `/corp/address/get-my-manage-dept-list?page={page}&size=20` - 分页获取部门
-  - Current: 手动管理 `curPage.value++`, `allDepts.value.push(...)`
-  - Target: 使用 `useQuery` + 手动累积模式
-  - 迁移要点：
-    ```ts
-    // 1. 定义状态
-    const currentPage = ref(0)
-    const accumulatedDepts = ref<Dept[]>([])
-    const searchKey = ref('')
-    const debouncedSearchKey = refDebounced(searchKey, 1000)
-    
-    // 2. 使用 useQuery
-    const { state, asyncStatus } = useQuery({
-      key: () => ['dept', 'list', { key: debouncedSearchKey.value, page: currentPage.value }],
-      query: async () => {
-        return await weilaFetch<DeptListResponse>(
-          `/corp/address/get-my-manage-dept-list?page=${currentPage.value}&size=20`,
-          { method: 'POST', body: { key: debouncedSearchKey.value } }
-        )
-      },
-      placeholderData: previousData => previousData,
-    })
-    
-    // 3. watch state 累积数据
-    watch(() => state.value, (state) => {
-      if (state?.status === 'success' && state.data) {
-        if (currentPage.value === 0) {
-          accumulatedDepts.value = state.data.list || []
-        } else {
-          const newItems = state.data.list || []
-          const existingIds = new Set(accumulatedDepts.value.map(d => d.id))
-          const uniqueNew = newItems.filter(d => !existingIds.has(d.id))
-          accumulatedDepts.value = [...accumulatedDepts.value, ...uniqueNew]
-        }
-      }
-    })
-    
-    // 4. 搜索重置
-    watch(debouncedSearchKey, () => {
-      currentPage.value = 0
-      accumulatedDepts.value = []
-    })
-    
-    // 5. 加载更多
-    const hasNextPage = computed(() => {
-      if (!state.value?.data) return false
-      return accumulatedDepts.value.length < (state.value.data.count || 0)
-    })
-    
-    function loadNextPage() {
-      if (hasNextPage.value && asyncStatus.value !== 'loading')
-        currentPage.value += 1
-    }
-    
-    // 6. 无限滚动
-    const loadMoreEl = useTemplateRef('load-more')
-    useInfiniteScroll(loadMoreEl, loadNextPage, { distance: 100 })
-    ```
-
-#### 2.2 分组列表
-- [x] **pages/directory/groups/index.vue**
-  - Endpoints:
-    - `/corp/group/get-my-manage-group-list?page={page}&size=20` - 分页获取分组
-  - Pattern: 完全照搬 2.1 的模式
-  - 迁移要点：同 2.1，只需替换 endpoint 和类型
-
----
-
-### Phase 3: 复杂页面（分页 + Mutations）(优先级：高 ⭐⭐⭐)
-
-> 混合了分页查询、搜索、模态框数据获取、以及添加成员操作
-> 使用 useQuery + 手动累积模式（参考 members/index.vue）+ useMutation
-
-#### 3.1 部门成员页
-- [ ] **pages/directory/departments/[id]/members.vue**
-  - Endpoints:
-    - `/corp/address/get-dept-member-list` - 分页成员列表（带搜索）
-    - `/corp/address/get-my-manage-all-dept` - 部门列表（已有 useQuery，保持）
-    - `/corp/address/add-dept-members` - 添加成员（mutation）
-    - `/corp/address/get-dept-all-member` - 获取部门所有成员（模态框）
-  - 迁移策略：
-    1. 成员列表 → `useQuery` + 手动累积（照搬 members/index.vue）
-       - key: `['dept', deptId, 'members', 'list', { key: keyword, page }]`
-    2. 添加成员 → `useMutation` + invalidate 成员列表
-    3. 部门所有成员 → 保持现有 `immediate: false` 或改为 conditional `useQuery`
-
-#### 3.2 分组成员页
-- [ ] **pages/directory/groups/[id]/members.vue**
-  - Endpoints:
-    - `/corp/group/get-my-manage-group-list` - 分组信息
-    - `/corp/group/get-group-member-list` - 分页成员列表
-    - `/corp/address/get-my-manage-all-dept` - 部门列表
-    - `/corp/group/add-group-members` - 添加成员
-    - `/corp/group/get-group-all-member` - 获取分组所有成员
-  - 迁移策略：同 3.1
-
----
-
-### Phase 4: 特殊组件完善 (优先级：中 ⭐)
-
-#### 4.1 部门成员树选择器
-- [ ] **components/DeptMemberTreeSelector.vue**
-  - Current: 混合使用 useQuery (部门列表) + useWeilaFetch (成员列表)
-  - Endpoints:
-    - `/corp/address/get-dept-all-member` - 根据 dept_id 获取成员
-  - 迁移策略：
-    - 移除 `Map<number, ReturnType<typeof useWeilaFetch>>`
-    - 使用 `useQuery({ key: () => ['dept-members', deptId.value], enabled: computed(() => !!deptId.value) })`
-    - 动态 key 确保每个部门独立缓存
-
----
-
-### Phase 5: 用户相关 Mutations (优先级：低 ⭐)
-
-> 简单的 immediate:false mutations，使用 useMutation
-> **这些页面优先级最低**，可以最后处理或保持现有实现
-
-#### 5.1 绑定手机
-- [ ] **pages/me/bind-phone.vue**
-  - Endpoints:
-    - `/common/send-sms-verifycode` - 发送验证码
-    - `/corp/user/bind-phone` - 绑定手机
-  - Pattern: `useWeilaFetch(url, {immediate: false}).post()` → `useMutation()`
-  - 迁移后：添加 query invalidation (userInfo)
-
-#### 5.2 绑定邮箱
-- [ ] **pages/me/bind-email.vue**
-  - Endpoints:
-    - `/corp/user/bind-email` - 绑定邮箱
-  - Pattern: 同上
-  - 迁移后：添加 query invalidation
-
-#### 5.3 修改密码
-- [ ] **pages/me/change-password.vue**
-  - Endpoints:
-    - `/corp/user/change-password` - 修改密码
-  - Pattern: 同上
-  - 迁移后：成功后跳转登录页
-
-#### 5.4 注销账号（邮箱）
-- [ ] **pages/me/UnregistEmail.vue**
-  - Endpoints:
-    - `/corp/user/unregist-by-email` - 通过邮箱注销
-  - Pattern: 同上
-  - 迁移后：成功后清理认证并跳转
-
-#### 5.5 注销账号（手机）
-- [ ] **pages/me/UnregistPhone.vue**
-  - Endpoints:
-    - `/corp/user/unregist` - 通过手机注销
-  - Pattern: 同上
-  - 迁移后：成功后清理认证并跳转
-
----
-
-### Phase 6: Query Invalidation 系统 (优先级：高 ⭐⭐⭐)
-
-> 在完成所有 mutations 迁移后，统一添加 query invalidation 逻辑
-
-- [ ] **建立 Query Key 规范**
-  ```ts
-  // 统一的 query key 定义
-  export const queryKeys = {
-    // 组织相关
-    org: ['org'] as const,
-    vip: ['vip'] as const,
-    
-    // 部门相关
-    departments: ['departments'] as const,
-    departmentList: (page: number, keyword?: string) => ['departments', 'list', page, keyword] as const,
-    department: (id: number) => ['departments', id] as const,
-    departmentMembers: (id: number, keyword?: string) => ['departments', id, 'members', keyword] as const,
-    
-    // 分组相关
-    groups: ['groups'] as const,
-    groupList: (page: number, keyword?: string) => ['groups', 'list', page, keyword] as const,
-    group: (id: number) => ['groups', id] as const,
-    groupMembers: (id: number) => ['groups', id, 'members'] as const,
-    
-    // 成员相关
-    members: ['members'] as const,
-    member: (id: number) => ['members', id] as const,
-    
-    // 用户相关
-    userInfo: ['user', 'info'] as const,
-  }
-  ```
-
-- [ ] **为所有 Mutations 添加 Invalidation**
-  - 创建/编辑/删除部门 → invalidate `queryKeys.departments`
-  - 创建/编辑/删除分组 → invalidate `queryKeys.groups`
-  - 添加/删除成员 → invalidate 相关的 `departmentMembers` / `groupMembers`
-  - 修改用户信息 → invalidate `queryKeys.userInfo`
-
-- [ ] **测试 Invalidation 逻辑**
-  - 确保创建后列表自动刷新
-  - 确保编辑后详情自动刷新
-  - 确保删除后列表自动更新
-
----
-
-### Phase 7: 清理工作 (优先级：低 ⭐)
-
-- [ ] **移除 useWeilaFetch 相关代码**
-  - 确认所有页面都已迁移
-  - 删除或标记 `composables/useWeilaFetch.ts` 为 deprecated
-  - 更新文档
-
-- [ ] **优化性能**
-  - 添加 `staleTime` 配置，减少不必要的重新请求
-  - 添加 `gcTime` (原 cacheTime) 配置
-  - 评估是否需要 prefetch
-
-- [ ] **完善错误处理**
-  - 统一错误提示样式
-  - 添加重试逻辑（retry）
-  - 添加离线提示
-
----
-
-## 🔧 迁移模式参考
-
-### 模式 1: Simple Query (POST → useQuery)
-
-**Before:**
 ```ts
-const { data, error, isFetching } = useWeilaFetch<Type>('/corp/endpoint')
-  .post()
-  .json()
-```
-
-**After:**
-```ts
-const { data, error, isPending } = useQuery({
-  key: ['endpoint'],
-  query: () => weilaApi.v2.fetch('/corp/endpoint', { method: 'POST' }),
-})
-```
-
----
-
-### 模式 2: Mutation (immediate: false → useMutation)
-
-**Before:**
-```ts
-const { execute: doAction } = useWeilaFetch('/corp/endpoint', { immediate: false })
-  .post(() => ({ param: value.value }))
-  .json()
-```
-
-**After:**
-```ts
-const queryCache = useQueryCache()
-const { mutate: doAction, isPending } = useMutation({
-  mutation: (params: ParamsType) => 
-    weilaApi.v2.fetch('/corp/endpoint', { body: params }),
-  async onSettled() {
-    await queryCache.invalidateQueries({ key: ['related-query'] })
-  },
-})
-```
-
----
-
-### 模式 3: Pagination (useQuery + 手动累积) ⭐ 标准模式
-
-> **参考实现**：`pages/directory/members/index.vue`
-
-**Before:**
-```ts
-const curPage = ref(0)
-const allItems = ref<Item[]>([])
-
-const url = computed(() => `/corp/endpoint?page=${curPage.value}&size=20`)
-const { data: pageData } = useWeilaFetch<Response>(url).post().json()
-
-watch(pageData, (data) => {
-  if (data?.list) {
-    allItems.value.push(...data.list)
-  }
-})
-
-function loadMore() {
-  curPage.value++
-}
-```
-
-**After:**
-```ts
-import { useQuery } from '@pinia/colada'
-import { useInfiniteScroll, refDebounced } from '@vueuse/core'
-import { weilaFetch } from '~/shared/instances'
-
-// 1. 状态定义
+// 1. 定义状态
 const currentPage = ref(0)
 const accumulatedItems = ref<Item[]>([])
-const searchKey = shallowRef('')
-const debouncedSearchKey = refDebounced(searchKey, 1000)
+const pageSize = 10
 
-// 2. useQuery 定义
-const { state, asyncStatus, error } = useQuery({
-  key: () => ['items', 'list', { key: debouncedSearchKey.value, page: currentPage.value }],
+// 2. useQuery
+const { data, status, error } = useQuery({
+  key: () => ['items', 'list', { page: currentPage.value }],
   query: async () => {
     return await weilaFetch<Response>(
-      `/corp/endpoint?page=${currentPage.value}&size=20`,
-      {
-        method: 'POST',
-        body: { key: debouncedSearchKey.value },
-      }
+      `/endpoint?page=${currentPage.value}&size=${pageSize}`,
+      { method: 'POST' }
     )
   },
-  placeholderData: previousData => previousData, // 保持旧数据显示
 })
 
-// 3. watch state 手动累积数据
-watch(() => state.value, (state) => {
-  if (state?.status === 'success' && state.data) {
+// 3. watch data (immediate: true)
+watch(data, (newData) => {
+  if (newData) {
     if (currentPage.value === 0) {
-      // 首页：直接替换
-      accumulatedItems.value = state.data.list || []
-    } else {
-      // 翻页：追加（去重）
-      const newItems = state.data.list || []
-      const existingIds = new Set(accumulatedItems.value.map(item => item.id))
-      const uniqueNewItems = newItems.filter(item => !existingIds.has(item.id))
-      accumulatedItems.value = [...accumulatedItems.value, ...uniqueNewItems]
+      accumulatedItems.value = newData.items || []
+    }
+    else {
+      const newItems = newData.items || []
+      const existingIds = new Set(accumulatedItems.value.map(i => i.id))
+      const uniqueNew = newItems.filter(i => !existingIds.has(i.id))
+      accumulatedItems.value = [...accumulatedItems.value, ...uniqueNew]
     }
   }
-})
+}, { immediate: true })
 
-// 4. 搜索关键词变化时重置
-watch(debouncedSearchKey, () => {
-  currentPage.value = 0
-  accumulatedItems.value = []
-})
-
-// 5. 计算是否有下一页
+// 4. hasNextPage
 const hasNextPage = computed(() => {
-  if (!state.value?.data) return false
-  const loadedCount = accumulatedItems.value.length
-  return loadedCount < (state.value.data.count || 0)
+  if (!data.value)
+    return false
+  const lastPageSize = data.value.items?.length || 0
+  return lastPageSize >= pageSize
 })
 
-// 6. 加载下一页
+// 5. loadNextPage (不检查 status)
 function loadNextPage() {
-  if (hasNextPage.value && asyncStatus.value !== 'loading')
+  if (hasNextPage.value)
     currentPage.value += 1
 }
 
-// 7. 无限滚动
+// 6. 无限滚动
 const loadMoreEl = useTemplateRef('load-more')
 useInfiniteScroll(loadMoreEl, loadNextPage, { distance: 100 })
 ```
 
-**Template:**
+### Template 状态检查
+
 ```vue
 <template>
-  <div>
-    <!-- 搜索框 -->
-    <input v-model="searchKey" placeholder="搜索..." />
-    
-    <!-- Loading (首次) -->
-    <div v-if="asyncStatus === 'loading' && accumulatedItems.length === 0">
-      加载中...
-    </div>
-    
-    <!-- 错误 -->
-    <div v-else-if="error">
-      错误: {{ error.message }}
-    </div>
-    
-    <!-- 空状态 -->
-    <div v-if="accumulatedItems.length === 0 && asyncStatus !== 'loading'">
-      暂无数据
-    </div>
-    
-    <!-- 列表 -->
-    <div v-else>
-      <div v-for="item in accumulatedItems" :key="item.id">
-        {{ item.name }}
-      </div>
-    </div>
-    
-    <!-- 加载更多指示器 -->
-    <div v-if="hasNextPage" ref="load-more">
-      加载中...
-    </div>
-    
-    <!-- 已加载完成 -->
-    <div v-else-if="accumulatedItems.length > 0">
-      已加载全部数据（共 {{ state?.data?.count || 0 }} 条）
-    </div>
+  <!-- 首次加载 -->
+  <div v-if="status === 'pending' && items.length === 0">
+    加载中...
+  </div>
+  
+  <!-- 错误 -->
+  <div v-else-if="error">
+    错误: {{ error.message }}
+  </div>
+  
+  <!-- 空数据 -->
+  <div v-if="items.length === 0 && status !== 'pending'">
+    暂无数据
+  </div>
+  
+  <!-- 列表 -->
+  <div v-else>
+    <Item v-for="item in items" :key="item.id" :item="item" />
+  </div>
+  
+  <!-- 加载更多 -->
+  <div v-if="hasNextPage" ref="load-more">
+    加载中...
+  </div>
+  
+  <!-- 已加载完成 -->
+  <div v-else-if="items.length > 0">
+    已加载全部数据（共 {{ items.length }} 条）
   </div>
 </template>
 ```
 
-**关键点**：
-1. ✅ 使用 `placeholderData` 保持旧数据显示
-2. ✅ watch `state.value` 而不是 `data`，检查 `status === 'success'`
-3. ✅ 手动累积数据，page=0 时替换，page>0 时追加（去重）
-4. ✅ 搜索关键词变化时重置 page 和累积数据
-5. ✅ 使用 `useInfiniteScroll` 自动触发加载
-6. ✅ `asyncStatus === 'loading'` 判断加载状态
+### Mutations 模式
 
----
-
-### 模式 4: Conditional Query (模态框数据)
-
-**Before:**
 ```ts
-const { data, execute } = useWeilaFetch('/corp/endpoint', { immediate: false })
-  .post()
-  .json()
+const { mutate, isPending } = useMutation({
+  mutation: (params: Params) =>
+    weilaFetch('/endpoint', {
+      method: 'POST',
+      body: params,
+    }),
+  async onSuccess() {
+    showToast('操作成功')
+    await queryCache.invalidateQueries({ key: ['related-query'] })
+  },
+  onError(error) {
+    showToast(error.message || '操作失败')
+  },
+})
+```
 
-function openModal() {
-  showModal.value = true
-  execute()
+### 交互式组件数据加载（参考 DeptMemberTreeSelector）
+
+对于按需加载的交互式组件（树形、级联等）：
+
+```ts
+// ✅ 推荐：部门列表用 useQuery，成员数据用 weilaFetch + Map 缓存
+const { data: depts, status } = useQuery({
+  key: ['dept', 'my-manage'],
+  query: () => weilaFetch<Dept[]>('/get-all-dept', { method: 'POST' }),
+})
+
+const deptMembersCache = ref<Map<number, Member[]>>(new Map())
+const loadingDeptIds = ref<Set<number>>(new Set())
+
+async function loadDeptMembers(deptId: number) {
+  if (loadingDeptIds.value.has(deptId))
+    return
+
+  loadingDeptIds.value.add(deptId)
+  try {
+    const result = await weilaFetch<MemberListResponse>('/get-dept-members', {
+      method: 'POST',
+      body: { dept_id: deptId },
+    })
+    deptMembersCache.value.set(deptId, result.members || [])
+  }
+  finally {
+    loadingDeptIds.value.delete(deptId)
+  }
 }
 ```
 
-**After:**
-```ts
-const showModal = ref(false)
+**原因**：
+- 部门列表是组件加载时就需要的 → useQuery（缓存、自动管理）
+- 部门成员是用户交互触发的 → weilaFetch（简单、可控、按需）
 
-const { data, isPending } = useQuery({
-  key: ['modal-data'],
-  query: () => weilaApi.v2.fetch('/corp/endpoint', { method: 'POST' }),
-  enabled: computed(() => showModal.value),
-})
+### 图片加载处理（使用 Reka UI Avatar）
 
-// 当 showModal.value 变为 true 时，自动触发请求
+```vue
+<AvatarRoot class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+  <AvatarImage
+    :src="user.avatar"
+    :alt="user.name"
+    class="w-full h-full object-cover"
+  />
+  <AvatarFallback class="w-full h-full flex items-center justify-center">
+    <Icon icon="lucide:user" class="w-5 h-5 text-gray-400" />
+  </AvatarFallback>
+</AvatarRoot>
 ```
+
+**优势**：
+- 自动处理加载状态
+- 自动处理加载失败
+- 可选延迟显示 fallback (`delayMs`)
+- 无需手动处理 `@error` 事件
 
 ---
 
-### 模式 5: Search with Pagination (useQuery + 手动累积)
+## 🔄 Phase 5: Me 页面全面升级计划（方案 B - 完整升级）
 
-> 搜索关键词变化时，自动重置分页（参考模式 3）
+> **状态**: 进行中 🚧  
+> **策略**: 逐步升级，每个任务完成后验证再进行下一步
 
-**After:**
+### 📊 任务概览
+
+| 任务 | 文件 | 复杂度 | 状态 | 验证者 |
+|-----|------|--------|------|--------|
+| Task 1 | `pages/me/change-password.vue` | 🟢 简单 | ✅ 已完成 | @user |
+| Task 2 | `pages/me/bind-email.vue` | 🟡 中等 | ⏳ 待开始 | @user |
+| Task 3 | `pages/me/UnregistPhone.vue` | 🔴 复杂 | ⏳ 待开始 | @user |
+| Task 4 | `pages/me/UnregistEmail.vue` | 🔴 复杂 | ⏳ 待开始 | @user |
+| Task 5 | `types/auth.ts` | 🟢 简单 | ⏳ 待开始 | @user |
+
+### 🎯 升级目标
+
+1. **迁移到 Pinia Colada**: 所有页面从 `useWeilaFetch` 迁移到 `useMutation`
+2. **统一验证码流程**: 所有需要验证码的场景添加图形验证码 + 发送验证码按钮
+3. **优化错误处理**: 添加 Toast 提示，提升用户体验
+4. **对齐表单风格**: 参考 `bind-phone.vue` 和 `MemberAddForm.vue`
+
+### 🔍 当前问题分析
+
+#### 1. **bind-email.vue** - 缺失验证码发送流程
+**现状**: 
+- ❌ 只有邮箱输入框 + 验证码输入框
+- ❌ 用户需要自己去获取验证码
+
+**目标**:
+- ✅ 邮箱输入框
+- ✅ 图形验证码组件（`ImageVerifyCode`）
+- ✅ 邮箱验证码输入框 + 发送按钮（`CountDownButton`）
+
+#### 2. **UnregistPhone.vue & UnregistEmail.vue** - 缺失验证码发送流程
+**现状**:
+- ❌ 只有输入框，没有发送验证码的交互
+- ❌ 用户体验不友好
+
+**目标**:
+- ✅ 手机号/邮箱输入框
+- ✅ 图形验证码组件
+- ✅ 短信/邮箱验证码输入框 + 发送按钮
+- ✅ 危险操作警告提示
+
+#### 3. **change-password.vue** - 只需迁移
+**现状**:
+- ✅ 逻辑简单，不需要验证码
+- ❌ 使用旧的 `useWeilaFetch`
+
+**目标**:
+- ✅ 迁移到 `useMutation`
+- ✅ 优化错误处理
+
+---
+
+### 📝 Task 1: 升级 `change-password.vue`（最简单）
+
+**文件**: `src/pages/me/change-password.vue`  
+**复杂度**: 🟢 简单  
+**预计改动**: ~20 行
+
+#### 改动内容
+
+1. **迁移 API 调用**
+   ```ts
+   // ❌ 旧代码
+   const { error, isFetching, isFinished, data, execute: changePassword } = useWeilaFetch(...)
+   watch([data, isFinished, error], ...)
+   
+   // ✅ 新代码
+   const { mutate: changePassword, isPending: isFetching, error } = useMutation({
+     mutation: (params) => weilaFetch(...),
+     onSuccess() {
+       showToast('密码修改成功')
+       router.push('/me')
+     },
+     onError(error) {
+       showToast(error.message || '密码修改失败')
+     },
+   })
+   ```
+
+2. **优化表单提交**
+   ```ts
+   function handleSubmit() {
+     if (!validate(formData.value)) {
+       showToast(Object.values(errors.value)?.[0] || '表单验证失败')
+       return
+     }
+     changePassword({
+       old_password: md5(formData.value.old_password),
+       new_password: md5(formData.value.new_password),
+     })
+   }
+   ```
+
+3. **清理冗余代码**
+   - 移除不必要的 `computed`
+   - 移除冗余注释
+   - 简化 imports
+
+#### 验收标准
+- [x] 能正常提交修改密码
+- [x] 成功时显示 Toast 并跳转
+- [x] 失败时显示 Toast 提示错误信息
+- [x] 表单验证失败时显示 Toast
+- [x] 无 lint 错误
+
+#### ✅ 完成状态
+**状态**: ✅ 已完成并验证  
+**完成时间**: 2025-12-31  
+**额外改进**: 同时优化了 `login.vue` 页面，添加了 Toast 提示
+
+**login.vue 改进**:
+- ✅ 添加登录成功的 Toast 提示
+- ✅ 添加登录失败的 Toast 提示
+- ✅ 添加表单验证失败的 Toast 提示
+- ✅ 移除模板中冗余的错误信息显示
+- ✅ 清理不必要的 `watch`、`computed` 代码
+- ✅ 代码行数: 140 → 118 (-22 lines)
+
+---
+
+### 📝 Task 2: 升级 `bind-email.vue`（中等复杂度）
+
+**文件**: `src/pages/me/bind-email.vue`  
+**复杂度**: 🟡 中等  
+**预计改动**: ~80 行
+
+#### ⚠️ 需要确认的 API 信息
+
+在开始前需要确认：
+
+1. **发送邮箱验证码的 API 端点**
+   - 推测: `/common/send-email-verifycode`
+   - 请求参数格式:
+     ```ts
+     {
+       email: string
+       countrycode: string  // ❓ 邮箱验证码是否需要国家代码？
+       verify_id: string
+       verify_answer: string
+       emailtype: 'work-bind'  // ❓ 请确认参数名和值
+     }
+     ```
+
+2. **是否需要图形验证码？**
+   - 参考 `bind-phone` 使用了图形验证码
+   - ❓ 确认 `bind-email` 是否也需要
+
+#### 改动内容
+
+1. **UI 结构调整**
+   ```vue
+   <template>
+     <!-- 邮箱输入框 -->
+     <div>...</div>
+     
+     <!-- 图形验证码 -->
+     <div>
+       <ImageVerifyCode
+         ref="imageVerifyCodeRef"
+         v-model="formData.imageVerifyAnswer"
+         :disabled="isFetching"
+         :error="!!errors.imageVerifyAnswer"
+       />
+     </div>
+     
+     <!-- 邮箱验证码 + 发送按钮 -->
+     <div class="flex items-center space-x-2">
+       <input v-model="formData.verifycode" ... />
+       <CountDownButton
+         ref="countDownButtonRef"
+         :disabled="!canSendEmail"
+         :loading="isSendingEmail"
+         @click="handleSendEmailVerifyCode"
+       />
+     </div>
+   </template>
+   ```
+
+2. **表单数据扩展**
+   ```ts
+   const formData = ref({
+     email: '',
+     imageVerifyAnswer: '',  // 新增
+     verifycode: '',
+   })
+   ```
+
+3. **添加发送邮箱验证码逻辑**
+   ```ts
+   const { mutate: sendEmailVerifyCode, isPending: isSendingEmail } = useMutation({
+     mutation: (params: SendEmailVerifyCodeRequest) =>
+       weilaFetch('/common/send-email-verifycode', {
+         method: 'POST',
+         body: params,
+       }),
+     onSuccess() {
+       showToast('验证码已发送')
+       countDownButtonRef.value?.startCountdown()
+     },
+     onError(error) {
+       showToast(error.message || '发送验证码失败')
+       imageVerifyCodeRef.value?.refresh()
+     },
+   })
+   
+   const canSendEmail = computed(() => {
+     return formData.value.email
+       && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)
+       && formData.value.imageVerifyAnswer
+       && !isSendingEmail.value
+   })
+   ```
+
+4. **迁移绑定邮箱逻辑**
+   ```ts
+   const { mutate: bindEmail, isPending: isFetching, error } = useMutation({
+     mutation: (params: BindEmailRequest) =>
+       weilaFetch('/corp/user/bind-email', {
+         method: 'POST',
+         body: params,
+       }),
+     onSuccess() {
+       showToast('邮箱绑定成功')
+       router.push('/me')
+     },
+     onError(error) {
+       showToast(error.message || '邮箱绑定失败')
+     },
+   })
+   ```
+
+#### 验收标准
+- [ ] 图形验证码正常显示和刷新
+- [ ] 填写邮箱和图形验证码后，发送按钮可点击
+- [ ] 点击发送按钮后，能收到邮箱验证码
+- [ ] 发送成功后开始倒计时
+- [ ] 填写验证码后能成功绑定邮箱
+- [ ] 所有错误都有 Toast 提示
+- [ ] 无 lint 错误
+
+---
+
+### 📝 Task 3: 升级 `UnregistPhone.vue`（复杂）
+
+**文件**: `src/pages/me/UnregistPhone.vue`  
+**复杂度**: 🔴 复杂  
+**预计改动**: ~90 行
+
+#### ⚠️ 需要确认的 API 信息
+
+1. **发送注销短信验证码的 smstype**
+   - 绑定手机使用: `'work-bind'`
+   - 注销账号使用: `'work-unregist'` ❓ 请确认
+
+2. **是否需要图形验证码？**
+   - ❓ 确认注销流程是否需要图形验证码
+
+#### 改动内容
+
+1. **UI 结构调整**（同 Task 2 模式）
+   - 添加图形验证码组件
+   - 添加发送验证码按钮
+   - 添加危险操作警告
+
+2. **表单数据扩展**
+   ```ts
+   const formData = ref({
+     phone: '',
+     country_code: '86',
+     imageVerifyAnswer: '',  // 新增
+     verifycode: '',
+   })
+   ```
+
+3. **添加发送短信验证码逻辑**
+   ```ts
+   const { mutate: sendSmsVerifyCode, isPending: isSendingSms } = useMutation({
+     mutation: (params: SendSmsVerifyCodeRequest) =>
+       weilaFetch('/common/send-sms-verifycode', {
+         method: 'POST',
+         body: params,
+       }),
+     onSuccess() {
+       showToast('验证码已发送')
+       countDownButtonRef.value?.startCountdown()
+     },
+     onError(error) {
+       showToast(error.message || '发送验证码失败')
+       imageVerifyCodeRef.value?.refresh()
+     },
+   })
+   ```
+
+4. **迁移注销逻辑**（保留确认对话框）
+   ```ts
+   const { mutate: unregister, isPending: isFetching, error } = useMutation({
+     mutation: (params: UnregistRequest) =>
+       weilaFetch('/corp/user/unregist', {
+         method: 'POST',
+         body: params,
+       }),
+     onSuccess() {
+       showToast('账号注销成功')
+       clearAuth()
+       router.push('/login')
+     },
+     onError(error) {
+       showToast(error.message || '账号注销失败')
+     },
+   })
+   ```
+
+#### 验收标准
+- [ ] 图形验证码正常显示
+- [ ] 能发送短信验证码
+- [ ] 倒计时功能正常
+- [ ] 提交时显示确认对话框
+- [ ] 注销成功后清除登录状态并跳转
+- [ ] 所有错误都有 Toast 提示
+- [ ] 无 lint 错误
+
+---
+
+### 📝 Task 4: 升级 `UnregistEmail.vue`（复杂）
+
+**文件**: `src/pages/me/UnregistEmail.vue`  
+**复杂度**: 🔴 复杂  
+**预计改动**: ~90 行
+
+#### ⚠️ 需要确认的 API 信息
+
+1. **发送注销邮箱验证码的 emailtype**
+   - 注销账号使用: `'work-unregist'` ❓ 请确认
+
+2. **是否需要图形验证码？**
+   - ❓ 确认注销流程是否需要图形验证码
+
+#### 改动内容
+
+与 Task 3 类似，但使用邮箱验证码：
+1. 添加图形验证码 + 邮箱验证码发送流程
+2. 迁移到 Pinia Colada
+3. 保留确认对话框
+
+#### 验收标准
+- [ ] 图形验证码正常显示
+- [ ] 能发送邮箱验证码
+- [ ] 倒计时功能正常
+- [ ] 提交时显示确认对话框
+- [ ] 注销成功后清除登录状态并跳转
+- [ ] 所有错误都有 Toast 提示
+- [ ] 无 lint 错误
+
+---
+
+### 📝 Task 5: 补充类型定义
+
+**文件**: `src/types/auth.ts`  
+**复杂度**: 🟢 简单  
+**预计改动**: ~10 行
+
+#### 改动内容
+
 ```ts
-const searchKey = shallowRef('')
-const debouncedSearchKey = refDebounced(searchKey, 1000)
-const currentPage = ref(0)
-const accumulatedItems = ref<Item[]>([])
+// 发送邮箱验证码请求参数
+export interface SendEmailVerifyCodeRequest {
+  email: string
+  countrycode?: string  // 根据实际 API 确定是否需要
+  verify_id: string
+  verify_answer: string
+  emailtype: string  // 'work-bind' | 'work-unregist'
+}
+```
 
-const { state, asyncStatus } = useQuery({
-  // key 中包含 searchKey，但累积逻辑通过 watch 处理
-  key: () => ['items', 'list', { key: debouncedSearchKey.value, page: currentPage.value }],
-  query: async () => {
-    return await weilaFetch<Response>(
-      `/corp/endpoint?page=${currentPage.value}&size=20`,
-      { method: 'POST', body: { key: debouncedSearchKey.value } }
-    )
-  },
-  placeholderData: previousData => previousData,
-})
+#### 验收标准
+- [ ] 类型定义准确
+- [ ] 所有引用处无类型错误
+- [ ] 无 lint 错误
 
-// 手动累积（同模式 3）
-watch(() => state.value, (state) => {
-  if (state?.status === 'success' && state.data) {
-    if (currentPage.value === 0) {
-      accumulatedItems.value = state.data.list || []
-    } else {
-      const newItems = state.data.list || []
-      const existingIds = new Set(accumulatedItems.value.map(item => item.id))
-      const uniqueNew = newItems.filter(item => !existingIds.has(item.id))
-      accumulatedItems.value = [...accumulatedItems.value, ...uniqueNew]
-    }
+---
+
+## 🎨 表单风格规范
+
+参考 `bind-phone.vue` 和 `MemberAddForm.vue`：
+
+### 1. **表单验证错误处理**
+
+```ts
+function handleSubmit() {
+  if (!validate(formData.value)) {
+    // 显示第一个验证错误
+    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
+    return
   }
-})
+  // 提交表单
+  submitMutation(formData.value)
+}
+```
 
-// 搜索关键词变化时，重置分页
-watch(debouncedSearchKey, () => {
-  currentPage.value = 0
-  accumulatedItems.value = []
+### 2. **API 错误处理**
+
+```ts
+const { mutate, isPending, error } = useMutation({
+  mutation: (params) => weilaFetch(...),
+  onSuccess() {
+    showToast('操作成功')
+    // 其他成功逻辑
+  },
+  onError(error) {
+    showToast(error.message || '操作失败')
+  },
 })
 ```
 
-**关键点**：
-- ✅ 搜索关键词包含在 query key 中
-- ✅ 使用 `refDebounced` 防抖（1000ms）
-- ✅ watch 搜索关键词变化，重置 `currentPage` 和 `accumulatedItems`
-- ✅ key 变化会触发新请求，但累积逻辑由 watch 控制
+### 3. **验证码发送流程**
+
+```vue
+<template>
+  <!-- 图形验证码 -->
+  <div>
+    <label>图形验证码</label>
+    <ImageVerifyCode
+      ref="imageVerifyCodeRef"
+      v-model="formData.imageVerifyAnswer"
+      :disabled="isFetching"
+      :error="!!errors.imageVerifyAnswer"
+    />
+    <p class="text-xs text-gray-500">点击图片可刷新验证码</p>
+  </div>
+
+  <!-- 短信/邮箱验证码 -->
+  <div>
+    <label>验证码</label>
+    <div class="flex items-center space-x-2">
+      <input v-model="formData.verifycode" ... />
+      <CountDownButton
+        ref="countDownButtonRef"
+        :disabled="!canSendCode"
+        :loading="isSendingCode"
+        @click="handleSendCode"
+      />
+    </div>
+    <p class="text-xs text-gray-500">请先输入图形验证码，然后点击发送验证码</p>
+  </div>
+</template>
+```
+
+### 4. **按钮状态管理**
+
+```ts
+const canSendCode = computed(() => {
+  return formData.value.contact  // 手机号或邮箱
+    && isValidContact.value       // 格式验证
+    && formData.value.imageVerifyAnswer
+    && !isSendingCode.value
+})
+```
 
 ---
 
-## 📝 注意事项
+## ❓ 待确认的 API 信息
 
-1. **渐进式迁移**：按 Phase 顺序进行，每个 Phase 完成后测试
-2. **保持向后兼容**：迁移期间保留 `useWeilaFetch`，确保其他页面正常运行
-3. **测试充分**：每迁移一个页面，测试所有功能点（列表、搜索、分页、CRUD）
-4. **错误处理**：pinia-colada 的 `error` 是 ref，直接使用即可（已解构）
-5. **Loading 状态**：`isFetching` → `asyncStatus` (query: 'loading' | 'idle'), `isLoading` (mutation)
-6. **Query Keys**：遵循规范，确保 invalidation 准确
-7. **使用 weilaFetch**：所有请求通过 `weilaFetch` (from `~/shared/instances`)，而非 `weilaApi.v2.fetch()`
-8. **分页模式**：统一使用 `useQuery` + 手动累积模式（参考 members/index.vue），不使用 useInfiniteQuery
+在开始实施前，请确认以下信息：
+
+### 1. **邮箱验证码 API**
+```ts
+// 端点
+POST /common/send-email-verifycode
+
+// 请求参数
+{
+  email: string
+  countrycode?: string        // ❓ 是否需要？
+  verify_id: string
+  verify_answer: string
+  emailtype: 'work-bind' | 'work-unregist'  // ❓ 请确认参数名和值
+}
+```
+
+### 2. **短信验证码类型**
+```ts
+// 绑定手机
+smstype: 'work-bind'  // ✅ 已确认（参考 bind-phone.vue）
+
+// 注销账号
+smstype: 'work-unregist'  // ❓ 请确认
+```
+
+### 3. **图形验证码需求**
+- ❓ bind-email 是否需要图形验证码？
+- ❓ 注销流程是否需要图形验证码？
+
+### 4. **其他**
+- ❓ 是否有其他需要调整的交互细节？
+- ❓ 按钮文案、提示信息是否需要特定的内容？
 
 ---
 
-## ⚡ 快速检查清单
+## 🚦 执行流程
 
-迁移每个文件时，确保：
+1. **开始 Task 1**（最简单，用于验证流程）
+   - Agent 完成代码修改
+   - 提交代码
+   - 等待 User 验证
 
-- [ ] 移除 `import { useWeilaFetch } from '~/composables/useWeilaFetch'`
-- [ ] 添加 `import { useQuery, useMutation, useQueryCache } from '@pinia/colada'`
-- [ ] 添加 `import { weilaFetch } from '~/shared/instances'`
-- [ ] 更新 loading 状态：`isFetching` → `asyncStatus`
-- [ ] 错误访问：直接使用解构后的 `error`（已是值）
-- [ ] 添加 query invalidation (mutations)
-- [ ] 定义清晰的 query keys
-- [ ] 分页使用手动累积模式（watch state.value）
-- [ ] 测试所有功能（CRUD、分页、搜索）
-- [ ] 检查 TypeScript 类型
-- [ ] 在 checkbox 上打勾 ✅
+2. **User 验证 Task 1**
+   - ✅ 通过 → 继续 Task 2
+   - ❌ 需要调整 → Agent 修改 → 重新验证
+
+3. **依次完成 Task 2-5**
+   - 每个任务完成后都需要 User 验证
+   - 确保每一步都正确后再进行下一步
+
+4. **全部完成后**
+   - 更新文档
+   - 运行完整测试
+   - 确认所有页面正常工作
 
 ---
 
-## 📚 参考资源
+## 📋 迁移检查清单
 
-- **标准分页实现**：`src/pages/directory/members/index.vue` ⭐⭐⭐
-- [Pinia Colada 官方文档](https://github.com/posva/pinia-colada)
-- [Query Keys 最佳实践](https://github.com/posva/pinia-colada/blob/main/docs/guide/query-keys.md)
-- [Pagination Guide](https://github.com/posva/pinia-colada/blob/main/docs/guide/paginated-queries.md)
-- [Query Invalidation](https://github.com/posva/pinia-colada/blob/main/docs/guide/query-invalidation.md)
-- 项目内部：`.claude/skills/data-fetching/SKILL.md`
+每次迁移文件时确保：
+
+- [ ] 移除 `useWeilaFetch` import
+- [ ] 添加 `useQuery/useMutation` import
+- [ ] 添加 `weilaFetch` import
+- [ ] watch data 添加 `{ immediate: true }`
+- [ ] 使用 `status === 'pending'` 而不是 `'loading'`
+- [ ] `loadNextPage` 不检查 status
+- [ ] Template 中使用正确的状态检查
+- [ ] 运行 `pnpm lint` 确保无错误
+- [ ] 测试功能正常
+
+---
+
+## 📚 参考文件
+
+- **标准分页实现**: `src/pages/directory/departments/index.vue` ⭐⭐⭐
+- **搜索 + 分页**: `src/pages/directory/members/index.vue`
+- **Mutations + Query**: `src/pages/directory/departments/[id]/members.vue`
+- **交互式组件**: `src/components/DeptMemberTreeSelector.vue`
+- **用户操作**: `src/pages/me/bind-phone.vue`
