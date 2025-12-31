@@ -85,10 +85,127 @@ const { mutate: editMember, isLoading, error } = useMutation({
       dept_id: payload.dept_id,
     },
   }),
-  onSuccess: () => {
-    // Invalidate member queries on success
+  onMutate(payload) {
     const queryCache = useQueryCache()
-    queryCache.invalidateQueries({ key: ['member'] })
+
+    // Helper function to update member in a list
+    const updateMemberInList = (list: any[] | undefined) => {
+      if (!list)
+        return list
+      return list.map(item =>
+        item.user_id === payload.user_id
+          ? { ...item, ...payload }
+          : item,
+      )
+    }
+
+    // Get all query entries and update them optimistically
+    const entries = queryCache.getEntries()
+    const oldData: Record<string, any> = {}
+
+    entries.forEach((entry) => {
+      const key = entry.key
+      // Match member list queries: ['member', 'list', ...]
+      if (Array.isArray(key) && key[0] === 'member' && key[1] === 'list') {
+        const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+        if (data?.members) {
+          oldData[JSON.stringify(key)] = data
+          queryCache.setQueryData(key, {
+            ...data,
+            members: updateMemberInList(data.members),
+          })
+        }
+      }
+      // Match dept member queries: ['dept', deptId, 'members', 'list', ...]
+      else if (Array.isArray(key) && key[0] === 'dept' && key[2] === 'members') {
+        const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+        if (data?.members) {
+          oldData[JSON.stringify(key)] = data
+          queryCache.setQueryData(key, {
+            ...data,
+            members: updateMemberInList(data.members),
+          })
+        }
+      }
+      // Match group member queries: ['group', groupId, 'members', 'list', ...]
+      else if (Array.isArray(key) && key[0] === 'group' && key[2] === 'members') {
+        const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+        if (data?.members) {
+          oldData[JSON.stringify(key)] = data
+          queryCache.setQueryData(key, {
+            ...data,
+            members: updateMemberInList(data.members),
+          })
+        }
+      }
+    })
+
+    // Cancel queries to prevent them from overwriting our optimistic update
+    queryCache.cancelQueries({ key: ['member', 'list'] })
+    queryCache.cancelQueries({ key: ['dept'] })
+    queryCache.cancelQueries({ key: ['group'] })
+
+    return { oldData }
+  },
+  onSuccess(response, payload) {
+    const queryCache = useQueryCache()
+    const serverMember = response.member
+
+    // Helper function to update member with server data
+    const updateMemberWithServerData = (list: any[] | undefined) => {
+      if (!list)
+        return list
+      return list.map(item =>
+        item.user_id === payload.user_id
+          ? { ...item, ...serverMember }
+          : item,
+      )
+    }
+
+    // Update all affected queries with server response
+    const entries = queryCache.getEntries()
+    entries.forEach((entry) => {
+      const key = entry.key
+      if (Array.isArray(key)
+        && ((key[0] === 'member' && key[1] === 'list')
+          || (key[0] === 'dept' && key[2] === 'members')
+          || (key[0] === 'group' && key[2] === 'members'))) {
+        const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+        if (data?.members) {
+          queryCache.setQueryData(key, {
+            ...data,
+            members: updateMemberWithServerData(data.members),
+          })
+        }
+      }
+    })
+
+    // Invalidate to refetch in background
+    queryCache.invalidateQueries({ key: ['member', 'list'] })
+    queryCache.invalidateQueries({ key: ['dept'] })
+    queryCache.invalidateQueries({ key: ['group'] })
+  },
+  onError(_error, _payload, context) {
+    const queryCache = useQueryCache()
+
+    // Rollback optimistic updates
+    if (context?.oldData) {
+      Object.entries(context.oldData).forEach(([keyStr, data]) => {
+        const key = JSON.parse(keyStr)
+        // Check if the current data is still our optimistic update before rolling back
+        const currentData = queryCache.getQueryData(key)
+        if (currentData) {
+          queryCache.setQueryData(key, data)
+        }
+      })
+    }
+  },
+  onSettled() {
+    const queryCache = useQueryCache()
+    // Ensure queries are invalidated even if onSuccess/onError didn't run
+    queryCache.invalidateQueries({ key: ['member', 'list'] })
+    queryCache.invalidateQueries({ key: ['dept'] })
+    queryCache.invalidateQueries({ key: ['group'] })
   },
 })
 

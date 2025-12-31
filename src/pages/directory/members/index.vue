@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import type { Dept, MemberListResponse } from '~/types/management'
-import { useQuery } from '@pinia/colada'
+import type { Dept, Member, MemberListResponse } from '~/types/management'
+import { useQuery, useQueryCache } from '@pinia/colada'
 import { refDebounced, useInfiniteScroll } from '@vueuse/core'
 import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { weilaFetch } from '~/shared/instances'
 
 const memberAddFormRef = useTemplateRef('memberAddFormRef')
 const deviceAddFormRef = useTemplateRef('deviceAddFormRef')
+const queryCache = useQueryCache()
+const { showToast } = useToast()
 
 const isMemberModalOpen = ref(false)
 const isDeviceModalOpen = ref(false)
@@ -33,10 +35,11 @@ const {
     )
     return result
   },
-  placeholderData: previousData => previousData,
+  // placeholderData: previousData => previousData,
 })
 
 watch(data, (newData) => {
+  console.log('newData', newData)
   if (newData) {
     if (currentPage.value === 0) {
       accumulatedMembers.value = newData.members || []
@@ -108,6 +111,92 @@ function handleDeviceCancel() {
   deviceAddFormRef.value?.reset()
   isDeviceModalOpen.value = false
 }
+
+async function handleDeleteMember(member: Member) {
+  // Helper function to remove member from list
+  const removeMemberFromList = (list: any[] | undefined) => {
+    if (!list)
+      return list
+    return list.filter(item => item.user_id !== member.user_id)
+  }
+
+  // Get current data for rollback
+  const entries = queryCache.getEntries()
+  const oldData: Record<string, any> = {}
+  const oldAccumulatedMembers = [...accumulatedMembers.value]
+
+  // Optimistically remove member from accumulated list
+  accumulatedMembers.value = accumulatedMembers.value.filter(m => m.user_id !== member.user_id)
+
+  // Optimistically remove member from all cache lists
+  entries.forEach((entry) => {
+    const key = entry.key
+    if (Array.isArray(key) && key[0] === 'member' && key[1] === 'list') {
+      const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+      if (data?.members) {
+        oldData[JSON.stringify(key)] = data
+        queryCache.setQueryData(key, {
+          ...data,
+          members: removeMemberFromList(data.members),
+          count: Math.max(0, (data.count || 0) - 1),
+        })
+      }
+    }
+  })
+
+  // Cancel queries to prevent overwriting optimistic update
+  queryCache.cancelQueries({ key: ['member', 'list'] })
+
+  try {
+    await weilaFetch('/corp/address/delete-member', {
+      method: 'POST',
+      body: { user_id: member.user_id },
+    })
+
+    // Show success toast
+    showToast('注销成功')
+
+    // On success, just invalidate to refetch in background
+    await queryCache.invalidateQueries({ key: ['member', 'list'] })
+  }
+  catch (error) {
+    // Show error toast
+    showToast('注销失败')
+
+    // Rollback accumulated members
+    accumulatedMembers.value = oldAccumulatedMembers
+
+    // Rollback cache
+    Object.entries(oldData).forEach(([keyStr, data]) => {
+      const key = JSON.parse(keyStr)
+      queryCache.setQueryData(key, data)
+    })
+    throw error
+  }
+}
+
+function handleEditMember(member: Member) {
+  // Update the member in accumulated list
+  // Note: EditMemberForm's optimistic update already updated the cache
+  // We just need to sync accumulatedMembers with cache data
+  const entries = queryCache.getEntries()
+  entries.forEach((entry) => {
+    const key = entry.key
+    if (Array.isArray(key) && key[0] === 'member' && key[1] === 'list') {
+      const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+      if (data?.members) {
+        // Find updated member from cache
+        const updatedMember = data.members.find(m => m.user_id === member.user_id)
+        if (updatedMember) {
+          // Update in accumulated list
+          accumulatedMembers.value = accumulatedMembers.value.map(m =>
+            m.user_id === member.user_id ? updatedMember : m,
+          )
+        }
+      }
+    }
+  })
+}
 </script>
 
 <template>
@@ -172,7 +261,11 @@ function handleDeviceCancel() {
             :dept-name="getDeptName(member.dept_id)"
           >
             <template #actions>
-              <MemberActions :member="member" />
+              <MemberActions
+                :member="member"
+                :handle-delete="handleDeleteMember"
+                :handle-edit-success="handleEditMember"
+              />
             </template>
           </MemberCard>
         </div>

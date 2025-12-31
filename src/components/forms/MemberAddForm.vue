@@ -60,9 +60,10 @@ const { mutateAsync: createMember, error } = useMutation({
     },
   }),
   onSuccess: () => {
-    // Invalidate member queries on success
+    // Invalidate all member-related queries on success
     const queryCache = useQueryCache()
-    queryCache.invalidateQueries({ key: ['member'] })
+    queryCache.invalidateQueries({ key: ['member', 'list'] })
+    queryCache.invalidateQueries({ key: ['dept'] })
   },
 })
 

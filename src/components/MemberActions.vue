@@ -18,6 +18,7 @@ import ResetPasswordModal from './ResetPasswordModal.vue'
 const props = defineProps<{
   member: Member
   handleDelete?: (member: Member) => Promise<void>
+  handleEditSuccess?: (updatedMember: Member) => void
 }>()
 
 const { showToast } = useToast()
@@ -36,7 +37,9 @@ const { mutate: deleteMember } = useMutation({
   onSuccess: () => {
     showToast('注销成功')
     // Invalidate all member-related queries
-    queryCache.invalidateQueries({ key: ['member'] })
+    queryCache.invalidateQueries({ key: ['member', 'list'] })
+    queryCache.invalidateQueries({ key: ['dept'] })
+    queryCache.invalidateQueries({ key: ['group'] })
   },
   onError: (error) => {
     console.error('删除失败:', error)
@@ -48,9 +51,14 @@ function handleEdit() {
   showEditModal.value = true
 }
 
-// 处理编辑成功 - invalidate queries instead of emitting refresh
+// 处理编辑成功 - Call custom handler if provided
 function handleEditSuccess() {
-  queryCache.invalidateQueries({ key: ['member'] })
+  if (props?.handleEditSuccess) {
+    // Custom handler will update accumulated members
+    // Note: We don't have the updated member data here,
+    // but EditMemberForm's optimistic update already handled the cache
+    props.handleEditSuccess(props.member)
+  }
 }
 
 function handleResetPasswordSuccess() {
@@ -59,13 +67,11 @@ function handleResetPasswordSuccess() {
 
 async function handleDeleteConfirm() {
   if (props?.handleDelete) {
-    // Use custom delete handler if provided
+    // Use custom delete handler if provided (handles optimistic updates)
     await props.handleDelete(props.member)
-    // Still invalidate queries after custom delete
-    queryCache.invalidateQueries({ key: ['member'] })
   }
   else {
-    // Use default delete mutation
+    // Use default delete mutation (as fallback)
     await deleteMember(props.member.user_id)
   }
 }

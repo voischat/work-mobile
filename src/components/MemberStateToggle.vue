@@ -14,7 +14,6 @@ const emit = defineEmits<{
 }>()
 
 const { showToast } = useToast()
-const queryCache = useQueryCache()
 
 // 使用 ref 管理状态（0=启用, 1=停用）
 const state = ref(props.member.state)
@@ -33,9 +32,73 @@ const { mutate: changeState, isLoading: isFetching } = useMutation({
     method: 'POST',
     body: payload,
   }),
-  onSuccess: () => {
-    // Invalidate member queries on success
-    queryCache.invalidateQueries({ key: ['member'] })
+  onMutate(payload) {
+    const queryCache = useQueryCache()
+
+    // Helper function to update member state in a list
+    const updateMemberState = (list: any[] | undefined) => {
+      if (!list)
+        return list
+      return list.map(item =>
+        item.user_id === payload.user_id
+          ? { ...item, state: payload.state }
+          : item,
+      )
+    }
+
+    // Get all query entries and update them optimistically
+    const entries = queryCache.getEntries()
+    const oldData: Record<string, any> = {}
+
+    entries.forEach((entry) => {
+      const key = entry.key
+      // Match member list queries
+      if (Array.isArray(key)
+        && ((key[0] === 'member' && key[1] === 'list')
+          || (key[0] === 'dept' && key[2] === 'members')
+          || (key[0] === 'group' && key[2] === 'members'))) {
+        const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+        if (data?.members) {
+          oldData[JSON.stringify(key)] = data
+          queryCache.setQueryData(key, {
+            ...data,
+            members: updateMemberState(data.members),
+          })
+        }
+      }
+    })
+
+    // Cancel queries to prevent overwriting
+    queryCache.cancelQueries({ key: ['member', 'list'] })
+    queryCache.cancelQueries({ key: ['dept'] })
+    queryCache.cancelQueries({ key: ['group'] })
+
+    return { oldData, oldState: state.value }
+  },
+  onSuccess(_data, payload) {
+    const queryCache = useQueryCache()
+    // Update local state
+    state.value = payload.state
+    // Invalidate to refetch in background
+    queryCache.invalidateQueries({ key: ['member', 'list'] })
+    queryCache.invalidateQueries({ key: ['dept'] })
+    queryCache.invalidateQueries({ key: ['group'] })
+  },
+  onError(_error, _payload, context) {
+    const queryCache = useQueryCache()
+
+    // Rollback state
+    if (context?.oldState !== undefined) {
+      state.value = context.oldState
+    }
+
+    // Rollback cache
+    if (context?.oldData) {
+      Object.entries(context.oldData).forEach(([keyStr, data]) => {
+        const key = JSON.parse(keyStr)
+        queryCache.setQueryData(key, data)
+      })
+    }
   },
 })
 
@@ -48,9 +111,8 @@ async function handleToggle() {
       user_id: props.member.user_id,
       state: newState.value,
     })
-    state.value = newState.value
-    showToast(state.value === 0 ? '已启用' : '已停用')
-    emit('updated', { ...props.member, state: state.value })
+    showToast(newState.value === 0 ? '已启用' : '已停用')
+    emit('updated', { ...props.member, state: newState.value })
   }
   catch (error) {
     console.error('修改状态失败:', error)

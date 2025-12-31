@@ -163,12 +163,93 @@ function openAddMemberModal() {
 }
 
 async function handleDeleteGroupMember(member: Member) {
-  await weilaFetch('/corp/group/delete-group-member', {
-    method: 'POST',
-    body: {
-      group_id: groupId.value,
-      user_id: member.user_id,
-    },
+  const queryCache = useQueryCache()
+
+  // Helper function to remove member from list
+  const removeMemberFromList = (list: any[] | undefined) => {
+    if (!list)
+      return list
+    return list.filter(item => item.user_id !== member.user_id)
+  }
+
+  // Get current data for rollback
+  const entries = queryCache.getEntries()
+  const oldData: Record<string, any> = {}
+  const oldAccumulatedMembers = [...accumulatedMembers.value]
+
+  // Optimistically remove member from accumulated list
+  accumulatedMembers.value = accumulatedMembers.value.filter(m => m.user_id !== member.user_id)
+
+  // Optimistically remove member from group member cache lists
+  entries.forEach((entry) => {
+    const key = entry.key
+    if (Array.isArray(key) && key[0] === 'group' && key[1] === groupId.value && key[2] === 'members') {
+      const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+      if (data?.members) {
+        oldData[JSON.stringify(key)] = data
+        queryCache.setQueryData(key, {
+          ...data,
+          members: removeMemberFromList(data.members),
+          count: Math.max(0, (data.count || 0) - 1),
+        })
+      }
+    }
+  })
+
+  // Cancel queries to prevent overwriting optimistic update
+  queryCache.cancelQueries({ key: ['group', groupId.value, 'members'] })
+
+  try {
+    await weilaFetch('/corp/group/delete-group-member', {
+      method: 'POST',
+      body: {
+        group_id: groupId.value,
+        user_id: member.user_id,
+      },
+    })
+
+    // Show success toast
+    showToast('注销成功')
+
+    // On success, invalidate to refetch in background
+    await queryCache.invalidateQueries({ key: ['group', groupId.value, 'members'] })
+  }
+  catch (error) {
+    // Show error toast
+    showToast('注销失败')
+
+    // Rollback accumulated members
+    accumulatedMembers.value = oldAccumulatedMembers
+
+    // Rollback cache
+    Object.entries(oldData).forEach(([keyStr, data]) => {
+      const key = JSON.parse(keyStr)
+      queryCache.setQueryData(key, data)
+    })
+    throw error
+  }
+}
+
+function handleEditGroupMember(member: Member) {
+  // Update the member in accumulated list
+  // Note: EditMemberForm's optimistic update already updated the cache
+  // We just need to sync accumulatedMembers with cache data
+  const entries = queryCache.getEntries()
+  entries.forEach((entry) => {
+    const key = entry.key
+    if (Array.isArray(key) && key[0] === 'group' && key[1] === groupId.value && key[2] === 'members') {
+      const data = queryCache.getQueryData<{ members: Member[], count: number }>(key)
+      if (data?.members) {
+        // Find updated member from cache
+        const updatedMember = data.members.find(m => m.user_id === member.user_id)
+        if (updatedMember) {
+          // Update in accumulated list
+          accumulatedMembers.value = accumulatedMembers.value.map(m =>
+            m.user_id === member.user_id ? updatedMember : m,
+          )
+        }
+      }
+    }
   })
 }
 </script>
@@ -246,6 +327,7 @@ async function handleDeleteGroupMember(member: Member) {
               <MemberActions
                 :member="member"
                 :handle-delete="handleDeleteGroupMember"
+                :handle-edit-success="handleEditGroupMember"
                 @refresh="handleRefresh"
               />
             </template>

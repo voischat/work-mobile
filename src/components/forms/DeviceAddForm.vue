@@ -64,9 +64,10 @@ const { mutateAsync: addDevice, error } = useMutation({
     },
   }),
   onSuccess: () => {
-    // Invalidate member queries on success (devices are members with type=1)
+    // Invalidate all member-related queries on success (devices are members with type=1)
     const queryCache = useQueryCache()
-    queryCache.invalidateQueries({ key: ['member'] })
+    queryCache.invalidateQueries({ key: ['member', 'list'] })
+    queryCache.invalidateQueries({ key: ['dept'] })
   },
 })
 
