@@ -112,7 +112,7 @@ function formatDate(timestamp: number): string {
         <CollapsibleTrigger class="shrink-0 p-1 text-gray-400 hover:text-gray-600 rounded transition-colors">
           <Icon
             icon="lucide:chevron-down"
-            class="w-5 h-5 transition-transform duration-200 collapsible-chevron"
+            class="size-10 transition-transform duration-200 collapsible-chevron"
           />
         </CollapsibleTrigger>
       </div>
