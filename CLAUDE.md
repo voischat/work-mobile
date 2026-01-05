@@ -1,285 +1,66 @@
-# CLAUDE.md
+# Agent Guidelines
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## General
 
-## Project Overview
+When reviewing or modifying code, identify and remove AI-generated patterns that humans wouldn't write:
 
-This is **Weila Work WebView** - a Vue 3 corporate management web application for the "微喇" enterprise communication platform. It provides organization management, user authentication, department/group management, and member administration features.
+- **Redundant Comments**: Remove obvious comments like `// Check if user exists` before `if (user)` or `// Return the result`
+- **Defensive Checks**: Remove unnecessary null checks, try-catch blocks, or validations that framework/types already handle
+- **Type Bypasses**: Replace `any` types used to bypass TypeScript with proper types or type assertions
+- **Style Inconsistencies**: Ensure code matches existing file patterns (spacing, naming, structure)
+- **Verbose Logic**: Simplify unnecessarily complex conditionals or ternaries
+- **Boilerplate**: Remove duplicate error handling, repeated validation patterns, or unnecessary abstractions
 
-## Development Commands
+## Build/Lint/Test Commands
 
-```bash
-# Install dependencies (use pnpm or ni)
-pnpm install
-ni
+- **Dev**: `pnpm dev` (start Nuxt dev server)
+- **Build**: `pnpm build` (production build)
+- **Lint**: `pnpm lint` (ESLint) or `pnpm lint:fix` (auto-fix)
+- **Type Check**: `pnpm typecheck` (Vue type checking with vue-tsc)
+- **Preview**: `pnpm preview` (preview production build)
 
-# Run development server with hot reload
-pnpm dev
-nr dev
+## Tech Stack
 
-# Build for production
-pnpm build
-nr build
+- **Framework**: Vue 3 + TypeScript
+- **Styling**: TailwindCSS + `@iconify/vue`: `<Icon icon="lucide:sparkles" class="w-4 h-4" />`
+- **State**: Pinia for global state, composables for logic
+- **Linting**: @antfu/eslint-config (auto-import aware, no formatters)
 
-# Build for staging environment
-pnpm build:staging
-nr build:staging
+## Code Style
 
-# Run linting
-pnpm lint
-nr lint
+- **Imports**: auto-imports enabled (Vue APIs)
+- **Types**: Explicit return types for exported functions; use `type` imports where possible
+- **Naming**: camelCase for variables/functions, PascalCase for components/types
+- **Vue**: Composition API with `<script setup lang="ts">`, props/emits/model via defineProps/defineEmits/defineModel
 
-# Run TypeScript type checking
-pnpm typecheck
-nr typecheck
+### Vue
 
-# Run tests
-pnpm test
-nr test
+`defineProps/defineEmits` usage:
 
-# Update dependencies
-pnpm up
-ncu
-```
+```ts
+const props = defineProps<{
+  foo: string
+  bar?: number
+}>()
 
-## Architecture Overview
-
-### Technology Stack
-
-- **Frontend**: Vue 3 with Composition API (`<script setup>`)
-- **Build Tool**: Vite (not Bun - ignore any Bun references in existing docs)
-- **Package Manager**: pnpm
-- **Command Runner**: `@antfu/ni` (ni, nr, ncu commands)
-- **Styling**: TailwindCSS with PostCSS
-- **Language**: TypeScript with strict configuration
-- **Routing**: File-based routing via `unplugin-vue-router`
-- **HTTP Client**: Custom `useWeilaFetch` composable
-- **Testing**: Vitest with Vue Test Utils
-
-### Key Architectural Patterns
-
-#### 1. File-Based Routing
-
-Routes are automatically generated from the `src/pages/` directory structure:
-
-- `src/pages/members/index.vue` → `/members/`
-- `src/pages/departments/[id]/members.vue` → `/departments/:id/members`
-- Uses hash-based routing (`createWebHashHistory`)
-
-#### 2. Custom HTTP Client (`useWeilaFetch`)
-
-Sophisticated fetch wrapper with:
-
-- **V2 API Signature System**: MD5-based signatures with timestamps
-- **Automatic Token Management**: Handles access/refresh tokens
-- **Token Refresh Queue**: Prevents simultaneous refresh attempts
-- **Error Handling**: Standardized `errcode`/`errmsg` format
-- **Pagination Support**: Built-in page/size handling
-
-Usage pattern:
-
-```typescript
-const { data, error, isFetching } = useWeilaFetch('/corp/address/members', {
-  query: { page: 1, size: 20 }
-})
-```
-
-#### 3. Modal System (`useModal`)
-
-Global modal management with:
-
-```typescript
-const { showModal } = useModal()
-showModal({
-  title: '确认操作',
-  message: '确定要执行此操作吗？',
-  onConfirm: async () => { /* handle confirmation */ }
-})
-```
-
-#### 4. Authentication Pattern (`useAuth`)
-
-Simple localStorage-based auth with reactive tokens:
-
-```typescript
-const { saveAuth, clearAuth } = useAuth()
-```
-
-### API Integration
-
-All APIs use `/v2/` prefix with query parameter authentication:
-
-- Required params: `appid`, `et` (timestamp), `sign` (MD5 signature), `token`
-- Response format: `{ errcode: number, errmsg: string, data: any }`
-- Error code 31 triggers automatic token refresh
-
-Key endpoint categories:
-
-- **Auth**: `/corp/auth/*` (login, register, refresh)
-- **Organization**: `/corp/org/*` (org management)
-- **Address Book**: `/corp/address/*` (departments, members, groups)
-- **User**: `/corp/user/*` (profile management)
-
-### Data Fetching Patterns
-
-**Pagination with Infinite Scroll** (see `members/index.vue`):
-
-- Use `usePage()` composable for page/size management
-- Accumulate results in `allMembers` array
-- Use `isAtBottom` for scroll detection
-- Implement debounced search (300ms)
-
-**Search Integration**:
-
-```typescript
-const searchQuery = ref('')
-const debouncedSearch = refDebounced(searchQuery, 300)
-const url = computed(() => `/corp/address/members?keyword=${debouncedSearch.value}`)
-```
-
-### Project Structure
-
-```
-src/
-├── components/     # Auto-imported Vue components
-├── composables/    # Vue composition functions
-│   ├── useAuth.ts          # Authentication management
-│   ├── useModal.ts         # Global modal system
-│   ├── useWeilaFetch.ts    # HTTP client with auth
-│   └── usePage.ts          # Pagination helpers
-├── pages/         # File-based routing pages
-├── styles/        # Global styles and Tailwind config
-├── types/         # TypeScript type definitions
-├── utils/         # Utility functions
-└── shared/        # Shared resources
-```
-
-### TypeScript Configuration
-
-- Strict mode enabled
-- Path alias: `~/` → `src/`
-- Auto-imports for Vue APIs and composables
-- Component auto-imports from `src/components/`
-
-### Development Guidelines
-
-1. **Use Composition API**: Always use `<script setup>` syntax
-2. **Follow File-Based Routing**: Create pages in `src/pages/` directory
-3. **Use Custom Fetch**: Always use `useWeilaFetch` for API calls
-4. **Handle Authentication**: Check token expiration and handle refresh
-5. **Implement Error Handling**: Use standardized error responses
-6. **Use Modal System**: Use `useModal` for confirmations and alerts
-7. **Follow Pagination Pattern**: Use `usePage` for paginated endpoints
-8. **Type Safety**: Define interfaces for all API responses
-
-#### Vue 3.3+ defineModel and defineEmits Patterns
-
-**defineModel Usage**:
-
-```typescript
-// Basic model with potential undefined value
-const modelValue = defineModel<string>()
-//    ^? Ref<string | undefined>
-
-// Model with required option to remove undefined
-const modelValue = defineModel<string>({ required: true })
-//    ^? Ref<string>
-
-// Model with modifiers (trim, uppercase, etc.)
-const [modelValue, modifiers] = defineModel<string, 'trim' | 'uppercase'>()
-//                 ^? Record<'trim' | 'uppercase', true | undefined>
-
-// Using model modifiers in component
-const [modelValue, modelModifiers] = defineModel()
-
-if (modelModifiers.trim) {
-  // Handle trim modifier
-}
-
-// Custom set function for model
-const [modelValue, modelModifiers] = defineModel({
-  set(value) {
-    // Apply trim modifier if present
-    if (modelModifiers.trim) {
-      return value.trim()
-    }
-    return value
-  }
-})
-```
-
-**defineEmits Usage**:
-
-```typescript
-// 3.3+ concise syntax with named tuple
 const emit = defineEmits<{
-  change: [id: number] // named tuple syntax
+  change: [id: number]
   update: [value: string]
 }>()
 ```
 
-### Common Patterns
+`defineModel` usage:
 
-**Loading Data**:
+```html
+<UserName v-model:first-name="first" v-model:last-name="last" />
 
-```typescript
-const { data, error, isFetching } = useWeilaFetch('/corp/address/members')
-const members = computed(() => pickWeilaData(data.value) || [])
+<script setup>
+  const firstName = defineModel('firstName')
+  const lastName = defineModel('lastName')
+</script>
+
+<template>
+  <input type="text" v-model="firstName" />
+  <input type="text" v-model="lastName" />
+</template>
 ```
-
-**Form Submission**:
-
-```typescript
-const { execute, isFetching } = useWeilaFetch('/corp/user/modify', {
-  immediate: false,
-  query: { name: newName.value }
-}).post()
-```
-
-**Modal Confirmation**:
-
-```typescript
-const { showModal } = useModal()
-async function confirmDelete() {
-  const confirmed = await showModal({
-    title: '删除确认',
-    message: '确定要删除此项目吗？'
-  })
-  if (confirmed) {
-    // Perform deletion
-  }
-}
-```
-
-### Environment Variables
-
-The application uses environment variables for configuration. Environment-specific files are automatically loaded by Vite:
-
-- `.env.development` - Development environment (local development)
-- `.env.staging` - Staging environment
-- `.env.production` - Production environment
-
-**Key Environment Variables:**
-
-- `VITE_APP_ID` - Application ID for API authentication
-- `VITE_APP_KEY` - Application key for API authentication
-- `VITE_DEEPSEEK_API_KEY` - DeepSeek API key for AI features
-- `VITE_DEEPSEEK_BASE_URL` - DeepSeek API base URL
-
-**Usage in Code:**
-
-```typescript
-// Access environment variables
-const appId = import.meta.env.VITE_APP_ID
-const appKey = import.meta.env.VITE_APP_KEY
-```
-
-### Important Notes
-
-- **Vite Configuration**: Development proxy points to `demo.weila.hk`
-- **Authentication**: Tokens are stored in localStorage with automatic refresh
-- **Error Handling**: Always check `errcode` in API responses
-- **Pagination**: Most list APIs support `page` and `size` parameters
-- **Search**: Use debounced search for better UX
-- **Styling**: Use TailwindCSS classes, avoid inline styles
-- **Icons**: SVG icons are embedded directly in components
