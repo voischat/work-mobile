@@ -26,36 +26,91 @@ const isPopoverOpen = ref(false)
 // 当前选中的 ID，基于 tab 类型
 const sessionId = computed(() => selectedType.value === 'dept' ? selectedDeptId.value : selectedGroupId.value)
 
-// 同步 selectedNodes 到对应的 query param
+// 辅助函数：加载部门节点
+async function loadDeptNode(deptId: number): Promise<TreeNode | null> {
+  try {
+    const depts = await weilaFetch<{ id: number, name: string, user_count: number }[]>('/corp/address/get-my-manage-all-dept', { method: 'POST' })
+    const dept = depts.find(d => d.id === deptId)
+
+    if (dept) {
+      return {
+        id: dept.id,
+        label: dept.name,
+        type: 'dept',
+        count: dept.user_count,
+        expandable: true,
+        selectable: true,
+        raw_data: dept,
+      }
+    }
+  }
+  catch (error) {
+    console.error('Failed to load dept:', error)
+  }
+
+  return null
+}
+
+// 辅助函数：加载群组节点
+async function loadGroupNode(groupId: number): Promise<TreeNode | null> {
+  try {
+    const result = await weilaFetch<{ count: number, groups: { id: number, name: string, user_count: number }[] }>('/corp/group/get-my-manage-group-list?page=0&size=1000', { method: 'POST' })
+    const group = result.groups.find(g => g.id === groupId)
+
+    if (group) {
+      return {
+        id: group.id,
+        label: group.name,
+        type: 'group',
+        count: group.user_count,
+        expandable: true,
+        selectable: true,
+        raw_data: group,
+      }
+    }
+  }
+  catch (error) {
+    console.error('Failed to load group:', error)
+  }
+
+  return null
+}
+
+// Watch #1: URL → State (加载数据并更新 selectedNodes)
+watch([sessionId, selectedType], async ([newId, type]) => {
+  if (newId < 0) {
+    selectedNodes.value = []
+    return
+  }
+
+  // 防止重复加载
+  if (selectedNodes.value[0]?.id === newId) {
+    return
+  }
+
+  // 根据类型加载对应的节点
+  const node = type === 'dept'
+    ? await loadDeptNode(newId)
+    : await loadGroupNode(newId)
+
+  selectedNodes.value = node ? [node] : []
+}, { immediate: true })
+
+// Watch #2: State → URL (用户在 selector 中选择后更新 URL)
 watch(selectedNodes, (newNodes) => {
   const newId = newNodes[0]?.id ?? -1
+
   if (selectedType.value === 'dept') {
-    if (newId !== selectedDeptId.value)
+    if (newId !== selectedDeptId.value) {
       selectedDeptId.value = newId
+    }
   }
   else {
-    if (newId !== selectedGroupId.value)
+    if (newId !== selectedGroupId.value) {
       selectedGroupId.value = newId
+    }
   }
 }, { deep: true })
-
-// 当 tab 切换时，同步 selectedNodes 到当前 tab 的选中项
-watch([selectedType, selectedDeptId, selectedGroupId], ([type, deptId, groupId]) => {
-  const currentId = type === 'dept' ? deptId : groupId
-  const existingNode = selectedNodes.value[0]
-
-  if (existingNode?.id !== currentId) {
-    // 如果当前有选中值但 selectedNodes 为空或 ID 不匹配，清空 selectedNodes
-    // 这样 TreeSelector 会重新加载并选中正确的节点
-    if (currentId === -1) {
-      selectedNodes.value = []
-    }
-    else if (!existingNode || existingNode.id !== currentId) {
-      // 切换 tab 时，清空选中状态让用户重新选择，或者这里可以保留逻辑根据需要
-      selectedNodes.value = []
-    }
-  }
-})
 
 const selectedNode = computed(() => selectedNodes.value[0])
 

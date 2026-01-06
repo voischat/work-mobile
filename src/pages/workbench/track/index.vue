@@ -16,6 +16,7 @@ import { weilaFetch } from '~/shared/instances'
 const { loadAMap } = useAMap()
 
 const userId = useRouteQuery('userId', -1, { transform: Number })
+const userName = useRouteQuery<string>('userName', '')
 const date = useRouteQuery('date', () => {
   const today = new Date()
   return today.toISOString().split('T')[0]
@@ -25,25 +26,47 @@ const isPopoverOpen = ref(false)
 const selectedNodes = ref<TreeNode[]>([])
 const selectedTab = ref('dept')
 
-watch(userId, (newId, oldId) => {
-  if (newId === oldId)
-    return
+// Watch #1: URL → State (根据 URL 参数自动构造 selectedNodes)
+watch([userId, userName], ([id, name]) => {
+  if (id > 0 && name) {
+    // 如果已经选中了同一个成员，不重复设置
+    if (selectedNodes.value[0]?.id === id) {
+      return
+    }
 
-  selectedNodes.value = newId > 0
-    ? selectedNodes.value.filter(n => n.id === newId)
-    : []
-})
+    selectedNodes.value = [{
+      id,
+      label: name,
+      type: 'member',
+      expandable: false,
+      selectable: true,
+      raw_data: { user_id: id, name } as unknown as Member,
+    }]
+  }
+  else {
+    selectedNodes.value = []
+  }
+}, { immediate: true })
 
+// Watch #2: State → URL (用户在 selector 中选择后更新 URL)
+watch(selectedNodes, (newNodes) => {
+  const newId = newNodes[0]?.id ?? -1
+  const newName = (newNodes[0]?.raw_data as Member | undefined)?.name || ''
+
+  if (newId !== userId.value) {
+    userId.value = newId
+  }
+  if (newName && newName !== userName.value) {
+    userName.value = newName
+  }
+}, { deep: true })
+
+// Watch #3: Tab 切换 (清空选择)
 watch(selectedTab, () => {
   selectedNodes.value = []
   userId.value = -1
+  userName.value = ''
 })
-
-watch(selectedNodes, (newNodes) => {
-  const newId = newNodes[0]?.id ?? -1
-  if (newId !== userId.value)
-    userId.value = newId
-}, { deep: true })
 
 const member = computed(() => selectedNodes.value[0]?.raw_data as Member | undefined)
 

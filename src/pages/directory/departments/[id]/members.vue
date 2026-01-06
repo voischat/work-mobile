@@ -102,6 +102,10 @@ function getDeptName(deptId: number): string {
   return allDepts.value?.find((d: Dept) => d.id === deptId)?.name || ''
 }
 
+function getDeptCount(deptId: number): number {
+  return allDepts.value?.find((d: Dept) => d.id === deptId)?.user_count || 0
+}
+
 function handleDeptChange(event: Event) {
   const target = event.target as HTMLSelectElement
   const newDeptId = Number(target.value)
@@ -352,10 +356,12 @@ function handleEditDeptMember(member: Member) {
             :key="member.user_id"
             :member
             :dept-name="getDeptName(member.dept_id)"
+            :dept-count="getDeptCount(member.dept_id)"
           >
             <template #actions>
               <MemberActions
                 :member="member"
+                :context="{ type: 'dept', id: deptId }"
                 :handle-delete="handleDeleteDeptMember"
                 :handle-edit-success="handleEditDeptMember"
                 @refresh="handleRefresh"

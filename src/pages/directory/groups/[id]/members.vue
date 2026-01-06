@@ -41,6 +41,14 @@ const groupName = computed(() => {
   return ''
 })
 
+const groupCount = computed(() => {
+  if (groupInfo.value?.groups) {
+    const group = groupInfo.value.groups.find((g: Group) => g.id === groupId.value)
+    return group?.user_count || 0
+  }
+  return 0
+})
+
 const {
   data,
   status,
@@ -348,10 +356,13 @@ function handleEditGroupMember(member: Member) {
             :key="member.user_id"
             :member
             :dept-name="getDeptName(member.dept_id)"
+            :group-name="groupName"
+            :group-count="groupCount"
           >
             <template #actions>
               <MemberActions
                 :member="member"
+                :context="{ type: 'group', id: groupId }"
                 :handle-delete="handleDeleteGroupMember"
                 :handle-edit-success="handleEditGroupMember"
                 @refresh="handleRefresh"

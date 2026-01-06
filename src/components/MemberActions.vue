@@ -20,6 +20,13 @@ const props = defineProps<{
   member: Member
   handleDelete?: (member: Member) => Promise<void>
   handleEditSuccess?: (updatedMember: Member) => void
+  // 上下文信息：用于确定实时位置跳转目标
+  // - 'dept': 跳转到成员所在部门的实时位置（默认）
+  // - 'group': 跳转到当前群组的实时位置
+  context?: {
+    type: 'dept' | 'group'
+    id: number // dept_id 或 group_id
+  }
 }>()
 
 const router = useRouter()
@@ -88,12 +95,19 @@ function handleStateUpdated(_updatedMember: Member) {
 
 // 导航到轨迹页面
 function handleViewTrack() {
-  router.push(`/workbench/track?userId=${props.member.user_id}`)
+  router.push(`/workbench/track?userId=${props.member.user_id}&userName=${encodeURIComponent(props.member.name)}`)
 }
 
 // 导航到实时位置页面
 function handleViewRealtime() {
-  router.push(`/workbench/realtime-location?userId=${props.member.user_id}&sessionId=${props.member.dept_id}`)
+  if (props.context) {
+    // 使用提供的上下文（群组或部门）
+    router.push(`/workbench/realtime-location?type=${props.context.type}&${props.context.type}Id=${props.context.id}`)
+  }
+  else {
+    // 默认跳转到成员所在部门的实时位置
+    router.push(`/workbench/realtime-location?type=dept&deptId=${props.member.dept_id}`)
+  }
 }
 </script>
 
