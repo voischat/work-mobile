@@ -1,79 +1,149 @@
-# Notes: 实时位置页面重构 - 部门/群组选择器拆分
+# Notes: Realtime Location Tab Switching Issue
 
-## Research Findings
+## Root Cause Analysis
 
-### 现有组件分析
+### The Problem
 
-**MemberSelector (src/components/MemberSelector.vue):**
+When switching tabs (dept ↔ group) in the realtime location page, a loading state appears. This does NOT happen in the track page.
 
-- Modal 包装器 + DeptMemberTreeSelector (单选模式)
-- v-model:userId 双向绑定
-- 内部维护 selectedMembers: Member[]
+### Key Differences
 
-**DeptMemberTreeSelector (src/components/DeptMemberTreeSelector.vue):**
+#### Realtime Location Page (src/pages/workbench/realtime-location/index.vue)
 
-- API: `/corp/address/get-my-manage-all-dept` (获取部门列表)
-- API: `/corp/address/get-dept-all-member` (获取部门成员)
-- 支持 single/multiple 模式
-- 树形结构，可展开部门查看成员
-- v-model:selectedMembers 双向绑定 (Member[])
+**State management:**
 
-### 群组相关 API (从 groups/[id]/members.vue 分析)
+- Single `selectedNodes` ref shared between both tabs
+- `selectedType` uses `useRouteQuery` to track current tab
+- When `selectedType` changes, it clears `selectedNodes` and resets `sessionId` to -1
 
-- `/corp/group/get-my-manage-group-list` (获取我的群组列表)
-- `/corp/group/get-group-all-member` (获取群组所有成员)
-- 请求格式: `{ group_id: number }`
-
-### reka-ui 组件使用情况
-
-项目已使用的 reka-ui 组件:
-
-- AvatarRoot, AvatarImage, AvatarFallback
-- DropdownMenuRoot, DropdownMenuTrigger
-- TreeRoot, TreeItem
-- CollapsibleRoot, CollapsibleTrigger
-
-**Select 组件未使用，但 reka-ui 提供:**
-
-- SelectRoot, SelectTrigger, SelectContent, SelectItem, SelectValue
-
-## 实现方案
-
-### 1. 部门/群组类型选择
-
-使用 reka-ui Select 组件，让用户选择:
-
-- 部门 (sessionType = 20)
-- 群组 (sessionType = 需确认)
-
-### 2. DeptMemberSelector
-
-基于 DeptMemberTreeSelector 的简化版本:
-
-- 直接使用 DeptMemberTreeSelector (mode="single")
-- 保持相同的 API 调用
-- v-model:userId 绑定
-
-### 3. GroupMemberSelector
-
-参考 DeptMemberSelector 结构:
-
-- 先获取群组列表 (选择哪个群组)
-- 然后获取该群组的成员列表
-- 单选模式
-
-### 4. realtime-location/index.vue 修改
+**The problematic code (lines 31-34):**
 
 ```ts
-// 添加类型选择
-const selectedType = useRouteQuery<'dept' | 'group'>('type', 'dept') // 'dept' | 'group'
-const sessionType = computed(() => selectedType.value === 'dept' ? 20 : 30)
+watch(selectedType, () => {
+  selectedNodes.value = []
+  sessionId.value = -1
+})
 ```
 
-## API 端点总结
+**Query structure (lines 42-52):**
 
-| 功能        | 部门                                              | 群组                                              |
-| ----------- | ------------------------------------------------- | ------------------------------------------------- |
-| 获取列表    | `/corp/address/get-my-manage-all-dept`            | `/corp/group/get-my-manage-group-list`            |
-| 获取成员    | `/corp/address/get-dept-all-member` + `{dept_id}` | `/corp/group/get-group-all-member` + `{group_id}` |
-| sessionType | 20                                                | 需确认                                            |
+```ts
+const { data: realtimeData, status, error, refetch } = useQuery({
+  key: () => ['realtime-location', sessionId.value, sessionType.value],
+  //                                         ^^^^^^^^^^^^^^^^^^
+  query: () => weilaFetch<RealtimeLocationsResponse>('/corp/loc/get-realtime-location', {
+    method: 'POST',
+    body: {
+      session_id: sessionId.value,
+      session_type: sessionType.value, // Changes when tab changes
+    },
+  }),
+  enabled: isValid,
+})
+```
+
+**Issue:** When `selectedType` changes:
+
+1. `sessionType` changes (20 → 18 or 18 → 20)
+2. This changes the query key
+3. Even though `isValid` becomes false (sessionId=-1), the query status goes through transitions
+4. The UI shows "加载中..." (loading) during this transition
+
+#### Track Page (src/pages/workbench/track/index.vue)
+
+**State management:**
+
+- Separate components: `DeptMemberTreeSelector` and `GroupMemberTreeSelector`
+- Each component maintains its own internal state
+- `selectedTab` is just for UI, doesn't affect the query key
+
+**Query structure (lines 67-77):**
+
+```ts
+const { data: trackData, status, error } = useQuery({
+  key: () => ['track', userId.value, date.value],
+  // No tab type in the key!
+  query: () => weilaFetch<TrackResponse>('/corp/loc/get-track', {
+    method: 'POST',
+    body: {
+      user_id: userId.value,
+      date: date.value,
+    },
+  }),
+  enabled: isValid,
+})
+```
+
+**Why no loading:** The query key doesn't include the tab type. The tree selectors handle their own data loading internally, so switching tabs doesn't trigger a query refetch.
+
+### TreeSelector Structure
+
+Realtime location uses a single `TreeSelector` component with different loaders:
+
+- `deptLoader` - loads dept/group tree
+- `groupLoader` - loads group/member tree
+
+Track page uses separate components:
+
+- `DeptMemberTreeSelector` - self-contained, loads dept + members
+- `GroupMemberTreeSelector` - self-contained, loads group + members
+
+## Solution Options
+
+### Option 1: Separate State for Each Tab Type
+
+Create separate state for dept and group:
+
+```ts
+const selectedDeptId = useRouteQuery('deptId', -1, { transform: Number })
+const selectedGroupId = useRouteQuery('groupId', -1, { transform: Number })
+```
+
+Pros:
+
+- Each tab maintains its own selection
+- No loading when switching tabs
+- More intuitive UX
+
+Cons:
+
+- More state to manage
+- Need to handle which ID to use based on selectedType
+
+### Option 2: Separate Tree Selector Components
+
+Follow track page pattern - create `DeptTreeSelector` and `GroupTreeSelector` components.
+
+Pros:
+
+- Matches existing pattern in track page
+- Each component is self-contained
+- Cleaner separation of concerns
+
+Cons:
+
+- More files/components to maintain
+- Some code duplication (unless shared logic extracted)
+
+### Option 3: Remove sessionType from Query Key
+
+Don't include `sessionType` in the query key since it's determined by the session ID anyway.
+
+Pros:
+
+- Minimal change
+- Fixes the loading issue
+
+Cons:
+
+- May have stale data issues if session ID can exist in both contexts
+- Less explicit cache key
+
+## Recommendation
+
+**Option 1** (Separate State) is the best solution because:
+
+1. Maintains the single `TreeSelector` component (less duplication)
+2. Each tab remembers its selection
+3. No loading state when switching
+4. More flexible for future enhancements

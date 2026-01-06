@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Member, TreeNode } from '~/types/management'
+import { toArray } from '@antfu/utils'
 import { Icon } from '@iconify/vue'
 import { useQuery } from '@pinia/colada'
 import { AvatarFallback, AvatarImage, AvatarRoot } from 'reka-ui'
@@ -8,8 +9,12 @@ import { computed, ref, toValue } from 'vue'
 const props = withDefaults(defineProps<{
   loadMore: (ctx: TreeNode | null) => Promise<TreeNode[]>
   mode?: 'single' | 'multiple'
+  cacheKey?: string | string[]
+  existingNodeIds?: number[]
 }>(), {
   mode: 'multiple',
+  cacheKey: 'tree-selector-root',
+  existingNodeIds: () => [],
 })
 
 const selectedNodes = defineModel<TreeNode[]>('selectedNodes', {
@@ -22,12 +27,13 @@ const nodeChildrenCache = ref<Map<number, TreeNode[]>>(new Map())
 const loadingNodeIds = ref<Set<number>>(new Set())
 
 const selectedNodeIdsSet = computed(() => new Set(selectedNodes.value.map(n => n.id)))
+const existingNodeIdsSet = computed(() => new Set(props.existingNodeIds || []))
 
 const {
   data: rootNodes,
   status: rootStatus,
 } = useQuery({
-  key: ['tree-selector-root'],
+  key: toArray(props.cacheKey),
   query: () => props.loadMore(null),
 })
 
@@ -66,7 +72,7 @@ async function loadNodeChildren(node: TreeNode) {
 }
 
 async function selectNode(node: TreeNode) {
-  if (!node.selectable)
+  if (!node.selectable || existingNodeIdsSet.value.has(node.id))
     return
 
   if (props.mode === 'single') {
@@ -161,16 +167,24 @@ defineExpose({
             v-if="node.selectable"
             :type="mode === 'single' ? 'radio' : 'checkbox'"
             :checked="isNodeSelected(node)"
+            :disabled="existingNodeIdsSet.has(node.id)"
             :name="mode === 'single' ? 'node-select' : undefined"
             class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mr-3 flex-shrink-0"
+            :class="{
+              'cursor-pointer': !existingNodeIdsSet.has(node.id),
+              'cursor-not-allowed opacity-50': existingNodeIdsSet.has(node.id),
+            }"
             @change="selectNode(node)"
           >
           <div v-else class="w-4 mr-3 flex-shrink-0" />
 
           <!-- Clickable Area (Icon + Avatar + Content) -->
           <div
-            class="flex items-center flex-1 min-w-0 cursor-pointer"
-            :class="{ 'cursor-default': !node.selectable }"
+            class="flex items-center flex-1 min-w-0"
+            :class="{
+              'cursor-pointer': node.selectable && !existingNodeIdsSet.has(node.id),
+              'cursor-default': !node.selectable || existingNodeIdsSet.has(node.id),
+            }"
             @click="selectNode(node)"
           >
             <!-- Node Icon -->
@@ -192,6 +206,12 @@ defineExpose({
             <div class="flex-1 min-w-0">
               <div class="flex items-center space-x-2">
                 <span class="font-medium text-gray-900">{{ toValue(node.label) }}</span>
+                <span
+                  v-if="existingNodeIdsSet.has(node.id)"
+                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"
+                >
+                  已添加
+                </span>
                 <span v-if="node.count !== undefined" class="text-sm text-gray-500">({{ node.count }}人)</span>
               </div>
               <div v-if="node.type === 'member' && (node.raw_data as Member)?.user_num" class="text-xs text-gray-500">
@@ -230,16 +250,24 @@ defineExpose({
                   v-if="child.selectable"
                   :type="mode === 'single' ? 'radio' : 'checkbox'"
                   :checked="isNodeSelected(child)"
+                  :disabled="existingNodeIdsSet.has(child.id)"
                   :name="mode === 'single' ? 'node-select' : undefined"
                   class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mr-3 flex-shrink-0"
+                  :class="{
+                    'cursor-pointer': !existingNodeIdsSet.has(child.id),
+                    'cursor-not-allowed opacity-50': existingNodeIdsSet.has(child.id),
+                  }"
                   @change="selectNode(child)"
                 >
                 <div v-else class="w-4 mr-3 flex-shrink-0" />
 
                 <!-- Clickable Area (Icon + Avatar + Content) -->
                 <div
-                  class="flex items-center flex-1 min-w-0 cursor-pointer"
-                  :class="{ 'cursor-default': !child.selectable }"
+                  class="flex items-center flex-1 min-w-0"
+                  :class="{
+                    'cursor-pointer': child.selectable && !existingNodeIdsSet.has(child.id),
+                    'cursor-default': !child.selectable || existingNodeIdsSet.has(child.id),
+                  }"
                   @click="selectNode(child)"
                 >
                   <Icon :icon="getNodeIcon(child.type)" class="w-5 h-5 text-gray-400 flex-shrink-0 mr-3" />
@@ -257,8 +285,16 @@ defineExpose({
                   </AvatarRoot>
 
                   <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-gray-900">
-                      {{ toValue(child.label) }}
+                    <div class="flex items-center space-x-2">
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ toValue(child.label) }}
+                      </div>
+                      <span
+                        v-if="existingNodeIdsSet.has(child.id)"
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"
+                      >
+                        已添加
+                      </span>
                     </div>
                     <div v-if="child.type === 'member' && (child.raw_data as Member)?.user_num" class="text-xs text-gray-500">
                       {{ (child.raw_data as Member).user_num }}

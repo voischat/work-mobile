@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TrackPoint, TrackResponse } from '~/types/location'
-import type { Member } from '~/types/management'
+import type { Member, TreeNode } from '~/types/management'
 import { Icon } from '@iconify/vue'
 import { useQuery } from '@pinia/colada'
 import { useRouteQuery } from '@vueuse/router'
@@ -8,9 +8,8 @@ import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'rek
 import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
-import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
-import GroupMemberTreeSelector from '~/components/GroupMemberTreeSelector.vue'
 import TargetSelectorPopover from '~/components/TargetSelectorPopover.vue'
+import TreeSelector from '~/components/TreeSelector.vue'
 import { useAMap } from '~/composables/useAMap'
 import { weilaFetch } from '~/shared/instances'
 
@@ -23,30 +22,84 @@ const date = useRouteQuery('date', () => {
 })
 
 const isPopoverOpen = ref(false)
-const selectedMembers = ref<Member[]>([])
+const selectedNodes = ref<TreeNode[]>([])
 const selectedTab = ref('dept')
 
 watch(userId, (newId, oldId) => {
   if (newId === oldId)
     return
 
-  selectedMembers.value = newId > 0
-    ? selectedMembers.value.filter(m => m.user_id === newId)
+  selectedNodes.value = newId > 0
+    ? selectedNodes.value.filter(n => n.id === newId)
     : []
 })
 
 watch(selectedTab, () => {
-  selectedMembers.value = []
+  selectedNodes.value = []
   userId.value = -1
 })
 
-watch(selectedMembers, (newMembers) => {
-  const newId = newMembers[0]?.user_id ?? -1
+watch(selectedNodes, (newNodes) => {
+  const newId = newNodes[0]?.id ?? -1
   if (newId !== userId.value)
     userId.value = newId
 }, { deep: true })
 
-const member = computed(() => selectedMembers.value[0])
+const member = computed(() => selectedNodes.value[0]?.raw_data as Member | undefined)
+
+async function deptMemberLoader(ctx: TreeNode | null): Promise<TreeNode[]> {
+  if (!ctx) {
+    const depts = await weilaFetch<{ id: number, name: string, user_count: number }[]>('/corp/address/get-my-manage-all-dept', { method: 'POST' })
+    return depts.map(d => ({
+      id: d.id,
+      label: d.name,
+      type: 'dept' as const,
+      count: d.user_count,
+      expandable: true,
+      selectable: false,
+      raw_data: d,
+    }))
+  }
+  const members = await weilaFetch<{ user_id: number, name: string, avatar: string, user_num: string, dept_id: number }[]>('/corp/address/get-dept-all-member', {
+    method: 'POST',
+    body: { dept_id: ctx.id },
+  })
+  return members.map(m => ({
+    id: m.user_id,
+    label: m.name,
+    type: 'member' as const,
+    expandable: false,
+    selectable: true,
+    raw_data: m as Member,
+  }))
+}
+
+async function groupMemberLoader(ctx: TreeNode | null): Promise<TreeNode[]> {
+  if (!ctx) {
+    const result = await weilaFetch<{ count: number, groups: { id: number, name: string, user_count: number }[] }>('/corp/group/get-my-manage-group-list?page=0&size=1000', { method: 'POST' })
+    return result.groups.map(g => ({
+      id: g.id,
+      label: g.name,
+      type: 'group' as const,
+      count: g.user_count,
+      expandable: true,
+      selectable: false,
+      raw_data: g,
+    }))
+  }
+  const members = await weilaFetch<{ user_id: number, name: string, avatar: string, user_num: string }[]>('/corp/group/get-group-all-member', {
+    method: 'POST',
+    body: { group_id: ctx.id },
+  })
+  return members.map(m => ({
+    id: m.user_id,
+    label: m.name,
+    type: 'member' as const,
+    expandable: false,
+    selectable: true,
+    raw_data: m as Member,
+  }))
+}
 
 const mapContainerRef = useTemplateRef<HTMLDivElement>('mapContainer')
 
@@ -209,10 +262,22 @@ function renderTrack(tracks: TrackPoint[]): void {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="dept" class="mt-4 flex-1 overflow-y-auto min-h-0">
-                  <DeptMemberTreeSelector v-model:selected-members="selectedMembers" mode="single" />
+                  <TreeSelector
+                    key="dept"
+                    v-model:selected-nodes="selectedNodes"
+                    :load-more="deptMemberLoader"
+                    :cache-key="['track', 'dept', 'selector']"
+                    mode="single"
+                  />
                 </TabsContent>
                 <TabsContent value="group" class="mt-4 flex-1 overflow-y-auto min-h-0">
-                  <GroupMemberTreeSelector v-model:selected-members="selectedMembers" mode="single" />
+                  <TreeSelector
+                    key="group"
+                    v-model:selected-nodes="selectedNodes"
+                    :load-more="groupMemberLoader"
+                    :cache-key="['track', 'group', 'selector']"
+                    mode="single"
+                  />
                 </TabsContent>
               </TabsRoot>
             </template>

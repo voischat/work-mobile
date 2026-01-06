@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Dept, Group, GroupListResponse, Member, MemberListResponse } from '~/types/management'
+import type { Dept, Group, GroupListResponse, Member, MemberListResponse, TreeNode } from '~/types/management'
 import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useRouteParams } from '@vueuse/router'
@@ -7,10 +7,10 @@ import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
-import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
 import MemberActions from '~/components/MemberActions.vue'
 import MemberCard from '~/components/MemberCard.vue'
 import Modal from '~/components/Modal.vue'
+import TreeSelector from '~/components/TreeSelector.vue'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
@@ -21,8 +21,8 @@ const { showToast } = useToast()
 const groupId = computed(() => Number(useRouteParams('id').value))
 
 const isAddMemberModalOpen = ref(false)
-const treeSelectorRef = ref<InstanceType<typeof DeptMemberTreeSelector> | null>(null)
-const selectedMembers = ref<Member[]>([])
+const treeSelectorRef = ref<InstanceType<typeof TreeSelector> | null>(null)
+const selectedNodes = ref<TreeNode[]>([])
 
 const currentPage = ref(0)
 const accumulatedMembers = ref<Member[]>([])
@@ -108,6 +108,32 @@ async function handleRefresh() {
   accumulatedMembers.value = []
 }
 
+async function deptMemberLoader(ctx: TreeNode | null): Promise<TreeNode[]> {
+  if (!ctx) {
+    const depts = await weilaFetch<{ id: number, name: string, user_count: number }[]>('/corp/address/get-my-manage-all-dept', { method: 'POST' })
+    return depts.map(d => ({
+      id: d.id,
+      label: d.name,
+      type: 'dept' as const,
+      count: d.user_count,
+      expandable: true,
+      selectable: false,
+    }))
+  }
+  const members = await weilaFetch<{ user_id: number, name: string, avatar: string, user_num: string, dept_id: number }[]>('/corp/address/get-dept-all-member', {
+    method: 'POST',
+    body: { dept_id: ctx.id },
+  })
+  return members.map(m => ({
+    id: m.user_id,
+    label: m.name,
+    type: 'member' as const,
+    expandable: false,
+    selectable: true,
+    raw_data: m as Member,
+  }))
+}
+
 const { mutate: addMembersToGroup, isLoading: isAddingMembers } = useMutation({
   mutation: (userIds: number[]) =>
     weilaFetch('/corp/group/add-group-members', {
@@ -130,12 +156,12 @@ const { mutate: addMembersToGroup, isLoading: isAddingMembers } = useMutation({
 })
 
 async function handleAddMembersConfirm() {
-  if (selectedMembers.value.length === 0) {
+  if (selectedNodes.value.length === 0) {
     showToast('请至少选择一个成员')
     return
   }
 
-  addMembersToGroup(selectedMembers.value.map(m => m.user_id))
+  addMembersToGroup(selectedNodes.value.map(n => n.id))
 }
 
 const { data: groupAllMembers } = useQuery({
@@ -354,16 +380,18 @@ function handleEditGroupMember(member: Member) {
       v-model:open="isAddMemberModalOpen"
       title="选择成员"
     >
-      <DeptMemberTreeSelector
+      <TreeSelector
         ref="treeSelectorRef"
-        v-model:selected-members="selectedMembers"
-        :existing-member-ids="existingMemberIds"
+        v-model:selected-nodes="selectedNodes"
+        :existing-node-ids="existingMemberIds"
+        :load-more="deptMemberLoader"
+        :cache-key="['directory', 'group', 'add-members']"
       />
       <template #footer>
         <div class="flex items-center justify-between">
           <!-- 左侧显示选中数量 -->
           <div class="text-sm text-gray-600">
-            <span class="font-medium text-blue-600">{{ selectedMembers.length }}</span> 位成员已选择
+            <span class="font-medium text-blue-600">{{ selectedNodes.length }}</span> 位成员已选择
           </div>
           <!-- 右侧按钮组 -->
           <div class="flex space-x-3">

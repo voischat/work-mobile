@@ -16,21 +16,45 @@ import { weilaFetch } from '~/shared/instances'
 
 const { loadAMap } = useAMap()
 
-const sessionId = useRouteQuery('sessionId', -1, { transform: Number })
 const selectedType = useRouteQuery<'dept' | 'group'>('type', 'dept')
+const selectedDeptId = useRouteQuery('deptId', -1, { transform: Number })
+const selectedGroupId = useRouteQuery('groupId', -1, { transform: Number })
 
 const selectedNodes = ref<TreeNode[]>([])
 const isPopoverOpen = ref(false)
 
+// 当前选中的 ID，基于 tab 类型
+const sessionId = computed(() => selectedType.value === 'dept' ? selectedDeptId.value : selectedGroupId.value)
+
+// 同步 selectedNodes 到对应的 query param
 watch(selectedNodes, (newNodes) => {
-  const newId = newNodes[0]?.id
-  if (newId !== sessionId.value)
-    sessionId.value = newId
+  const newId = newNodes[0]?.id ?? -1
+  if (selectedType.value === 'dept') {
+    if (newId !== selectedDeptId.value)
+      selectedDeptId.value = newId
+  }
+  else {
+    if (newId !== selectedGroupId.value)
+      selectedGroupId.value = newId
+  }
 }, { deep: true })
 
-watch(selectedType, () => {
-  selectedNodes.value = []
-  sessionId.value = -1
+// 当 tab 切换时，同步 selectedNodes 到当前 tab 的选中项
+watch([selectedType, selectedDeptId, selectedGroupId], ([type, deptId, groupId]) => {
+  const currentId = type === 'dept' ? deptId : groupId
+  const existingNode = selectedNodes.value[0]
+
+  if (existingNode?.id !== currentId) {
+    // 如果当前有选中值但 selectedNodes 为空或 ID 不匹配，清空 selectedNodes
+    // 这样 TreeSelector 会重新加载并选中正确的节点
+    if (currentId === -1) {
+      selectedNodes.value = []
+    }
+    else if (!existingNode || existingNode.id !== currentId) {
+      // 切换 tab 时，清空选中状态让用户重新选择，或者这里可以保留逻辑根据需要
+      selectedNodes.value = []
+    }
+  }
 })
 
 const selectedNode = computed(() => selectedNodes.value[0])
@@ -249,6 +273,7 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
                     key="dept"
                     v-model:selected-nodes="selectedNodes"
                     :load-more="deptLoader"
+                    :cache-key="['realtime-location', 'dept', 'selector']"
                     mode="single"
                   />
                 </TabsContent>
@@ -257,6 +282,7 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
                     key="group"
                     v-model:selected-nodes="selectedNodes"
                     :load-more="groupLoader"
+                    :cache-key="['realtime-location', 'group', 'selector']"
                     mode="single"
                   />
                 </TabsContent>
