@@ -77,7 +77,7 @@ function parseMaybeWeilaErrorString(str: string): string {
       <div
         v-if="open"
         class="fixed top-0 right-0 bottom-0 left-0 z-[9998] flex items-center justify-center bg-black bg-opacity-50 p-4"
-        @click="handleCancel"
+        @mousedown.self="handleCancel"
       >
         <div
           class="bg-white rounded-lg shadow-xl max-w-md w-full mx-auto flex flex-col max-h-[80vh]"
