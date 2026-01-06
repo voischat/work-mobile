@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { LegalInfo, LegalRequest } from '~/types/legal'
 import { useMutation, useQuery } from '@pinia/colada'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
+import Breadcrumb from '~/components/Breadcrumb.vue'
 import LicenseUpload from '~/components/LicenseUpload.vue'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
@@ -135,6 +136,14 @@ function handleSubmit() {
 
 <template>
   <BackLayout title="企业认证">
+    <template #breadcrumb>
+      <Breadcrumb
+        :items="[
+          { name: '我的', steps: 1 },
+          { name: '企业认证' },
+        ]"
+      />
+    </template>
     <div class="p-4">
       <div class="max-w-2xl mx-auto">
         <!-- 加载状态 -->
