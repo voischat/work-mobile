@@ -10,21 +10,20 @@ import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import DeptMemberTreeSelector from '~/components/DeptMemberTreeSelector.vue'
 import GroupMemberTreeSelector from '~/components/GroupMemberTreeSelector.vue'
-import Modal from '~/components/Modal.vue'
+import TargetSelectorPopover from '~/components/TargetSelectorPopover.vue'
 import { useAMap } from '~/composables/useAMap'
 import { weilaFetch } from '~/shared/instances'
 
 const { loadAMap } = useAMap()
 
-const userId = useRouteQuery('userId', '', { transform: Number })
+const userId = useRouteQuery('userId', -1, { transform: Number })
 const date = useRouteQuery('date', () => {
   const today = new Date()
   return today.toISOString().split('T')[0]
 })
 
-const isMemberSelectorOpen = ref(false)
+const isPopoverOpen = ref(false)
 const selectedMembers = ref<Member[]>([])
-const pendingSelection = ref<Member[]>([])
 const selectedTab = ref('dept')
 
 watch(userId, (newId, oldId) => {
@@ -36,25 +35,16 @@ watch(userId, (newId, oldId) => {
     : []
 })
 
+watch(selectedTab, () => {
+  selectedMembers.value = []
+  userId.value = -1
+})
+
 watch(selectedMembers, (newMembers) => {
-  const newId = newMembers[0]?.user_id || 0
+  const newId = newMembers[0]?.user_id ?? -1
   if (newId !== userId.value)
     userId.value = newId
 }, { deep: true })
-
-watch(isMemberSelectorOpen, (isOpen) => {
-  if (isOpen)
-    pendingSelection.value = [...selectedMembers.value]
-})
-
-function handleConfirm() {
-  selectedMembers.value = pendingSelection.value
-  isMemberSelectorOpen.value = false
-}
-
-function handleCancel() {
-  isMemberSelectorOpen.value = false
-}
 
 const member = computed(() => selectedMembers.value[0])
 
@@ -179,33 +169,59 @@ function renderTrack(tracks: TrackPoint[]): void {
     <div class="absolute inset-0">
       <div ref="mapContainer" class="absolute inset-0" />
 
-      <div class="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-auto md:min-w-[320px] bg-white rounded-lg shadow-lg z-10">
-        <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 p-3">
-          <div class="flex items-center gap-2 md:gap-3 flex-1">
-            <!-- 成员选择按钮 -->
-            <button
-              type="button"
-              class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 transition-colors min-w-[120px]"
-              @click="isMemberSelectorOpen = true"
-            >
-              <span class="truncate">
-                {{ member?.name || '选择成员' }}
-              </span>
-              <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
-            </button>
-
-            <div class="flex items-center space-x-2 border-l border-gray-200 pl-2 md:pl-3">
-              <label for="date" class="text-xs font-medium text-gray-700 whitespace-nowrap">
-                日期 <span class="text-red-500">*</span>
-              </label>
-              <input
-                id="date"
-                v-model="date"
-                type="date"
-                class="px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-28"
+      <div class="absolute top-4 left-4  bg-white rounded-lg shadow-lg z-10">
+        <div class="flex flex-col md:flex-row md:items-center p-3 space-x-2">
+          <TargetSelectorPopover v-model:open="isPopoverOpen">
+            <template #trigger="{ isOpen: isPopoverOpen }">
+              <button
+                type="button"
+                class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 transition-colors min-w-[120px]"
               >
-            </div>
-          </div>
+                <span class="truncate">
+                  {{ member?.name || '选择成员' }}
+                </span>
+                <Icon
+                  icon="lucide:chevron-down"
+                  class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200"
+                  :class="{ 'rotate-180': isPopoverOpen }"
+                />
+              </button>
+            </template>
+            <template #default>
+              <TabsRoot v-model="selectedTab" class="w-full h-[50vh] flex flex-col">
+                <TabsList
+                  class="inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 p-1 w-full shrink-0"
+                >
+                  <TabsIndicator
+                    class="absolute bottom-0 left-0 h-[2px] w-full bg-transparent transition-all duration-300"
+                  />
+                  <TabsTrigger
+                    value="dept"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
+                  >
+                    部门
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="group"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
+                  >
+                    群组
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="dept" class="mt-4 flex-1 overflow-y-auto min-h-0">
+                  <DeptMemberTreeSelector v-model:selected-members="selectedMembers" mode="single" />
+                </TabsContent>
+                <TabsContent value="group" class="mt-4 flex-1 overflow-y-auto min-h-0">
+                  <GroupMemberTreeSelector v-model:selected-members="selectedMembers" mode="single" />
+                </TabsContent>
+              </TabsRoot>
+            </template>
+          </TargetSelectorPopover>
+
+          <input
+            id="date" v-model="date" type="date"
+            class="px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-28"
+          >
 
           <div class="flex items-center text-xs">
             <span v-if="!isValid" class="text-orange-600 whitespace-nowrap">
@@ -226,46 +242,6 @@ function renderTrack(tracks: TrackPoint[]): void {
           </div>
         </div>
       </div>
-
-      <!-- 成员选择 Modal -->
-      <Modal
-        v-model:open="isMemberSelectorOpen"
-        title="选择成员"
-        confirm-text="确定"
-        cancel-text="取消"
-        @confirm="handleConfirm"
-        @cancel="handleCancel"
-      >
-        <TabsRoot v-model="selectedTab" class="w-full h-[50vh] flex flex-col">
-          <TabsList class="inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 p-1 w-full shrink-0">
-            <TabsIndicator class="absolute bottom-0 left-0 h-[2px] w-full bg-transparent transition-all duration-300" />
-            <TabsTrigger
-              value="dept"
-              class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
-            >
-              部门
-            </TabsTrigger>
-            <TabsTrigger
-              value="group"
-              class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
-            >
-              群组
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="dept" class="mt-4 flex-1 overflow-y-auto min-h-0">
-            <DeptMemberTreeSelector
-              v-model:selected-members="pendingSelection"
-              mode="single"
-            />
-          </TabsContent>
-          <TabsContent value="group" class="mt-4 flex-1 overflow-y-auto min-h-0">
-            <GroupMemberTreeSelector
-              v-model:selected-members="pendingSelection"
-              mode="single"
-            />
-          </TabsContent>
-        </TabsRoot>
-      </Modal>
     </div>
   </BackLayout>
 </template>

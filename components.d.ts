@@ -45,6 +45,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('./src/components/Sidebar.vue')['default']
     Tab: typeof import('./src/components/Tab.vue')['default']
+    TargetSelectorPopover: typeof import('./src/components/TargetSelectorPopover.vue')['default']
     Toast: typeof import('./src/components/Toast.vue')['default']
     TreeSelector: typeof import('./src/components/TreeSelector.vue')['default']
     VipCard: typeof import('./src/components/VipCard.vue')['default']

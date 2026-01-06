@@ -9,44 +9,29 @@ import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'rek
 import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
-import Modal from '~/components/Modal.vue'
+import TargetSelectorPopover from '~/components/TargetSelectorPopover.vue'
 import TreeSelector from '~/components/TreeSelector.vue'
 import { useAMap } from '~/composables/useAMap'
 import { weilaFetch } from '~/shared/instances'
 
 const { loadAMap } = useAMap()
 
-const sessionId = useRouteQuery('sessionId', '', { transform: Number })
+const sessionId = useRouteQuery('sessionId', -1, { transform: Number })
 const selectedType = useRouteQuery<'dept' | 'group'>('type', 'dept')
 
-const isSelectorOpen = ref(false)
 const selectedNodes = ref<TreeNode[]>([])
-const pendingSelection = ref<TreeNode[]>([])
+const isPopoverOpen = ref(false)
 
 watch(selectedNodes, (newNodes) => {
-  const newId = newNodes[0]?.id || 0
+  const newId = newNodes[0]?.id
   if (newId !== sessionId.value)
     sessionId.value = newId
 }, { deep: true })
 
 watch(selectedType, () => {
   selectedNodes.value = []
-  sessionId.value = 0
+  sessionId.value = -1
 })
-
-watch(isSelectorOpen, (isOpen) => {
-  if (isOpen)
-    pendingSelection.value = [...selectedNodes.value]
-})
-
-function handleConfirm() {
-  selectedNodes.value = pendingSelection.value
-  isSelectorOpen.value = false
-}
-
-function handleCancel() {
-  isSelectorOpen.value = false
-}
 
 const selectedNode = computed(() => selectedNodes.value[0])
 
@@ -228,23 +213,57 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
     <div class="absolute inset-0">
       <div ref="mapContainer" class="w-full h-full" />
 
-      <div class="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-auto md:min-w-[340px] bg-white rounded-lg shadow-lg z-10">
-        <div class="flex flex-col gap-3 p-3">
-          <div class="flex items-center gap-3 flex-wrap">
-            <!-- 选择按钮 -->
-            <button
-              type="button"
-              class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 transition-colors min-w-[120px]"
-              @click="isSelectorOpen = true"
-            >
-              <span class="truncate">
-                {{ selectedNode?.label || `选择${selectedType === 'dept' ? '部门' : '群组'}` }}
-              </span>
-              <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
-            </button>
-          </div>
+      <div class="absolute top-4 left-4 bg-white rounded-lg shadow-lg z-10">
+        <div class="flex p-3 space-x-2">
+          <TargetSelectorPopover v-model:open="isPopoverOpen">
+            <template #trigger="{ isOpen: isPopoverOpen }">
+              <button
+                type="button"
+                class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 transition-colors min-w-[120px]"
+              >
+                <span class="truncate">
+                  {{ selectedNode?.label || `选择${selectedType === 'dept' ? '部门' : '群组'}` }}
+                </span>
+                <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200" :class="{ 'rotate-180': isPopoverOpen }" />
+              </button>
+            </template>
+            <template #default>
+              <TabsRoot v-model="selectedType" class="w-full h-[50vh] flex flex-col">
+                <TabsList class="inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 p-1 w-full shrink-0">
+                  <TabsIndicator class="absolute bottom-0 left-0 h-[2px] w-full bg-transparent transition-all duration-300" />
+                  <TabsTrigger
+                    value="dept"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
+                  >
+                    部门
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="group"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
+                  >
+                    群组
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="dept" class="mt-4 flex-1 overflow-y-auto min-h-0">
+                  <TreeSelector
+                    key="dept"
+                    v-model:selected-nodes="selectedNodes"
+                    :load-more="deptLoader"
+                    mode="single"
+                  />
+                </TabsContent>
+                <TabsContent value="group" class="mt-4 flex-1 overflow-y-auto min-h-0">
+                  <TreeSelector
+                    key="group"
+                    v-model:selected-nodes="selectedNodes"
+                    :load-more="groupLoader"
+                    mode="single"
+                  />
+                </TabsContent>
+              </TabsRoot>
+            </template>
+          </TargetSelectorPopover>
 
-          <!-- 状态显示 -->
           <div class="flex items-center text-xs">
             <span v-if="!isValid" class="text-orange-600 whitespace-nowrap">
               选择{{ selectedType === 'dept' ? '部门' : '群组' }}
@@ -262,60 +281,6 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
               {{ realtimeData?.length || 0 }} 人
             </span>
           </div>
-        </div>
-      </div>
-
-      <!-- 选择 Modal -->
-      <Modal
-        v-model:open="isSelectorOpen"
-        :title="`选择${selectedType === 'dept' ? '部门' : '群组'}`"
-        confirm-text="确定"
-        cancel-text="取消"
-        @confirm="handleConfirm"
-        @cancel="handleCancel"
-      >
-        <TabsRoot v-model="selectedType" class="w-full h-[60vh] flex flex-col">
-          <TabsList class="inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 p-1 w-full shrink-0">
-            <TabsIndicator class="absolute bottom-0 left-0 h-[2px] w-full bg-transparent transition-all duration-300" />
-            <TabsTrigger
-              value="dept"
-              class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
-            >
-              部门
-            </TabsTrigger>
-            <TabsTrigger
-              value="group"
-              class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
-            >
-              群组
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="dept" class="mt-4 flex-1 overflow-y-auto min-h-0">
-            <TreeSelector
-              key="dept"
-              v-model:selected-nodes="pendingSelection"
-              :load-more="deptLoader"
-              mode="single"
-            />
-          </TabsContent>
-          <TabsContent value="group" class="mt-4 flex-1 overflow-y-auto min-h-0">
-            <TreeSelector
-              key="group"
-              v-model:selected-nodes="pendingSelection"
-              :load-more="groupLoader"
-              mode="single"
-            />
-          </TabsContent>
-        </TabsRoot>
-      </Modal>
-
-      <div
-        v-if="isValid && (realtimeData?.length ?? 0) > 0"
-        class="absolute top-4 right-4 md:right-auto md:left-4 lg:right-4 bg-white rounded-lg shadow-lg p-3 z-10"
-      >
-        <div class="flex items-center space-x-2">
-          <div class="w-3 h-3 rounded-full bg-blue-500" />
-          <span class="text-xs text-gray-600">在线</span>
         </div>
       </div>
     </div>

@@ -1,114 +1,81 @@
-# Task Plan: Generic Tree Selector Design
+# Task Plan: Refactor Realtime Location and Track Pages with Popover
 
 ## Goal
 
-Create a generic tree selector component with `loadMore` function for departments/groups and their members.
+Unify the config panels for realtime-location and track pages by replacing Modal with Reka UI Popover for target selection.
 
-## Design
+## Current State Analysis
 
-### GenericTreeSelector Component
+### Realtime Location Page
 
-- Takes a `loadMore` function: `(ctx: NodeData | null) => Promise<NodeData[]>`
-- When `ctx` is null, returns root level (departments or groups)
-- When `ctx` is a dept/group node, returns its members
-- Supports single/multiple selection modes
-- Tracks selected nodes and their IDs
+- Uses Modal for selecting dept/group
+- Contains TreeSelector with custom loadMore function
+- Tabs for switching between dept/group
+- Single selection mode (select one dept or group)
 
-### NodeData Type
+### Track Page
 
-```ts
-interface NodeData {
-  id: number
-  name: string
-  type: 'dept' | 'group' | 'member'
-  user_count?: number
-  // member specific
-  avatar?: string
-  user_num?: string
-}
-```
-
-### Usage Examples
-
-#### Department/Group Selection (for realtime-location)
-
-```ts
-async function deptLoader(ctx: NodeData | null) {
-  if (!ctx) {
-    // Load departments
-    return await weilaFetch<Dept[]>('/corp/address/get-my-manage-all-dept', { method: 'POST' })
-  }
-  // Load members of this department
-  return await weilaFetch<Member[]>('/corp/address/get-dept-all-member', {
-    method: 'POST',
-    body: { dept_id: ctx.id }
-  })
-}
-```
-
-#### Member Selection (for track)
-
-```ts
-// Same loader but returns different node types
-// Selection is on member nodes, not dept/group nodes
-```
+- Uses Modal for selecting members
+- Contains DeptMemberTreeSelector and GroupMemberTreeSelector
+- Tabs for switching between dept/group
+- Single selection mode (select one member)
 
 ## Phases
 
-- [x] Phase 1: Define types for NodeData and generic selector
-- [ ] Phase 2: Create GenericTreeSelector component
-- [ ] Phase 3: Create loader functions for dept/group
-- [ ] Phase 4: Update realtime-location page
-- [ ] Phase 5: Update track page
-- [ ] Phase 6: Type check and verify
+- [x] Phase 1: Research Reka UI Popover API
+- [x] Phase 2: Create shared TargetSelectorPopover component
+- [x] Phase 3: Refactor realtime-location page
+- [x] Phase 4: Refactor track page
+- [x] Phase 5: Type check and verify
 
-## Status
+## Key Questions
 
-**Currently in Phase 2** - Creating TreeSelector component
-
-## Implementation Plan
-
-### reka-ui Select 组件用法
-
-```vue
-<script setup lang="ts">
-// nuxt will auto import reka ui
-const selectedType = ref('dept')
-</script>
-
-<template>
-  <SelectRoot v-model="selectedType">
-    <SelectTrigger>
-      <SelectValue placeholder="选择类型" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="dept">
-        <SelectItemText>部门</SelectItemText>
-      </SelectItem>
-      <SelectItem value="group">
-        <SelectItemText>群组</SelectItemText>
-      </SelectItem>
-    </SelectContent>
-  </SelectRoot>
-</template>
-```
-
-### 组件创建
-
-- **GroupMemberTreeSelector**: 参考 DeptMemberTreeSelector，API 为 `/corp/group/get-my-manage-group-list` + `/corp/group/get-group-all-member`
+1. How to handle the close behavior - should selection apply immediately or on explicit confirm?
+2. How to constrain popover size properly?
+3. Should we create separate popover components or one unified?
 
 ## Decisions Made
 
-- **简化实现**: 不创建额外的 DeptMemberSelector，直接使用现有的 DeptMemberTreeSelector
-- **新组件**: 只创建 GroupMemberTreeSelector 组件（参考 DeptMemberTreeSelector）
-- **类型选择**: 在 realtime-location 页面使用 reka-ui Select 切换部门/群组
-- **动态显示**: 根据类型选择动态显示 DeptMemberTreeSelector 或 GroupMemberTreeSelector
-- **支持模式**: 两个选择器都保持原有的单选/多选支持
-
-## Errors Encountered
-
--
+- **Selection behavior**: Apply selection immediately when user clicks (no confirm button needed)
+- **Close behavior**: Click outside or select to close
+- **Component structure**: Create TargetSelectorPopover that accepts tabs content as slot
+- **Size constraints**: Use Reka UI's CSS custom properties for proper sizing
 
 ## Status
 
-**Currently in Phase 7** - 已完成所有开发工作，typecheck 通过，等待用户测试验证
+**Completed** - All phases finished successfully
+
+## Summary
+
+Refactored both realtime-location and track pages to use Reka UI Popover instead of Modal:
+
+- Created shared `TargetSelectorPopover` component with 400px width and 60vh max-height
+- Selection applies immediately (no confirm button needed)
+- Added chevron icon rotation when popover is open
+- Type check passes
+
+## Reka UI Popover API Reference
+
+```vue
+<PopoverRoot>
+  <PopoverTrigger>Trigger button</PopoverTrigger>
+  <PopoverPortal>
+    <PopoverContent
+      class="PopoverContent"
+      :side-offset="5"
+    >
+      Content here
+      <PopoverArrow />
+    </PopoverContent>
+  </PopoverPortal>
+</PopoverRoot>
+```
+
+CSS for sizing:
+
+```css
+.PopoverContent {
+  width: var(--reka-popover-trigger-width);
+  max-height: var(--reka-popover-content-available-height);
+}
+```
