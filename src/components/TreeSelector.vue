@@ -182,7 +182,6 @@ defineExpose({
             }"
             @change="selectNode(node)"
           >
-          <div v-else class="w-4 mr-3 flex-shrink-0" />
 
           <!-- Clickable Area (Icon + Avatar + Content) -->
           <div
@@ -265,7 +264,6 @@ defineExpose({
                   }"
                   @change="selectNode(child)"
                 >
-                <div v-else class="w-4 mr-3 flex-shrink-0" />
 
                 <!-- Clickable Area (Icon + Avatar + Content) -->
                 <div
