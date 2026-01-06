@@ -37,7 +37,7 @@ const { mutate: deleteMember } = useMutation({
     body: { user_id: userId },
   }),
   onSuccess: () => {
-    showToast('注销成功')
+    showToast('删除成功')
     // Invalidate all member-related queries
     queryCache.invalidateQueries({ key: ['member', 'list'] })
     queryCache.invalidateQueries({ key: ['dept'] })
@@ -45,7 +45,7 @@ const { mutate: deleteMember } = useMutation({
   },
   onError: (error) => {
     console.error('删除失败:', error)
-    showToast('注销失败')
+    showToast('删除失败')
   },
 })
 
@@ -161,7 +161,7 @@ function handleViewRealtime() {
             @select="showDeleteModal = true"
           >
             <Icon icon="lucide:trash-2" class="w-4 h-4" />
-            <span>注销账号</span>
+            <span>删除成员</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuPortal>
@@ -171,8 +171,8 @@ function handleViewRealtime() {
   <!-- Delete Confirmation Modal -->
   <Modal
     v-model:open="showDeleteModal"
-    title="确认注销"
-    :message="`确定要注销成员「${member.name}」吗？此操作不可恢复。`"
+    title="确认删除"
+    :message="`确定要删除成员「${member.name}」吗？此操作不可恢复。`"
     confirm-button-type="danger"
     :on-confirm="handleDeleteConfirm"
   />
