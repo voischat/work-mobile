@@ -23,7 +23,7 @@ const breakpoints = useBreakpoints({
 })
 
 const filterdItems = computed(() =>
-  props.items.filter(({ name }) => !(name === '通讯录' && breakpoints.smaller('lg').value)),
+  props.items.filter(({ name }) => !(name === '通讯录' && breakpoints.greater('lg').value)),
 )
 
 const router = useRouter()

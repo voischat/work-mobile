@@ -1093,3 +1093,197 @@ http://localhost:8090/v2/corp/legal/add-corp-legal?appid=102036&et=1741491127&si
 		}
 	}
 }
+
+http://localhost:8090/v2/loc/regeo?appid=102036&et=1741491127&sign=e056a1e5&token=031f1b83d5dc0dd5ecf6fcf764906646
+{
+    "lat": 22.67166,
+    "lon": 114.06795,
+    "radius": 300 // default to be 300
+}
+{
+	"errcode": 0,
+	"errmsg": "请求成功",
+	"data": {
+		"regeo": {
+			"province": "",
+			"city": "",
+			"citycode": "",
+			"district": "",
+			"adcode": "",
+			"township": "",
+			"Address": ""
+		}
+	}
+}
+
+https://www.voiswork.com/v2/corp/loc/get-track?appid=102036&et=1763975550&sign=9f4cc4c3&token=c9fd11ef13f5e21a5e8f4e5b10a51942
+{
+	"user_id": 1253732,
+	"date": "2025-07-14"
+}
+{
+	"errcode": 0,
+	"errmsg": "请求成功",
+	"data": {
+		"count": 0,
+		"tracks": [
+			{
+				"created": 1752484177,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484174,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484171,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484168,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484165,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484162,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484159,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484156,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484153,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484150,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484147,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484144,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484141,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484138,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484135,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484132,
+				"lat": 22.671168782374878,
+				"lng": 114.06565088351861
+			},
+			{
+				"created": 1752484131,
+				"lat": 22.67054,
+				"lng": 114.065936
+			},
+			{
+				"created": 1752484128,
+				"lat": 22.671467508629547,
+				"lng": 114.06544668610263
+			},
+			{
+				"created": 1752484125,
+				"lat": 22.671467508629547,
+				"lng": 114.06544668610263
+			},
+			{
+				"created": 1752484122,
+				"lat": 22.671467508629547,
+				"lng": 114.06544668610263
+			}
+		]
+	}
+}
+
+http://www.voiswork.cn:8091/v2/corp/loc/get-realtime-location?appid=102065&et=1761032370&sign=73fe3278&token=319b738831fc52f7c43d11138ae94666
+{
+	"session_id": 0, // dept id | group id
+	"session_type": 20 // 20 (部门) | 18 (群组)
+}
+{
+	"errcode": 0,
+	"errmsg": "请求成功",
+	"data": {
+		"locations": [
+			{
+				"uid": 1253968,
+				"type": 0,
+				"lat": 22.66980367006622,
+				"lng": 112.07073400002416,
+				"spd": 4.1,
+				"rad": 3.3,
+				"dir": 4.4,
+				"ts": 1761030195
+			}
+		]
+	}
+}
+
+http://localhost:8090/v2/corp/group/get-group-all-member?appid=102036&et=1741491127&sign=e056a1e5&token=20fe489743d711490b3c96dc8e46eaba
+{
+	"group_id": 81000822
+}
+{
+	"errcode": 0,
+	"errmsg": "请求成功",
+	"data": {
+		"members": [
+			{
+				"user_id": 1253631,
+				"user_num": "70011662",
+				"job_num": "",
+				"sex": 0,
+				"name": "ent88562945",
+				"avatar": "http://weilacorp.oss-cn-shenzhen.aliyuncs.com/default/user.png",
+				"is_admin": 0,
+				"dept_id": 0,
+				"phone": "18675500568",
+				"country_code": "86",
+				"state": 0,
+				"type": 255,
+				"tts": 1,
+				"loc_share": 1,
+				"track": 0,
+				"group_count": 0,
+				"online_status": 1,
+				"created": 1752823588
+			}
+		]
+	}
+}

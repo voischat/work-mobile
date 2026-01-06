@@ -51,7 +51,7 @@ function formatDate(timestamp: number): string {
 <template>
   <CollapsibleRoot class="bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200">
     <!-- Header Section -->
-    <div class="p-5">
+    <CollapsibleTrigger class="p-5 w-full">
       <div class="flex items-start space-x-3.5">
         <!-- Avatar using Reka UI -->
         <AvatarRoot class="inline-flex h-14 w-14 shrink-0 select-none items-center justify-center overflow-hidden rounded-xl bg-gray-100 ring-1 ring-gray-200/50">
@@ -79,7 +79,7 @@ function formatDate(timestamp: number): string {
             />
           </div>
 
-          <div class="flex items-center flex-wrap space-x-2">
+          <div class="flex items-center flex-wrap space-x-1">
             <!-- Member Type Badge -->
             <span
               v-if="memberTypeMap[member.type as keyof typeof memberTypeMap]"
@@ -96,31 +96,17 @@ function formatDate(timestamp: number): string {
                 ? 'bg-green-50 text-green-700 border-green-200'
                 : 'bg-gray-50 text-gray-600 border-gray-200'"
             >
-              <Icon
-                :icon="onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.icon || 'lucide:circle'"
-                class="w-2 h-2"
-                :class="member.online_status === 1 ? 'text-green-600 fill-current' : 'text-gray-400'"
-              />
               <span>{{ onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.label || '未知' }}</span>
-            </span>
-
-            <!-- Department -->
-            <span v-if="deptName" class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
-              <Icon icon="lucide:building-2" class="w-3 h-3" />
-              <span>{{ deptName }}</span>
             </span>
           </div>
         </div>
 
-        <!-- Expand/Collapse Trigger -->
-        <CollapsibleTrigger class="shrink-0 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all">
-          <Icon
-            icon="lucide:chevron-down"
-            class="size-5 transition-transform duration-200 collapsible-chevron"
-          />
-        </CollapsibleTrigger>
+        <Icon
+          icon="lucide:chevron-down"
+          class="size-5 transition-transform duration-200 collapsible-chevron"
+        />
       </div>
-    </div>
+    </CollapsibleTrigger>
 
     <!-- Collapsible Content -->
     <CollapsibleContent class="collapsible-content">

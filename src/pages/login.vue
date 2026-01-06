@@ -22,7 +22,7 @@ const { saveAuth } = useAuth()
 const { showToast } = useToast()
 
 const formData = ref<LoginForm>({
-  account: '16675441248',
+  account: 'kvoon@duck.com',
   password: '123456',
 })
 

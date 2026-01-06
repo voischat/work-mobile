@@ -8,17 +8,19 @@ import { weilaFetch } from '~/shared/instances'
 
 const props = withDefaults(defineProps<{
   existingMemberIds?: number[]
+  mode?: 'single' | 'multiple'
 }>(), {
   existingMemberIds: () => [],
+  mode: 'multiple',
 })
 
-const selectedMemberIds = defineModel<Set<number>>('selectedMemberIds', {
-  default: () => new Set(),
+const selectedMembers = defineModel<Member[]>('selectedMembers', {
+  default: () => [],
   required: true,
 })
 
 const existingMemberIdsSet = computed(() => new Set(props.existingMemberIds))
-const selectedMemberIdsSet = computed(() => new Set(selectedMemberIds.value))
+const selectedMemberIdsSet = computed(() => new Set(selectedMembers.value.map(m => m.user_id)))
 
 const expandedDeptIds = ref<Set<number>>(new Set())
 const deptMembersCache = ref<Map<number, Member[]>>(new Map())
@@ -71,13 +73,26 @@ function toggleMember(memberId: number) {
   if (existingMemberIdsSet.value.has(memberId))
     return
 
-  const newSelectedSet = new Set(selectedMemberIds.value)
-  if (newSelectedSet.has(memberId))
-    newSelectedSet.delete(memberId)
-  else
-    newSelectedSet.add(memberId)
+  // Find the member from cache
+  let member: Member | undefined
+  for (const members of deptMembersCache.value.values()) {
+    member = members.find(m => m.user_id === memberId)
+    if (member)
+      break
+  }
+  if (!member)
+    return
 
-  selectedMemberIds.value = newSelectedSet
+  if (props.mode === 'single') {
+    const isSelected = selectedMembers.value.some(m => m.user_id === memberId)
+    selectedMembers.value = isSelected ? [] : [member]
+  }
+  else {
+    const isSelected = selectedMembers.value.some(m => m.user_id === memberId)
+    selectedMembers.value = isSelected
+      ? selectedMembers.value.filter(m => m.user_id !== memberId)
+      : [...selectedMembers.value, member]
+  }
 }
 
 function getDeptMembers(deptId: number): Member[] {
@@ -98,7 +113,7 @@ function isMemberExisting(memberId: number): boolean {
 
 defineExpose({
   clearSelection: () => {
-    selectedMemberIds.value = new Set()
+    selectedMembers.value = []
   },
 })
 </script>
@@ -155,10 +170,11 @@ defineExpose({
                 @click.stop="toggleMember(member.user_id)"
               >
                 <input
-                  type="checkbox"
+                  :type="mode === 'single' ? 'radio' : 'checkbox'"
                   :checked="isMemberSelected(member.user_id)"
                   :disabled="isMemberExisting(member.user_id)"
-                  class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  :name="mode === 'single' ? 'member-select' : undefined"
+                  class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   :class="{
                     'cursor-pointer': !isMemberExisting(member.user_id),
                     'cursor-not-allowed opacity-50': isMemberExisting(member.user_id),

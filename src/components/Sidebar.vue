@@ -41,6 +41,22 @@ const items: NavItem[] = [
     ],
   },
   {
+    title: '工作台',
+    icon: 'lucide:layout-dashboard',
+    children: [
+      {
+        title: '轨迹',
+        icon: 'lucide:route',
+        route: '/workbench/track',
+      },
+      {
+        title: '实时位置',
+        icon: 'lucide:map-pin',
+        route: '/workbench/realtime-location',
+      },
+    ],
+  },
+  {
     title: '我的',
     icon: 'lucide:user-circle',
     route: '/me',
@@ -62,7 +78,7 @@ function handleItemClick(item: NavItem) {
     class="list-none select-none w-56 bg-white text-stone-700 border-r shadow-sm p-2 text-sm font-medium"
     :items="items"
     :get-key="(item) => item.title"
-    :default-expanded="['通讯录']"
+    :default-expanded="['通讯录', '工作台']"
   >
     <h2 class="font-semibold text-sm text-neutral-400 px-2 pt-1 pb-3">
       微喇企业版

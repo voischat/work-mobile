@@ -69,7 +69,7 @@ onUnmounted(() => {
         <slot name="breadcrumb" />
       </div>
 
-      <main ref="mainElement" class="flex-1 overflow-y-auto">
+      <main ref="mainElement" class="flex-1 overflow-y-auto relative">
         <slot />
       </main>
     </div>

@@ -60,3 +60,13 @@ export interface GroupListResponse {
   count: number
   groups: Group[]
 }
+
+export interface TreeNode {
+  id: number
+  label: string | (() => string)
+  type: 'dept' | 'group' | 'member'
+  count?: number
+  raw_data?: Member | Dept | Group
+  expandable: boolean // 是否可以展开（有子节点）
+  selectable: boolean // 是否可以被选中
+}

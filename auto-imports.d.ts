@@ -6,6 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const AMapKeys: typeof import('./src/shared/const')['AMapKeys']
   const EffectScope: typeof import('vue')['EffectScope']
   const addMemberSchema: typeof import('./src/composables/useGenMember')['addMemberSchema']
   const appid: typeof import('./src/shared/const')['appid']
@@ -134,6 +135,7 @@ declare global {
   const unrefElement: typeof import('@vueuse/core')['unrefElement']
   const until: typeof import('@vueuse/core')['until']
   const useAIMemberParser: typeof import('./src/composables/useGenMember')['generateMember']
+  const useAMap: typeof import('./src/composables/useAMap')['useAMap']
   const useActiveElement: typeof import('@vueuse/core')['useActiveElement']
   const useAnimate: typeof import('@vueuse/core')['useAnimate']
   const useArrayDifference: typeof import('@vueuse/core')['useArrayDifference']
@@ -358,6 +360,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly AMapKeys: UnwrapRef<typeof import('./src/shared/const')['AMapKeys']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly addMemberSchema: UnwrapRef<typeof import('./src/composables/useGenMember')['addMemberSchema']>
     readonly appid: UnwrapRef<typeof import('./src/shared/const')['appid']>
@@ -482,6 +485,7 @@ declare module 'vue' {
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly unrefElement: UnwrapRef<typeof import('@vueuse/core')['unrefElement']>
     readonly until: UnwrapRef<typeof import('@vueuse/core')['until']>
+    readonly useAMap: UnwrapRef<typeof import('./src/composables/useAMap')['useAMap']>
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
     readonly useArrayDifference: UnwrapRef<typeof import('@vueuse/core')['useArrayDifference']>

@@ -9,6 +9,7 @@ import {
   DropdownMenuRoot,
   DropdownMenuTrigger,
 } from 'reka-ui'
+import { useRouter } from 'vue-router'
 import { weilaFetch } from '~/shared/instances'
 import EditMemberModal from './EditMemberModal.vue'
 import MemberStateToggle from './MemberStateToggle.vue'
@@ -21,6 +22,7 @@ const props = defineProps<{
   handleEditSuccess?: (updatedMember: Member) => void
 }>()
 
+const router = useRouter()
 const { showToast } = useToast()
 const queryCache = useQueryCache()
 
@@ -83,6 +85,16 @@ function handleResetPassword() {
 function handleStateUpdated(_updatedMember: Member) {
   // 状态更新后，组件内部状态已同步，无需刷新列表
 }
+
+// 导航到轨迹页面
+function handleViewTrack() {
+  router.push(`/workbench/track?userId=${props.member.user_id}`)
+}
+
+// 导航到实时位置页面
+function handleViewRealtime() {
+  router.push(`/workbench/realtime-location?userId=${props.member.user_id}&sessionId=${props.member.dept_id}`)
+}
 </script>
 
 <template>
@@ -125,6 +137,24 @@ function handleStateUpdated(_updatedMember: Member) {
           :side-offset="5"
           align="end"
         >
+          <!-- View Track -->
+          <DropdownMenuItem
+            class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 rounded cursor-pointer hover:bg-gray-50 focus:bg-gray-50 outline-none transition-colors"
+            @select="handleViewTrack"
+          >
+            <Icon icon="lucide:route" class="w-4 h-4" />
+            <span>查看轨迹</span>
+          </DropdownMenuItem>
+
+          <!-- View Realtime Location -->
+          <DropdownMenuItem
+            class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 rounded cursor-pointer hover:bg-gray-50 focus:bg-gray-50 outline-none transition-colors"
+            @select="handleViewRealtime"
+          >
+            <Icon icon="lucide:map-pin" class="w-4 h-4" />
+            <span>实时位置</span>
+          </DropdownMenuItem>
+
           <!-- Delete -->
           <DropdownMenuItem
             class="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 rounded cursor-pointer hover:bg-red-50 focus:bg-red-50 outline-none transition-colors"

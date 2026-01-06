@@ -26,6 +26,7 @@ declare module 'vue' {
     EditMemberModal: typeof import('./src/components/EditMemberModal.vue')['default']
     GroupActions: typeof import('./src/components/GroupActions.vue')['default']
     GroupAddForm: typeof import('./src/components/forms/GroupAddForm.vue')['default']
+    GroupMemberTreeSelector: typeof import('./src/components/GroupMemberTreeSelector.vue')['default']
     Header: typeof import('./src/components/Header.vue')['default']
     HomeLayout: typeof import('./src/components/HomeLayout.vue')['default']
     ImageVerifyCode: typeof import('./src/components/ImageVerifyCode.vue')['default']
@@ -34,6 +35,7 @@ declare module 'vue' {
     MemberAddForm: typeof import('./src/components/forms/MemberAddForm.vue')['default']
     MemberAIGenerator: typeof import('./src/components/MemberAIGenerator.vue')['default']
     MemberCard: typeof import('./src/components/MemberCard.vue')['default']
+    MemberSelector: typeof import('./src/components/MemberSelector.vue')['default']
     MemberStateToggle: typeof import('./src/components/MemberStateToggle.vue')['default']
     Modal: typeof import('./src/components/Modal.vue')['default']
     OrgCard: typeof import('./src/components/OrgCard.vue')['default']
@@ -44,6 +46,7 @@ declare module 'vue' {
     Sidebar: typeof import('./src/components/Sidebar.vue')['default']
     Tab: typeof import('./src/components/Tab.vue')['default']
     Toast: typeof import('./src/components/Toast.vue')['default']
+    TreeSelector: typeof import('./src/components/TreeSelector.vue')['default']
     VipCard: typeof import('./src/components/VipCard.vue')['default']
   }
 }

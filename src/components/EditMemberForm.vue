@@ -77,13 +77,7 @@ const { errors, validate } = useForm(editMemberSchema)
 const { mutate: editMember, isLoading, error } = useMutation({
   mutation: (payload: EditMemberForm) => weilaFetch<{ member: Member }>('/corp/address/change-member', {
     method: 'POST',
-    body: {
-      user_id: payload.user_id,
-      name: payload.name,
-      no: payload.job_num,
-      avatar: payload.avatar || 'http://weilacorp.oss-cn-shenzhen.aliyuncs.com/corp/100011/a/0e9763d6.jpg',
-      dept_id: payload.dept_id,
-    },
+    body: payload,
   }),
   onMutate(payload) {
     const queryCache = useQueryCache()

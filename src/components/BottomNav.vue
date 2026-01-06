@@ -17,11 +17,11 @@ const navItems = [
     path: '/directory',
     icon: 'lucide:book',
   },
-  // {
-  //   name: '工作台',
-  //   path: '/workbench',
-  //   icon: 'lucide:briefcase',
-  // },
+  {
+    name: '工作台',
+    path: '/workbench',
+    icon: 'lucide:layout-dashboard',
+  },
   {
     name: '我的',
     path: '/me',

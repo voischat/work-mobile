@@ -22,7 +22,7 @@ const groupId = computed(() => Number(useRouteParams('id').value))
 
 const isAddMemberModalOpen = ref(false)
 const treeSelectorRef = ref<InstanceType<typeof DeptMemberTreeSelector> | null>(null)
-const selectedMemberIds = ref(new Set<number>())
+const selectedMembers = ref<Member[]>([])
 
 const currentPage = ref(0)
 const accumulatedMembers = ref<Member[]>([])
@@ -130,12 +130,12 @@ const { mutate: addMembersToGroup, isLoading: isAddingMembers } = useMutation({
 })
 
 async function handleAddMembersConfirm() {
-  if (selectedMemberIds.value.size === 0) {
+  if (selectedMembers.value.length === 0) {
     showToast('请至少选择一个成员')
     return
   }
 
-  addMembersToGroup(Array.from(selectedMemberIds.value))
+  addMembersToGroup(selectedMembers.value.map(m => m.user_id))
 }
 
 const { data: groupAllMembers } = useQuery({
@@ -356,14 +356,14 @@ function handleEditGroupMember(member: Member) {
     >
       <DeptMemberTreeSelector
         ref="treeSelectorRef"
-        v-model:selected-member-ids="selectedMemberIds"
+        v-model:selected-members="selectedMembers"
         :existing-member-ids="existingMemberIds"
       />
       <template #footer>
         <div class="flex items-center justify-between">
           <!-- 左侧显示选中数量 -->
           <div class="text-sm text-gray-600">
-            <span class="font-medium text-blue-600">{{ selectedMemberIds.size }}</span> 位成员已选择
+            <span class="font-medium text-blue-600">{{ selectedMembers.length }}</span> 位成员已选择
           </div>
           <!-- 右侧按钮组 -->
           <div class="flex space-x-3">
