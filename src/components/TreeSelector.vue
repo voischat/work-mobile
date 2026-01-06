@@ -131,6 +131,35 @@ function getNodeIcon(type: TreeNode['type']): string {
   return icons[type] || 'lucide:circle'
 }
 
+// UI mode helpers based on expandable/selectable
+function shouldShowChevron(node: TreeNode): boolean {
+  return node.expandable
+}
+
+function shouldShowCheckbox(node: TreeNode): boolean {
+  return node.selectable
+}
+
+function getRowClickAction(node: TreeNode): 'expand' | 'select' | 'none' {
+  if (node.expandable && !node.selectable)
+    return 'expand'
+  if (node.selectable && !existingNodeIdsSet.value.has(node.id))
+    return 'select'
+  return 'none'
+}
+
+function handleRowClick(node: TreeNode, event: MouseEvent) {
+  const target = event.target as HTMLElement
+  if (target.closest('button') || target.tagName === 'INPUT')
+    return
+
+  const action = getRowClickAction(node)
+  if (action === 'expand')
+    toggleNode(node)
+  else if (action === 'select')
+    selectNode(node)
+}
+
 defineExpose({
   clearSelection: () => {
     selectedNodes.value = []
@@ -152,13 +181,17 @@ defineExpose({
         :key="node.id"
         class="border border-gray-200 rounded-lg overflow-hidden"
       >
-        <div class="flex items-center px-4 py-3 bg-gray-50">
-          <!-- Expand/Collapse Button -->
+        <div
+          class="flex items-center px-4 py-3 bg-gray-50"
+          :class="{ 'cursor-pointer hover:bg-gray-100': getRowClickAction(node) !== 'none' }"
+          @click="handleRowClick(node, $event)"
+        >
+          <!-- Expand/Collapse Button - only when expandable -->
           <button
-            v-if="node.expandable"
+            v-if="shouldShowChevron(node)"
             type="button"
             class="mr-2 p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-            @click="toggleNode(node)"
+            @click.stop="toggleNode(node)"
           >
             <Icon
               icon="lucide:chevron-right"
@@ -166,11 +199,10 @@ defineExpose({
               :class="{ 'rotate-90': expandedNodeIds.has(node.id) }"
             />
           </button>
-          <div v-else class="w-8 mr-2 flex-shrink-0" />
 
-          <!-- Selection Input -->
+          <!-- Selection Input - only when selectable -->
           <input
-            v-if="node.selectable"
+            v-if="shouldShowCheckbox(node)"
             :type="mode === 'single' ? 'radio' : 'checkbox'"
             :checked="isNodeSelected(node)"
             :disabled="existingNodeIdsSet.has(node.id)"
@@ -180,18 +212,12 @@ defineExpose({
               'cursor-pointer': !existingNodeIdsSet.has(node.id),
               'cursor-not-allowed opacity-50': existingNodeIdsSet.has(node.id),
             }"
+            @click.stop
             @change="selectNode(node)"
           >
 
-          <!-- Clickable Area (Icon + Avatar + Content) -->
-          <div
-            class="flex items-center flex-1 min-w-0"
-            :class="{
-              'cursor-pointer': node.selectable && !existingNodeIdsSet.has(node.id),
-              'cursor-default': !node.selectable || existingNodeIdsSet.has(node.id),
-            }"
-            @click="selectNode(node)"
-          >
+          <!-- Content Area -->
+          <div class="flex items-center flex-1 min-w-0">
             <!-- Node Icon -->
             <Icon :icon="getNodeIcon(node.type)" class="w-5 h-5 text-gray-500 flex-shrink-0 mr-3" />
 
@@ -246,13 +272,27 @@ defineExpose({
               <div
                 v-for="child in nodeChildrenCache.get(node.id)"
                 :key="child.id"
-                class="flex items-center px-4 py-3 hover:bg-gray-50"
+                class="flex items-center px-4 py-3"
+                :class="{ 'cursor-pointer hover:bg-gray-50': getRowClickAction(child) !== 'none' }"
+                @click="handleRowClick(child, $event)"
               >
-                <div class="w-8 mr-2 flex-shrink-0" />
+                <!-- Expand/Collapse Button - only when expandable -->
+                <button
+                  v-if="shouldShowChevron(child)"
+                  type="button"
+                  class="mr-2 p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                  @click.stop="toggleNode(child)"
+                >
+                  <Icon
+                    icon="lucide:chevron-right"
+                    class="w-4 h-4 text-gray-500 transition-transform duration-200"
+                    :class="{ 'rotate-90': expandedNodeIds.has(child.id) }"
+                  />
+                </button>
 
-                <!-- Selection Input -->
+                <!-- Selection Input - only when selectable -->
                 <input
-                  v-if="child.selectable"
+                  v-if="shouldShowCheckbox(child)"
                   :type="mode === 'single' ? 'radio' : 'checkbox'"
                   :checked="isNodeSelected(child)"
                   :disabled="existingNodeIdsSet.has(child.id)"
@@ -262,18 +302,12 @@ defineExpose({
                     'cursor-pointer': !existingNodeIdsSet.has(child.id),
                     'cursor-not-allowed opacity-50': existingNodeIdsSet.has(child.id),
                   }"
+                  @click.stop
                   @change="selectNode(child)"
                 >
 
-                <!-- Clickable Area (Icon + Avatar + Content) -->
-                <div
-                  class="flex items-center flex-1 min-w-0"
-                  :class="{
-                    'cursor-pointer': child.selectable && !existingNodeIdsSet.has(child.id),
-                    'cursor-default': !child.selectable || existingNodeIdsSet.has(child.id),
-                  }"
-                  @click="selectNode(child)"
-                >
+                <!-- Content Area -->
+                <div class="flex items-center flex-1 min-w-0">
                   <Icon :icon="getNodeIcon(child.type)" class="w-5 h-5 text-gray-400 flex-shrink-0 mr-3" />
 
                   <!-- Avatar for members -->
