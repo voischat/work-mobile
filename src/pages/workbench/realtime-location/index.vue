@@ -237,8 +237,8 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
     <div class="absolute inset-0">
       <div ref="mapContainer" class="w-full h-full" />
 
-      <div class="absolute top-4 left-4 bg-white rounded-lg shadow-lg z-10">
-        <div class="flex p-3 space-x-2">
+      <div class="absolute top-4 left-4 bg-white rounded-lg shadow-lg z-10 p-3 ">
+        <div class="flex space-x-2">
           <TargetSelectorPopover v-model:open="isPopoverOpen">
             <template #trigger="{ isOpen: isPopoverOpen }">
               <button
@@ -251,62 +251,63 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
                 <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200" :class="{ 'rotate-180': isPopoverOpen }" />
               </button>
             </template>
-            <template #default>
-              <TabsRoot v-model="selectedType" class="w-full h-[50vh] flex flex-col">
-                <TabsList class="inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 p-1 w-full shrink-0">
+            <template #default="{ close }">
+              <TabsRoot v-model="selectedType">
+                <TabsList class="inline-flex h-9 items-center justify-center rounded-lg bg-gray-100 p-0.5 w-full shrink-0">
                   <TabsIndicator class="absolute bottom-0 left-0 h-[2px] w-full bg-transparent transition-all duration-300" />
                   <TabsTrigger
                     value="dept"
-                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
                   >
                     部门
                   </TabsTrigger>
                   <TabsTrigger
                     value="group"
-                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm flex-1"
                   >
                     群组
                   </TabsTrigger>
                 </TabsList>
-                <TabsContent value="dept" class="mt-4 flex-1 overflow-y-auto min-h-0">
+                <TabsContent value="dept" class="mt-3 flex-1 overflow-y-auto min-h-0">
                   <TreeSelector
                     key="dept"
                     v-model:selected-nodes="selectedNodes"
                     :load-more="deptLoader"
                     :cache-key="['realtime-location', 'dept', 'selector']"
                     mode="single"
+                    @select="close"
                   />
                 </TabsContent>
-                <TabsContent value="group" class="mt-4 flex-1 overflow-y-auto min-h-0">
+                <TabsContent value="group" class="mt-3 flex-1 overflow-y-auto min-h-0">
                   <TreeSelector
                     key="group"
                     v-model:selected-nodes="selectedNodes"
                     :load-more="groupLoader"
                     :cache-key="['realtime-location', 'group', 'selector']"
                     mode="single"
+                    @select="close"
                   />
                 </TabsContent>
               </TabsRoot>
             </template>
           </TargetSelectorPopover>
-
-          <div class="flex items-center text-xs">
-            <span v-if="!isValid" class="text-orange-600 whitespace-nowrap">
-              选择{{ selectedType === 'dept' ? '部门' : '群组' }}
-            </span>
-            <span v-else-if="status === 'pending'" class="text-gray-500 whitespace-nowrap">
-              加载中...
-            </span>
-            <span v-else-if="error" class="text-red-600 whitespace-nowrap">
-              加载失败
-            </span>
-            <span v-else-if="(realtimeData?.length ?? 0) === 0" class="text-gray-500 whitespace-nowrap">
-              暂无数据
-            </span>
-            <span v-else class="text-gray-600 whitespace-nowrap">
-              {{ realtimeData?.length || 0 }} 人
-            </span>
-          </div>
+        </div>
+        <div class="flex items-center text-xs mt-2">
+          <span v-if="!isValid" class="text-orange-600 whitespace-nowrap">
+            选择{{ selectedType === 'dept' ? '部门' : '群组' }}
+          </span>
+          <span v-else-if="status === 'pending'" class="text-gray-500 whitespace-nowrap">
+            加载中...
+          </span>
+          <span v-else-if="error" class="text-red-600 whitespace-nowrap">
+            加载失败
+          </span>
+          <span v-else-if="(realtimeData?.length ?? 0) === 0" class="text-gray-500 whitespace-nowrap">
+            暂无数据
+          </span>
+          <span v-else class="text-gray-600 whitespace-nowrap">
+            {{ realtimeData?.length || 0 }} 人
+          </span>
         </div>
       </div>
     </div>

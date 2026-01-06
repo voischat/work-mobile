@@ -17,6 +17,10 @@ const props = withDefaults(defineProps<{
   existingNodeIds: () => [],
 })
 
+const emit = defineEmits<{
+  select: [node: TreeNode]
+}>()
+
 const selectedNodes = defineModel<TreeNode[]>('selectedNodes', {
   default: () => [],
   required: true,
@@ -78,6 +82,8 @@ async function selectNode(node: TreeNode) {
   if (props.mode === 'single') {
     const isSelected = selectedNodes.value.some(n => n.id === node.id)
     selectedNodes.value = isSelected ? [] : [node]
+    if (!isSelected)
+      emit('select', node)
     return
   }
 

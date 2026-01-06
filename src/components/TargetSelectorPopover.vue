@@ -4,14 +4,19 @@ import { PopoverArrow, PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigge
 defineProps<{
   triggerLabel?: string
   triggerClass?: string
+  closeOnSelect?: boolean
 }>()
 
 defineSlots<{
-  default: (props: object) => any
+  default: (props: { close: () => void }) => any
   trigger: (props: { isOpen: boolean }) => any
 }>()
 
 const isOpen = defineModel<boolean>('open', { default: false })
+
+function close() {
+  isOpen.value = false
+}
 </script>
 
 <template>
@@ -33,11 +38,11 @@ const isOpen = defineModel<boolean>('open', { default: false })
     </PopoverTrigger>
     <PopoverPortal>
       <PopoverContent
-        class="z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-0 w-[400px] max-h-[min(var(--reka-popover-content-available-height),60vh)] overflow-hidden"
+        class="z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-0 w-[calc(min(100vw-2rem,400px))] max-h-[min(var(--reka-popover-content-available-height),60vh)] overflow-hidden"
         align="start"
         :side-offset="4"
       >
-        <slot />
+        <slot :close="close" />
         <PopoverArrow class="fill-white" />
       </PopoverContent>
     </PopoverPortal>
