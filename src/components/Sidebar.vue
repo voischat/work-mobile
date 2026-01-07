@@ -22,6 +22,7 @@ const items: NavItem[] = [
   {
     title: '通讯录',
     icon: 'lucide:book',
+    route: '/directory',
     children: [
       {
         title: '部门管理',
@@ -43,6 +44,7 @@ const items: NavItem[] = [
   {
     title: '工作台',
     icon: 'lucide:layout-dashboard',
+    route: '/workbench',
     children: [
       {
         title: '轨迹',
@@ -64,11 +66,9 @@ const items: NavItem[] = [
 ]
 
 function handleItemClick(item: NavItem) {
-  // Only navigate if the item has a route and no children (or if it's a leaf node)
-  if (item.route && (!item.children || item.children.length === 0)) {
+  if (item.route) {
     router.replace(item.route)
   }
-  // If the item has children but no route, it will just expand/collapse via TreeRoot
 }
 </script>
 
@@ -85,7 +85,7 @@ function handleItemClick(item: NavItem) {
     </h2>
     <TreeItem
       v-for="item in flattenItems"
-      v-slot="{ isExpanded }"
+      v-slot="{ isExpanded, handleToggle }"
       :key="item._id"
       :style="{ 'padding-left': `${item.level - 0.5}rem` }"
       v-bind="item.bind"
@@ -112,9 +112,16 @@ function handleItemClick(item: NavItem) {
         :icon="item.value.icon || 'lucide:file'"
         class="h-4 w-4"
       />
-      <div class="pl-2">
+      <div class="pl-2 flex-1">
         {{ item.value.title }}
       </div>
+      <Icon
+        v-if="item.hasChildren"
+        icon="lucide:chevron-right"
+        class="h-4 w-4 ml-auto transition-transform duration-200"
+        :class="{ 'rotate-90': isExpanded }"
+        @click.stop="handleToggle"
+      />
     </TreeItem>
   </TreeRoot>
 </template>
