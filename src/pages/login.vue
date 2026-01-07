@@ -1,57 +1,192 @@
 <script setup lang="ts">
-import type { LoginResponse } from '~/types/auth'
+import type { LoginByEmailRequest, LoginBySmsRequest, LoginResponse, SendEmailVerifyCodeRequest, SendSmsVerifyCodeRequest } from '~/types/auth'
+import { Icon } from '@iconify/vue'
 import { useMutation } from '@pinia/colada'
 import md5 from 'md5'
-import { ref } from 'vue'
+import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
+import CountDownButton from '~/components/CountDownButton.vue'
+import ImageVerifyCode from '~/components/ImageVerifyCode.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
-const loginSchema = z.object({
+const passwordSchema = z.object({
   account: z.string().min(1, '账号不能为空'),
   password: z.string().min(1, '密码不能为空'),
 })
 
-type LoginForm = z.infer<typeof loginSchema>
+const phoneSchema = z.object({
+  phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号'),
+  imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
+  verifycode: z.string().min(4, '验证码至少4位'),
+})
+
+const emailSchema = z.object({
+  email: z.string().email('请输入正确的邮箱地址'),
+  imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
+  verifycode: z.string().min(4, '验证码至少4位'),
+})
 
 const router = useRouter()
 const { saveAuth } = useAuth()
 const { showToast } = useToast()
 
-const formData = ref<LoginForm>({
-  account: 'kvoon@duck.com',
-  password: '123456',
-})
+const passwordForm = ref({ account: '', password: '' })
+const phoneForm = ref({ phone: '', imageVerifyAnswer: '', verifycode: '' })
+const emailForm = ref({ email: '', imageVerifyAnswer: '', verifycode: '' })
 
-const { errors, validate } = useForm(loginSchema)
+const phoneImageVerifyCodeRef = ref<InstanceType<typeof ImageVerifyCode> | null>(null)
+const phoneCountDownButtonRef = ref<InstanceType<typeof CountDownButton> | null>(null)
+const emailImageVerifyCodeRef = ref<InstanceType<typeof ImageVerifyCode> | null>(null)
+const emailCountDownButtonRef = ref<InstanceType<typeof CountDownButton> | null>(null)
 
-const { mutate: login, isLoading: isFetching } = useMutation({
+const { errors: passwordErrors, validate: validatePassword } = useForm(passwordSchema)
+const { errors: phoneErrors, validate: validatePhone } = useForm(phoneSchema)
+const { errors: emailErrors, validate: validateEmail } = useForm(emailSchema)
+
+function handleLoginSuccess(loginData: LoginResponse) {
+  showToast('登录成功')
+  saveAuth(loginData.access_token, loginData.refresh_token, loginData.expires_in)
+  router.push('/')
+}
+
+const { mutate: loginByPassword, isLoading: isPasswordLoading } = useMutation({
   mutation: () => weilaFetch<LoginResponse>('/corp/auth/login', {
     method: 'POST',
     body: {
-      account: formData.value.account,
-      password: md5(formData.value.password),
+      account: passwordForm.value.account,
+      password: md5(passwordForm.value.password),
     },
   }),
-  onSuccess(loginData) {
-    showToast('登录成功')
-    saveAuth(loginData.access_token, loginData.refresh_token, loginData.expires_in)
-    router.push('/')
+  onSuccess: handleLoginSuccess,
+  onError: error => showToast(error.message || '登录失败'),
+})
+
+const { mutate: sendSmsVerifyCode, isLoading: isSendingSms } = useMutation({
+  mutation: (params: SendSmsVerifyCodeRequest) =>
+    weilaFetch('/common/send-sms-verifycode', { method: 'POST', body: params }),
+  onSuccess() {
+    showToast('验证码已发送')
+    phoneCountDownButtonRef.value?.startCountdown()
   },
   onError(error) {
-    showToast(error.message || '登录失败')
+    showToast(error.message || '发送验证码失败')
+    phoneImageVerifyCodeRef.value?.refresh()
   },
 })
 
-function handleLogin() {
-  if (!validate(formData.value)) {
-    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
+const { mutate: loginBySms, isLoading: isSmsLoading } = useMutation({
+  mutation: (params: LoginBySmsRequest) =>
+    weilaFetch<LoginResponse>('/corp/auth/login-by-sms', { method: 'POST', body: params }),
+  onSuccess: handleLoginSuccess,
+  onError: error => showToast(error.message || '登录失败'),
+})
+
+const { mutate: sendEmailVerifyCode, isLoading: isSendingEmail } = useMutation({
+  mutation: (params: SendEmailVerifyCodeRequest) =>
+    weilaFetch('/common/send-email-verifycode', { method: 'POST', body: params }),
+  onSuccess() {
+    showToast('验证码已发送')
+    emailCountDownButtonRef.value?.startCountdown()
+  },
+  onError(error) {
+    showToast(error.message || '发送验证码失败')
+    emailImageVerifyCodeRef.value?.refresh()
+  },
+})
+
+const { mutate: loginByEmail, isLoading: isEmailLoading } = useMutation({
+  mutation: (params: LoginByEmailRequest) =>
+    weilaFetch<LoginResponse>('/corp/auth/login-by-email', { method: 'POST', body: params }),
+  onSuccess: handleLoginSuccess,
+  onError: error => showToast(error.message || '登录失败'),
+})
+
+const isLoading = computed(() => isPasswordLoading.value || isSmsLoading.value || isEmailLoading.value)
+
+const canSendSms = computed(() => {
+  return /^1[3-9]\d{9}$/.test(phoneForm.value.phone)
+    && !!phoneForm.value.imageVerifyAnswer
+    && !isSendingSms.value
+})
+
+const canSendEmail = computed(() => {
+  const emailRegex = /^[\w.-]+@[a-z0-9.-]+\.[a-z]{2,}$/i
+  return emailRegex.test(emailForm.value.email)
+    && !!emailForm.value.imageVerifyAnswer
+    && !isSendingEmail.value
+})
+
+function handleSendSmsVerifyCode() {
+  if (!phoneForm.value.phone || !/^1[3-9]\d{9}$/.test(phoneForm.value.phone)) {
+    showToast('请输入正确的手机号')
     return
   }
-  login()
+  if (!phoneForm.value.imageVerifyAnswer) {
+    showToast('请输入图形验证码')
+    return
+  }
+  sendSmsVerifyCode({
+    phone: phoneForm.value.phone,
+    countrycode: '86',
+    verify_id: phoneImageVerifyCodeRef.value?.verifyId || '',
+    verify_answer: phoneForm.value.imageVerifyAnswer,
+    smstype: 'work-login',
+  })
+}
+
+function handleSendEmailVerifyCode() {
+  const emailRegex = /^[\w.-]+@[a-z0-9.-]+\.[a-z]{2,}$/i
+  if (!emailForm.value.email || !emailRegex.test(emailForm.value.email)) {
+    showToast('请输入正确的邮箱地址')
+    return
+  }
+  if (!emailForm.value.imageVerifyAnswer) {
+    showToast('请输入图形验证码')
+    return
+  }
+  sendEmailVerifyCode({
+    email: emailForm.value.email,
+    countrycode: '86',
+    verify_id: emailImageVerifyCodeRef.value?.verifyId || '',
+    verify_answer: emailForm.value.imageVerifyAnswer,
+    emailtype: 'work-login',
+  })
+}
+
+function handlePasswordLogin() {
+  if (!validatePassword(passwordForm.value)) {
+    showToast(Object.values(passwordErrors.value)?.[0] || '表单验证失败')
+    return
+  }
+  loginByPassword()
+}
+
+function handlePhoneLogin() {
+  if (!validatePhone(phoneForm.value)) {
+    showToast(Object.values(phoneErrors.value)?.[0] || '表单验证失败')
+    return
+  }
+  loginBySms({
+    phone: phoneForm.value.phone,
+    country_code: '86',
+    verifycode: phoneForm.value.verifycode,
+  })
+}
+
+function handleEmailLogin() {
+  if (!validateEmail(emailForm.value)) {
+    showToast(Object.values(emailErrors.value)?.[0] || '表单验证失败')
+    return
+  }
+  loginByEmail({
+    email: emailForm.value.email,
+    verifycode: emailForm.value.verifycode,
+  })
 }
 </script>
 
@@ -63,54 +198,244 @@ function handleLogin() {
           登录
         </h1>
 
-        <form class="space-y-4" @submit.prevent="() => handleLogin()">
-          <!-- 账号输入框 -->
-          <div>
-            <label for="account" class="block text-sm font-medium text-gray-700 mb-1">
-              账号
-            </label>
-            <input
-              id="account"
-              v-model="formData.account"
-              type="text"
-              placeholder="请输入账号"
-              class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="errors.account ? 'border-red-500' : 'border-gray-300'"
-              :disabled="isFetching"
+        <TabsRoot default-value="password">
+          <TabsList class="flex border-b border-gray-200 mb-6">
+            <TabsTrigger
+              value="password"
+              class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
-            <div v-if="errors.account" class="mt-1 text-sm text-red-600">
-              {{ errors.account }}
-            </div>
-          </div>
-
-          <!-- 密码输入框 -->
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-              密码
-            </label>
-            <input
-              id="password"
-              v-model="formData.password"
-              type="password"
-              placeholder="请输入密码"
-              class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="errors.password ? 'border-red-500' : 'border-gray-300'"
-              :disabled="isFetching"
+              密码登录
+            </TabsTrigger>
+            <TabsTrigger
+              value="phone"
+              class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
-            <div v-if="errors.password" class="mt-1 text-sm text-red-600">
-              {{ errors.password }}
-            </div>
-          </div>
+              手机号登录
+            </TabsTrigger>
+            <TabsTrigger
+              value="email"
+              class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
+            >
+              邮箱登录
+            </TabsTrigger>
+          </TabsList>
 
-          <!-- 登录按钮 -->
-          <button
-            type="submit"
-            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            :disabled="isFetching"
-          >
-            {{ isFetching ? '登录中...' : '登录' }}
-          </button>
-        </form>
+          <TabsContent value="password">
+            <form class="space-y-4" @submit.prevent="handlePasswordLogin">
+              <div>
+                <label for="account" class="block text-sm font-medium text-gray-700 mb-1">
+                  账号
+                </label>
+                <input
+                  id="account"
+                  v-model="passwordForm.account"
+                  type="text"
+                  placeholder="请输入账号"
+                  class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  :class="passwordErrors.account ? 'border-red-500' : 'border-gray-300'"
+                  :disabled="isLoading"
+                >
+                <div v-if="passwordErrors.account" class="mt-1 text-sm text-red-600">
+                  {{ passwordErrors.account }}
+                </div>
+              </div>
+
+              <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                  密码
+                </label>
+                <input
+                  id="password"
+                  v-model="passwordForm.password"
+                  type="password"
+                  placeholder="请输入密码"
+                  class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  :class="passwordErrors.password ? 'border-red-500' : 'border-gray-300'"
+                  :disabled="isLoading"
+                >
+                <div v-if="passwordErrors.password" class="mt-1 text-sm text-red-600">
+                  {{ passwordErrors.password }}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                :disabled="isLoading"
+              >
+                {{ isPasswordLoading ? '登录中...' : '登录' }}
+              </button>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="phone">
+            <form class="space-y-4" @submit.prevent="handlePhoneLogin">
+              <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                  手机号
+                </label>
+                <div class="flex items-center">
+                  <div class="flex items-center px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md">
+                    <span class="text-gray-700">+86</span>
+                    <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 ml-1" />
+                  </div>
+                  <input
+                    id="phone"
+                    v-model="phoneForm.phone"
+                    type="tel"
+                    placeholder="请输入手机号"
+                    class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    :class="phoneErrors.phone ? 'border-red-500' : 'border-gray-300'"
+                    :disabled="isLoading"
+                  >
+                </div>
+                <div v-if="phoneErrors.phone" class="mt-1 text-sm text-red-600">
+                  {{ phoneErrors.phone }}
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  图形验证码
+                </label>
+                <ImageVerifyCode
+                  ref="phoneImageVerifyCodeRef"
+                  v-model="phoneForm.imageVerifyAnswer"
+                  :width="120"
+                  :height="60"
+                  :disabled="isLoading"
+                  :error="!!phoneErrors.imageVerifyAnswer"
+                />
+                <div v-if="phoneErrors.imageVerifyAnswer" class="mt-1 text-sm text-red-600">
+                  {{ phoneErrors.imageVerifyAnswer }}
+                </div>
+                <p class="mt-1 text-xs text-gray-500">
+                  点击图片可刷新验证码
+                </p>
+              </div>
+
+              <div>
+                <label for="phone-verifycode" class="block text-sm font-medium text-gray-700 mb-1">
+                  短信验证码
+                </label>
+                <div class="flex items-center space-x-2">
+                  <input
+                    id="phone-verifycode"
+                    v-model="phoneForm.verifycode"
+                    type="text"
+                    placeholder="请输入短信验证码"
+                    class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    :class="phoneErrors.verifycode ? 'border-red-500' : 'border-gray-300'"
+                    :disabled="isLoading"
+                  >
+                  <CountDownButton
+                    ref="phoneCountDownButtonRef"
+                    class="flex-shrink-0"
+                    :disabled="!canSendSms"
+                    :loading="isSendingSms"
+                    storage-key="login-sms-time"
+                    :countdown-seconds="60"
+                    loading-text="发送中..."
+                    default-text="发送验证码"
+                    @click="handleSendSmsVerifyCode"
+                  />
+                </div>
+                <div v-if="phoneErrors.verifycode" class="mt-1 text-sm text-red-600">
+                  {{ phoneErrors.verifycode }}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                :disabled="isLoading"
+              >
+                {{ isSmsLoading ? '登录中...' : '登录' }}
+              </button>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="email">
+            <form class="space-y-4" @submit.prevent="handleEmailLogin">
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                  邮箱
+                </label>
+                <input
+                  id="email"
+                  v-model="emailForm.email"
+                  type="email"
+                  placeholder="请输入邮箱地址"
+                  class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  :class="emailErrors.email ? 'border-red-500' : 'border-gray-300'"
+                  :disabled="isLoading"
+                >
+                <div v-if="emailErrors.email" class="mt-1 text-sm text-red-600">
+                  {{ emailErrors.email }}
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  图形验证码
+                </label>
+                <ImageVerifyCode
+                  ref="emailImageVerifyCodeRef"
+                  v-model="emailForm.imageVerifyAnswer"
+                  :width="120"
+                  :height="60"
+                  :disabled="isLoading"
+                  :error="!!emailErrors.imageVerifyAnswer"
+                />
+                <div v-if="emailErrors.imageVerifyAnswer" class="mt-1 text-sm text-red-600">
+                  {{ emailErrors.imageVerifyAnswer }}
+                </div>
+                <p class="mt-1 text-xs text-gray-500">
+                  点击图片可刷新验证码
+                </p>
+              </div>
+
+              <div>
+                <label for="email-verifycode" class="block text-sm font-medium text-gray-700 mb-1">
+                  邮箱验证码
+                </label>
+                <div class="flex items-center space-x-2">
+                  <input
+                    id="email-verifycode"
+                    v-model="emailForm.verifycode"
+                    type="text"
+                    placeholder="请输入邮箱验证码"
+                    class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    :class="emailErrors.verifycode ? 'border-red-500' : 'border-gray-300'"
+                    :disabled="isLoading"
+                  >
+                  <CountDownButton
+                    ref="emailCountDownButtonRef"
+                    class="flex-shrink-0"
+                    :disabled="!canSendEmail"
+                    :loading="isSendingEmail"
+                    storage-key="login-email-time"
+                    :countdown-seconds="60"
+                    loading-text="发送中..."
+                    default-text="发送验证码"
+                    @click="handleSendEmailVerifyCode"
+                  />
+                </div>
+                <div v-if="emailErrors.verifycode" class="mt-1 text-sm text-red-600">
+                  {{ emailErrors.verifycode }}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                :disabled="isLoading"
+              >
+                {{ isEmailLoading ? '登录中...' : '登录' }}
+              </button>
+            </form>
+          </TabsContent>
+        </TabsRoot>
       </div>
     </div>
   </div>

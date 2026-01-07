@@ -125,5 +125,18 @@ export interface SendEmailVerifyCodeRequest {
   countrycode: string
   verify_id: string
   verify_answer: string
-  emailtype: 'work-bind' | 'work-unregist'
+  emailtype: 'work-login' | 'work-bind' | 'work-unregist'
+}
+
+// 手机号登录请求参数
+export interface LoginBySmsRequest {
+  phone: string
+  country_code: string
+  verifycode: string
+}
+
+// 邮箱登录请求参数
+export interface LoginByEmailRequest {
+  email: string
+  verifycode: string
 }
