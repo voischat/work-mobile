@@ -3,8 +3,8 @@ import { useBreakpoints } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 
 interface BreadcrumbItem {
-  name: string // 显示名称
-  steps?: number // 回退步数，router.go(-steps)
+  name: string
+  route?: string
 }
 
 const props = withDefaults(defineProps<{
@@ -28,8 +28,8 @@ const filterdItems = computed(() =>
 
 const router = useRouter()
 
-function handleClick(steps: number) {
-  router.go(-steps)
+function handleClick(route: string) {
+  router.replace(route)
 }
 
 const isDev = import.meta.env.DEV
@@ -45,9 +45,9 @@ const route = useRoute()
       v-for="(item, index) in filterdItems " :key="index"
     >
       <span
-        v-if="item.steps !== undefined"
+        v-if="item.route"
         class="hover:text-blue-600 transition-colors duration-200 hover:underline"
-        @click="handleClick(item.steps)"
+        @click="handleClick(item.route)"
       >
         {{ item.name }}
       </span>

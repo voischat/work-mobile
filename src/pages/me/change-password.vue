@@ -65,7 +65,7 @@ function handleSubmit() {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '我的', steps: 1 },
+          { name: '我的', route: '/me' },
           { name: '修改密码' },
         ]"
       />

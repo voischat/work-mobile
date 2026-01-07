@@ -362,7 +362,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '工作台', steps: 1 },
+          { name: '工作台', route: '/workbench' },
           { name: '轨迹' },
         ]"
       />

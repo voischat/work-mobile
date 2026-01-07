@@ -293,8 +293,8 @@ function handleEditGroupMember(member: Member) {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '通讯录', steps: 2 },
-          { name: '群组管理', steps: 1 },
+          { name: '通讯录', route: '/directory' },
+          { name: '群组管理', route: '/directory/groups' },
           { name: '群成员列表' },
         ]"
       />

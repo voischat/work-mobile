@@ -20,7 +20,7 @@ const tabs = [
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '我的', steps: 1 },
+          { name: '我的', route: '/me' },
           { name: '注销账号' },
         ]"
       />

@@ -285,8 +285,8 @@ function handleEditDeptMember(member: Member) {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '通讯录', steps: 2 },
-          { name: '部门管理', steps: 1 },
+          { name: '通讯录', route: '/directory' },
+          { name: '部门管理', route: '/directory/departments' },
           { name: '部门成员列表' },
         ]"
       />
