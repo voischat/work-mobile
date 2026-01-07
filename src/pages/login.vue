@@ -2,9 +2,9 @@
 import type { LoginByEmailRequest, LoginBySmsRequest, LoginResponse, SendEmailVerifyCodeRequest, SendSmsVerifyCodeRequest } from '~/types/auth'
 import { Icon } from '@iconify/vue'
 import { useMutation } from '@pinia/colada'
-import { useLocalStorage } from '@vueuse/core'
+import { useFocus, useLocalStorage } from '@vueuse/core'
 import md5 from 'md5'
-import { PopoverContent, PopoverPortal, PopoverRoot, TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
+import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger, TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
@@ -47,17 +47,34 @@ const savedCredentials = useLocalStorage<Record<string, string>>('saved-credenti
     write: v => JSON.stringify(v),
   },
 })
-const showAccountHints = ref(false)
-watchEffect(() => {
-  console.log('showAccountHints.value', showAccountHints.value)
-})
-
+const accountInputRef = ref<HTMLInputElement | null>(null)
+const { focused: isAccountInputFocused } = useFocus(accountInputRef)
 const savedAccounts = computed(() => Object.keys(savedCredentials.value))
+const showAccountHints = computed(() => isAccountInputFocused.value && savedAccounts.value.length > 0)
+
+const isPasswordFromStorage = ref(false)
 
 function selectAccount(account: string) {
   passwordForm.value.account = account
   passwordForm.value.password = savedCredentials.value[account] || ''
-  // showAccountHints.value = false
+  isPasswordFromStorage.value = !!savedCredentials.value[account]
+  isAccountInputFocused.value = false
+}
+
+function deleteAccount(account: string) {
+  const { [account]: _, ...rest } = savedCredentials.value
+  savedCredentials.value = rest
+  if (passwordForm.value.account === account) {
+    passwordForm.value.account = ''
+    passwordForm.value.password = ''
+    isPasswordFromStorage.value = false
+  }
+}
+
+function clearAccountInput() {
+  passwordForm.value.account = ''
+  passwordForm.value.password = ''
+  isPasswordFromStorage.value = false
 }
 
 onMounted(() => {
@@ -65,6 +82,7 @@ onMounted(() => {
   if (firstAccount) {
     passwordForm.value.account = firstAccount
     passwordForm.value.password = savedCredentials.value[firstAccount]
+    isPasswordFromStorage.value = true
     rememberPassword.value = true
   }
 })
@@ -89,22 +107,30 @@ function handleLoginSuccess(loginData: LoginResponse) {
   showToast('登录成功')
   saveAuth(loginData.access_token, loginData.refresh_token, loginData.expires_in)
   if (rememberPassword.value) {
+    const passwordHash = isPasswordFromStorage.value
+      ? passwordForm.value.password
+      : md5(passwordForm.value.password)
     savedCredentials.value = {
       ...savedCredentials.value,
-      [passwordForm.value.account]: passwordForm.value.password,
+      [passwordForm.value.account]: passwordHash,
     }
   }
   router.push('/')
 }
 
 const { mutate: loginByPassword, isLoading: isPasswordLoading } = useMutation({
-  mutation: () => weilaFetch<LoginResponse>('/corp/auth/login', {
-    method: 'POST',
-    body: {
-      account: passwordForm.value.account,
-      password: md5(passwordForm.value.password),
-    },
-  }),
+  mutation: () => {
+    const passwordHash = isPasswordFromStorage.value
+      ? passwordForm.value.password
+      : md5(passwordForm.value.password)
+    return weilaFetch<LoginResponse>('/corp/auth/login', {
+      method: 'POST',
+      body: {
+        account: passwordForm.value.account,
+        password: passwordHash,
+      },
+    })
+  },
   onSuccess: handleLoginSuccess,
   onError: error => showToast(error.message || '登录失败'),
 })
@@ -268,33 +294,56 @@ function handleEmailLogin() {
                 <label for="account" class="block text-sm font-medium text-gray-700 mb-1">
                   账号
                 </label>
-                <PopoverRoot v-model:open="showAccountHints">
-                  <input
-                    id="account"
-                    v-model="passwordForm.account"
-                    type="text"
-                    placeholder="请输入账号"
-                    class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    :class="passwordErrors.account ? 'border-red-500' : 'border-gray-300'"
-                    :disabled="isLoading"
-                    @focus="showAccountHints = true"
-                  >
+                <PopoverRoot :open="showAccountHints">
+                  <div class="relative">
+                    <PopoverTrigger
+                      id="account"
+                      ref="accountInputRef"
+                      as="input"
+                      type="text"
+                      :value="passwordForm.account"
+                      placeholder="请输入账号"
+                      class="w-full px-3 py-2 pr-8 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      :class="passwordErrors.account ? 'border-red-500' : 'border-gray-300'"
+                      :disabled="isLoading"
+                      @input="passwordForm.account = ($event.target as HTMLInputElement).value"
+                    />
+                    <button
+                      v-if="passwordForm.account"
+                      type="button"
+                      class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                      @mousedown.prevent="clearAccountInput"
+                    >
+                      <Icon icon="lucide:x" class="w-4 h-4" />
+                    </button>
+                  </div>
                   <PopoverPortal>
                     <PopoverContent
                       :side-offset="4"
                       align="start"
-                      class="z-50 w-[--reka-popover-trigger-width] bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden"
+                      class="z-50 w-[--reka-popover-trigger-width] max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg"
                       @open-auto-focus.prevent
                     >
-                      <button
+                      <div
                         v-for="account in savedAccounts"
                         :key="account"
-                        type="button"
-                        class="w-full px-3 py-2 text-sm text-left cursor-pointer hover:bg-gray-100"
-                        @click="selectAccount(account)"
+                        class="flex items-center justify-between px-3 py-2 hover:bg-gray-100"
                       >
-                        {{ account }}
-                      </button>
+                        <button
+                          type="button"
+                          class="flex-1 text-sm text-left cursor-pointer"
+                          @mousedown.prevent="selectAccount(account)"
+                        >
+                          {{ account }}
+                        </button>
+                        <button
+                          type="button"
+                          class="p-1 text-gray-400 hover:text-red-500"
+                          @mousedown.prevent="deleteAccount(account)"
+                        >
+                          <Icon icon="lucide:x" class="w-4 h-4" />
+                        </button>
+                      </div>
                     </PopoverContent>
                   </PopoverPortal>
                 </PopoverRoot>
@@ -315,6 +364,7 @@ function handleEmailLogin() {
                   class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="passwordErrors.password ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
+                  @input="isPasswordFromStorage = false"
                 >
                 <div v-if="passwordErrors.password" class="mt-1 text-sm text-red-600">
                   {{ passwordErrors.password }}
