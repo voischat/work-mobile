@@ -3,6 +3,7 @@ import type { TrackPoint, TrackResponse } from '~/types/location'
 import type { Member, TreeNode } from '~/types/management'
 import { Icon } from '@iconify/vue'
 import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
+import { useInfiniteScroll } from '@vueuse/core'
 import { useRouteQuery } from '@vueuse/router'
 import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger, ToggleGroupItem, ToggleGroupRoot } from 'reka-ui'
 import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
@@ -205,17 +206,54 @@ const isValid = computed(() =>
   && /^\d{4}-\d{2}-\d{2}$/.test(date.value),
 )
 
+const pageSize = 20
+const currentPage = ref(1)
+const accumulatedTracks = ref<TrackPoint[]>([])
+const totalCount = ref(0)
+
 const { data: trackData, status, error } = useQuery({
-  key: () => ['track', userId.value, date.value],
+  key: () => ['track', userId.value, date.value, currentPage.value],
   query: () => weilaFetch<TrackResponse>('/corp/loc/get-track', {
     method: 'POST',
     body: {
       user_id: userId.value,
       date: date.value,
+      page: currentPage.value,
+      size: pageSize,
     },
   }),
   enabled: isValid,
 })
+
+watch(trackData, (newData) => {
+  if (newData) {
+    totalCount.value = newData.count
+    if (currentPage.value === 0) {
+      accumulatedTracks.value = newData.tracks || []
+    }
+    else {
+      const newTracks = newData.tracks || []
+      accumulatedTracks.value = [...accumulatedTracks.value, ...newTracks]
+    }
+  }
+}, { immediate: true })
+
+watch([userId, date], () => {
+  currentPage.value = 0
+  accumulatedTracks.value = []
+  totalCount.value = 0
+})
+
+const hasNextPage = computed(() => accumulatedTracks.value.length < totalCount.value)
+
+function loadNextPage() {
+  if (hasNextPage.value && status.value !== 'pending') {
+    currentPage.value += 1
+  }
+}
+
+const trackListRef = useTemplateRef<HTMLDivElement>('trackListRef')
+useInfiniteScroll(trackListRef, loadNextPage, { distance: 100 })
 
 onMounted(async () => {
   const AMap = await loadAMap()
@@ -230,10 +268,10 @@ onMounted(async () => {
   map.addControl(new AMap.Scale())
   map.addControl(new AMap.ToolBar())
 
-  watch(trackData, (newData) => {
-    if (!newData || !map)
+  watch(accumulatedTracks, (tracks) => {
+    if (!map)
       return
-    renderTrack(newData.tracks || [])
+    renderTrack(tracks)
   }, { immediate: true })
 })
 
@@ -395,13 +433,13 @@ function navigateToPoint(point: TrackPoint, index: number): void {
           <span v-if="!isValid" class="text-orange-600 whitespace-nowrap">
             请选择成员和日期
           </span>
-          <span v-else-if="status === 'pending'" class="text-gray-500 whitespace-nowrap">
+          <span v-else-if="status === 'pending' && accumulatedTracks.length === 0" class="text-gray-500 whitespace-nowrap">
             加载中...
           </span>
           <span v-else-if="error" class="text-red-600 whitespace-nowrap">
             加载失败
           </span>
-          <span v-else-if="trackData?.count === 0" class="text-gray-500 whitespace-nowrap">
+          <span v-else-if="totalCount === 0" class="text-gray-500 whitespace-nowrap">
             暂无数据
           </span>
         </div>
@@ -417,12 +455,12 @@ function navigateToPoint(point: TrackPoint, index: number): void {
         leave-to-class="scale-0 opacity-0"
       >
         <button
-          v-if="trackData && trackData.count > 0"
+          v-if="totalCount > 0"
           type="button"
           class="absolute bottom-20 lg:bottom-4 left-4 w-12 h-12 bg-white text-gray-700 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all border border-gray-200"
           @click="isTrackListDrawerOpen = true"
         >
-          <span class="text-sm font-medium">{{ trackData.count }}</span>
+          <span class="text-sm font-medium">{{ totalCount }}</span>
         </button>
       </Transition>
 
@@ -513,9 +551,9 @@ function navigateToPoint(point: TrackPoint, index: number): void {
 
       <!-- Track list drawer -->
       <Drawer v-model:open="isTrackListDrawerOpen" title="轨迹点列表">
-        <div class="divide-y divide-gray-100">
+        <div ref="trackListRef" class="divide-y divide-gray-100 max-h-[60vh] overflow-y-auto">
           <button
-            v-for="(point, index) in trackData?.tracks || []"
+            v-for="(point, index) in accumulatedTracks"
             :key="index"
             type="button"
             class="w-full flex items-center px-2 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
@@ -534,6 +572,15 @@ function navigateToPoint(point: TrackPoint, index: number): void {
             </div>
             <Icon icon="lucide:chevron-right" class="w-4 h-4 text-gray-400 flex-shrink-0" />
           </button>
+
+          <div v-if="hasNextPage" class="flex items-center justify-center py-4">
+            <Icon icon="lucide:loader-2" class="w-4 h-4 text-gray-400 animate-spin mr-2" />
+            <span class="text-sm text-gray-500">加载中...</span>
+          </div>
+
+          <div v-else-if="accumulatedTracks.length > 0" class="flex items-center justify-center py-4">
+            <span class="text-sm text-gray-400">共 {{ totalCount }} 条</span>
+          </div>
         </div>
       </Drawer>
     </div>
