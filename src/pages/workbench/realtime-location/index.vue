@@ -14,7 +14,7 @@ import TreeSelector from '~/components/TreeSelector.vue'
 import { useAMap } from '~/composables/useAMap'
 import { weilaFetch } from '~/shared/instances'
 
-const { loadAMap } = useAMap()
+const { loadAMap, isLoaded: isMapLoaded } = useAMap()
 
 const selectedType = useRouteQuery<'dept' | 'group'>('type', 'dept')
 const selectedDeptId = useRouteQuery('deptId', -1, { transform: Number })
@@ -291,6 +291,19 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
 
     <div class="absolute left-0 right-0 top-0 bottom-0">
       <div ref="mapContainer" class="w-full h-full" />
+
+      <!-- Map loading placeholder -->
+      <Transition
+        leave-active-class="transition-opacity duration-300"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="!isMapLoaded" class="absolute inset-0 bg-gray-100 flex items-center justify-center">
+          <div class="flex flex-col items-center space-y-3">
+            <Icon icon="lucide:loader-2" class="w-8 h-8 text-blue-500 animate-spin" />
+            <span class="text-sm text-gray-500">地图加载中...</span>
+          </div>
+        </div>
+      </Transition>
 
       <div class="absolute top-2 sm:top-4 left-2 right-2 sm:left-4 sm:right-auto bg-white rounded-lg shadow-lg p-2 sm:p-3">
         <div class="flex space-x-2">
