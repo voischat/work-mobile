@@ -2,9 +2,10 @@
 import type { LoginByEmailRequest, LoginBySmsRequest, LoginResponse, SendEmailVerifyCodeRequest, SendSmsVerifyCodeRequest } from '~/types/auth'
 import { Icon } from '@iconify/vue'
 import { useMutation } from '@pinia/colada'
+import { useLocalStorage } from '@vueuse/core'
 import md5 from 'md5'
-import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
-import { computed, ref } from 'vue'
+import { PopoverContent, PopoverPortal, PopoverRoot, TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import CountDownButton from '~/components/CountDownButton.vue'
@@ -39,6 +40,42 @@ const passwordForm = ref({ account: '', password: '' })
 const phoneForm = ref({ phone: '', imageVerifyAnswer: '', verifycode: '' })
 const emailForm = ref({ email: '', imageVerifyAnswer: '', verifycode: '' })
 
+const rememberPassword = ref(false)
+const savedCredentials = useLocalStorage<Record<string, string>>('saved-credentials', {}, {
+  serializer: {
+    read: v => v ? JSON.parse(v) : {},
+    write: v => JSON.stringify(v),
+  },
+})
+const showAccountHints = ref(false)
+watchEffect(() => {
+  console.log('showAccountHints.value', showAccountHints.value)
+})
+
+const savedAccounts = computed(() => Object.keys(savedCredentials.value))
+
+function selectAccount(account: string) {
+  passwordForm.value.account = account
+  passwordForm.value.password = savedCredentials.value[account] || ''
+  // showAccountHints.value = false
+}
+
+onMounted(() => {
+  const firstAccount = savedAccounts.value[0]
+  if (firstAccount) {
+    passwordForm.value.account = firstAccount
+    passwordForm.value.password = savedCredentials.value[firstAccount]
+    rememberPassword.value = true
+  }
+})
+
+watch(rememberPassword, (newVal) => {
+  if (!newVal) {
+    const { [passwordForm.value.account]: _, ...rest } = savedCredentials.value
+    savedCredentials.value = rest
+  }
+})
+
 const phoneImageVerifyCodeRef = ref<InstanceType<typeof ImageVerifyCode> | null>(null)
 const phoneCountDownButtonRef = ref<InstanceType<typeof CountDownButton> | null>(null)
 const emailImageVerifyCodeRef = ref<InstanceType<typeof ImageVerifyCode> | null>(null)
@@ -51,6 +88,12 @@ const { errors: emailErrors, validate: validateEmail } = useForm(emailSchema)
 function handleLoginSuccess(loginData: LoginResponse) {
   showToast('登录成功')
   saveAuth(loginData.access_token, loginData.refresh_token, loginData.expires_in)
+  if (rememberPassword.value) {
+    savedCredentials.value = {
+      ...savedCredentials.value,
+      [passwordForm.value.account]: passwordForm.value.password,
+    }
+  }
   router.push('/')
 }
 
@@ -151,10 +194,9 @@ function handleSendEmailVerifyCode() {
   }
   sendEmailVerifyCode({
     email: emailForm.value.email,
-    countrycode: '86',
     verify_id: emailImageVerifyCodeRef.value?.verifyId || '',
     verify_answer: emailForm.value.imageVerifyAnswer,
-    emailtype: 'work-login',
+    smstype: 'work-login',
   })
 }
 
@@ -226,15 +268,36 @@ function handleEmailLogin() {
                 <label for="account" class="block text-sm font-medium text-gray-700 mb-1">
                   账号
                 </label>
-                <input
-                  id="account"
-                  v-model="passwordForm.account"
-                  type="text"
-                  placeholder="请输入账号"
-                  class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  :class="passwordErrors.account ? 'border-red-500' : 'border-gray-300'"
-                  :disabled="isLoading"
-                >
+                <PopoverRoot v-model:open="showAccountHints">
+                  <input
+                    id="account"
+                    v-model="passwordForm.account"
+                    type="text"
+                    placeholder="请输入账号"
+                    class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    :class="passwordErrors.account ? 'border-red-500' : 'border-gray-300'"
+                    :disabled="isLoading"
+                    @focus="showAccountHints = true"
+                  >
+                  <PopoverPortal>
+                    <PopoverContent
+                      :side-offset="4"
+                      align="start"
+                      class="z-50 w-[--reka-popover-trigger-width] bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden"
+                      @open-auto-focus.prevent
+                    >
+                      <button
+                        v-for="account in savedAccounts"
+                        :key="account"
+                        type="button"
+                        class="w-full px-3 py-2 text-sm text-left cursor-pointer hover:bg-gray-100"
+                        @click="selectAccount(account)"
+                      >
+                        {{ account }}
+                      </button>
+                    </PopoverContent>
+                  </PopoverPortal>
+                </PopoverRoot>
                 <div v-if="passwordErrors.account" class="mt-1 text-sm text-red-600">
                   {{ passwordErrors.account }}
                 </div>
@@ -256,6 +319,20 @@ function handleEmailLogin() {
                 <div v-if="passwordErrors.password" class="mt-1 text-sm text-red-600">
                   {{ passwordErrors.password }}
                 </div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    v-model="rememberPassword"
+                    type="checkbox"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  >
+                  <span class="ml-2 text-sm text-gray-600">记住密码</span>
+                </label>
+                <router-link to="/reset-password" class="text-sm text-blue-600 hover:text-blue-700">
+                  忘记密码？
+                </router-link>
               </div>
 
               <button
@@ -436,6 +513,13 @@ function handleEmailLogin() {
             </form>
           </TabsContent>
         </TabsRoot>
+
+        <div class="mt-6 text-center text-sm text-gray-600">
+          还没有账号？
+          <router-link to="/register" class="text-blue-600 hover:text-blue-700 font-medium">
+            立即注册
+          </router-link>
+        </div>
       </div>
     </div>
   </div>

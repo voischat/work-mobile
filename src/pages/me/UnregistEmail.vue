@@ -86,10 +86,9 @@ function handleSendEmailVerifyCode() {
 
   sendEmailVerifyCode({
     email: formData.value.email,
-    countrycode: '86',
     verify_id: imageVerifyCodeRef.value?.verifyId || '',
     verify_answer: formData.value.imageVerifyAnswer,
-    emailtype: 'work-unregist',
+    smstype: 'work-unregist',
   })
 }
 

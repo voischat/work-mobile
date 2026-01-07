@@ -34,6 +34,8 @@ declare module 'vue-router/auto-routes' {
     '/me/unregist': RouteRecordInfo<'/me/unregist', '/me/unregist', Record<never, never>, Record<never, never>>,
     '/me/UnregistEmail': RouteRecordInfo<'/me/UnregistEmail', '/me/UnregistEmail', Record<never, never>, Record<never, never>>,
     '/me/UnregistPhone': RouteRecordInfo<'/me/UnregistPhone', '/me/UnregistPhone', Record<never, never>, Record<never, never>>,
+    '/register': RouteRecordInfo<'/register', '/register', Record<never, never>, Record<never, never>>,
+    '/reset-password': RouteRecordInfo<'/reset-password', '/reset-password', Record<never, never>, Record<never, never>>,
     '/test-tree-selector': RouteRecordInfo<'/test-tree-selector', '/test-tree-selector', Record<never, never>, Record<never, never>>,
     '/workbench/': RouteRecordInfo<'/workbench/', '/workbench', Record<never, never>, Record<never, never>>,
     '/workbench/realtime-location/': RouteRecordInfo<'/workbench/realtime-location/', '/workbench/realtime-location', Record<never, never>, Record<never, never>>,

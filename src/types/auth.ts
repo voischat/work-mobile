@@ -122,10 +122,9 @@ export interface SendSmsVerifyCodeRequest {
 // 发送邮箱验证码请求参数
 export interface SendEmailVerifyCodeRequest {
   email: string
-  countrycode: string
   verify_id: string
   verify_answer: string
-  emailtype: 'work-login' | 'work-bind' | 'work-unregist'
+  smstype: 'work-login' | 'work-regist' | 'work-reset-password' | 'work-bind' | 'work-unregist'
 }
 
 // 手机号登录请求参数
@@ -139,4 +138,39 @@ export interface LoginBySmsRequest {
 export interface LoginByEmailRequest {
   email: string
   verifycode: string
+}
+
+// 手机号注册请求参数
+export interface RegisterByPhoneRequest {
+  phone: string
+  verifycode: string
+  password: string
+}
+
+// 邮箱注册请求参数
+export interface RegisterByEmailRequest {
+  email: string
+  verifycode: string
+  password: string
+}
+
+// 注册响应
+export interface RegisterResponse {
+  country_code: string
+  password: string
+  user_number: string
+}
+
+// 手机号重置密码请求参数
+export interface ResetPasswordByPhoneRequest {
+  phone: string
+  verifycode: string
+  password: string
+}
+
+// 邮箱重置密码请求参数
+export interface ResetPasswordByEmailRequest {
+  email: string
+  verifycode: string
+  password: string
 }
