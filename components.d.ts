@@ -17,6 +17,7 @@ declare module 'vue' {
     DeptActions: typeof import('./src/components/DeptActions.vue')['default']
     DeptAddForm: typeof import('./src/components/forms/DeptAddForm.vue')['default']
     DeviceAddForm: typeof import('./src/components/forms/DeviceAddForm.vue')['default']
+    Drawer: typeof import('./src/components/Drawer.vue')['default']
     EditDeptForm: typeof import('./src/components/EditDeptForm.vue')['default']
     EditDeptModal: typeof import('./src/components/EditDeptModal.vue')['default']
     EditGroupForm: typeof import('./src/components/EditGroupForm.vue')['default']

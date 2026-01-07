@@ -2,18 +2,22 @@
 import type { TrackPoint, TrackResponse } from '~/types/location'
 import type { Member, TreeNode } from '~/types/management'
 import { Icon } from '@iconify/vue'
-import { useQuery } from '@pinia/colada'
+import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import { useRouteQuery } from '@vueuse/router'
-import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
+import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger, ToggleGroupItem, ToggleGroupRoot } from 'reka-ui'
 import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
+import Drawer from '~/components/Drawer.vue'
 import TargetSelectorPopover from '~/components/TargetSelectorPopover.vue'
 import TreeSelector from '~/components/TreeSelector.vue'
 import { useAMap } from '~/composables/useAMap'
+import { useVip } from '~/composables/useVip'
 import { weilaFetch } from '~/shared/instances'
 
 const { loadAMap } = useAMap()
+const { hasQuickSupport } = useVip()
+const { showToast } = useToast()
 
 const userId = useRouteQuery('userId', -1, { transform: Number })
 const userName = useRouteQuery<string>('userName', '')
@@ -25,6 +29,8 @@ const date = useRouteQuery('date', () => {
 const isPopoverOpen = ref(false)
 const selectedNodes = ref<TreeNode[]>([])
 const selectedTab = ref('dept')
+const isSettingsDrawerOpen = ref(false)
+const isTrackListDrawerOpen = ref(false)
 
 // Watch #1: URL → State (根据 URL 参数自动构造 selectedNodes)
 watch([userId, userName], ([id, name]) => {
@@ -69,6 +75,65 @@ watch(selectedTab, () => {
 })
 
 const member = computed(() => selectedNodes.value[0]?.raw_data as Member | undefined)
+
+const trackOptions = [
+  { value: '0', label: '关闭', icon: 'lucide:x' },
+  { value: '1', label: '1小时', icon: 'lucide:clock' },
+  { value: '2', label: '15分钟', icon: 'lucide:clock' },
+  { value: '3', label: '5分钟', icon: 'lucide:clock' },
+  { value: '4', label: '1分钟', icon: 'lucide:zap', vipOnly: true },
+]
+
+const currentTrackValue = computed(() => String(member.value?.track ?? 0))
+
+const { mutate: updateTrack, isLoading: isUpdatingTrack } = useMutation({
+  mutation: (payload: { user_id: number, track: number }) =>
+    weilaFetch<Member>('/corp/address/change-member', {
+      method: 'POST',
+      body: payload,
+    }),
+  onMutate(payload) {
+    const oldMember = member.value ? { ...member.value } : null
+
+    if (selectedNodes.value[0]?.raw_data) {
+      (selectedNodes.value[0].raw_data as Member).track = payload.track
+    }
+
+    return { oldMember }
+  },
+  onSuccess(response) {
+    if (selectedNodes.value[0]?.raw_data) {
+      Object.assign(selectedNodes.value[0].raw_data, response)
+    }
+
+    const queryCache = useQueryCache()
+    queryCache.invalidateQueries({ key: ['member', 'list'] })
+    queryCache.invalidateQueries({ key: ['dept'] })
+    queryCache.invalidateQueries({ key: ['group'] })
+  },
+  onError(_error, _payload, context) {
+    if (context?.oldMember && selectedNodes.value[0]?.raw_data) {
+      (selectedNodes.value[0].raw_data as Member).track = context.oldMember.track
+    }
+  },
+})
+
+function handleTrackChange(value: unknown): void {
+  const trackStr = Array.isArray(value) ? value[0] : value
+  if (typeof trackStr !== 'string' || !member.value)
+    return
+
+  const trackValue = Number(trackStr)
+  if (trackValue === member.value.track)
+    return
+
+  if (trackValue === 4 && !hasQuickSupport.value) {
+    showToast('1分钟间隔需要 VIP 支持')
+    return
+  }
+
+  updateTrack({ user_id: member.value.user_id, track: trackValue })
+}
 
 async function deptMemberLoader(ctx: TreeNode | null): Promise<TreeNode[]> {
   if (!ctx) {
@@ -229,6 +294,29 @@ function renderTrack(tracks: TrackPoint[]): void {
 
   map.setFitView()
 }
+
+function navigateToPoint(point: TrackPoint, index: number): void {
+  if (!map)
+    return
+
+  const AMap = window.AMap
+  const position = new AMap.LngLat(point.lng, point.lat)
+
+  map.setZoomAndCenter(16, position)
+
+  const infoWindow = new AMap.InfoWindow({
+    content: `
+      <div style="padding: 8px; min-width: 120px;">
+        <div style="font-weight: bold; margin-bottom: 4px;">轨迹点 #${index + 1}</div>
+        <div style="color: #666; font-size: 12px;">${new Date(point.created * 1000).toLocaleString()}</div>
+      </div>
+    `,
+    offset: new AMap.Pixel(0, -10),
+  })
+  infoWindow.open(map, position)
+
+  isTrackListDrawerOpen.value = false
+}
 </script>
 
 <template>
@@ -245,8 +333,8 @@ function renderTrack(tracks: TrackPoint[]): void {
     <div class="absolute left-0 right-0 top-0 bottom-0">
       <div ref="mapContainer" class="absolute left-0 right-0 top-0 bottom-0" />
 
-      <div class="absolute top-4 left-4  bg-white rounded-lg shadow-lg p-3 ">
-        <div class="flex space-x-2">
+      <div class="absolute top-2 sm:top-4 left-2 right-2 sm:left-4 sm:right-auto bg-white rounded-lg shadow-lg p-2 sm:p-3">
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <TargetSelectorPopover v-model:open="isPopoverOpen">
             <template #trigger="{ isOpen: isPopoverOpen }">
               <button
@@ -299,7 +387,7 @@ function renderTrack(tracks: TrackPoint[]): void {
           </TargetSelectorPopover>
           <input
             id="date" v-model="date" type="date"
-            class="px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-28"
+            class="px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-28"
           >
         </div>
 
@@ -316,11 +404,138 @@ function renderTrack(tracks: TrackPoint[]): void {
           <span v-else-if="trackData?.count === 0" class="text-gray-500 whitespace-nowrap">
             暂无数据
           </span>
-          <span v-else class="text-gray-600 whitespace-nowrap">
-            {{ trackData?.count || 0 }} 点
-          </span>
         </div>
       </div>
+
+      <!-- FAB for track list -->
+      <Transition
+        enter-active-class="transition-all duration-200 ease-out"
+        leave-active-class="transition-all duration-150 ease-in"
+        enter-from-class="scale-0 opacity-0"
+        enter-to-class="scale-100 opacity-100"
+        leave-from-class="scale-100 opacity-100"
+        leave-to-class="scale-0 opacity-0"
+      >
+        <button
+          v-if="trackData && trackData.count > 0"
+          type="button"
+          class="absolute bottom-20 lg:bottom-4 left-4 w-12 h-12 bg-white text-gray-700 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all border border-gray-200"
+          @click="isTrackListDrawerOpen = true"
+        >
+          <span class="text-sm font-medium">{{ trackData.count }}</span>
+        </button>
+      </Transition>
+
+      <!-- Bottom floating track settings - Desktop only -->
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        leave-active-class="transition-all duration-200 ease-in"
+        enter-from-class="translate-y-full opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
+        leave-from-class="translate-y-0 opacity-100"
+        leave-to-class="translate-y-full opacity-0"
+      >
+        <div
+          v-if="member"
+          class="hidden lg:flex absolute bottom-4 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg px-4 py-3 items-center space-x-3"
+        >
+          <span class="text-sm text-gray-600 whitespace-nowrap">轨迹间隔</span>
+          <ToggleGroupRoot
+            type="single"
+            :model-value="currentTrackValue"
+            class="inline-flex bg-gray-100 rounded-lg p-1 space-x-1"
+            @update:model-value="handleTrackChange"
+          >
+            <ToggleGroupItem
+              v-for="option in trackOptions"
+              :key="option.value"
+              :value="option.value"
+              :disabled="option.vipOnly && !hasQuickSupport"
+              class="px-3 py-1.5 rounded-md text-xs font-medium transition-all data-[state=on]:bg-blue-500 data-[state=on]:text-white data-[state=on]:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 data-[state=on]:hover:bg-blue-600"
+              :title="option.vipOnly && !hasQuickSupport ? '需要 VIP' : option.label"
+            >
+              {{ option.label }}
+            </ToggleGroupItem>
+          </ToggleGroupRoot>
+          <Icon
+            v-if="isUpdatingTrack"
+            icon="lucide:loader-2"
+            class="w-4 h-4 text-gray-400 animate-spin"
+          />
+        </div>
+      </Transition>
+
+      <!-- Mobile FAB to open settings drawer -->
+      <Transition
+        enter-active-class="transition-all duration-200 ease-out"
+        leave-active-class="transition-all duration-150 ease-in"
+        enter-from-class="scale-0 opacity-0"
+        enter-to-class="scale-100 opacity-100"
+        leave-from-class="scale-100 opacity-100"
+        leave-to-class="scale-0 opacity-0"
+      >
+        <button
+          v-if="member"
+          type="button"
+          class="lg:hidden absolute bottom-20 right-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-600 active:scale-95 transition-all"
+          @click="isSettingsDrawerOpen = true"
+        >
+          <Icon icon="lucide:settings" class="w-6 h-6" />
+        </button>
+      </Transition>
+
+      <!-- Mobile drawer for track settings -->
+      <Drawer v-model:open="isSettingsDrawerOpen" title="轨迹设置">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-3">轨迹间隔</label>
+          <div class="flex flex-wrap -m-1">
+            <div v-for="option in trackOptions" :key="option.value" class="w-1/3 p-1">
+              <button
+                type="button"
+                :disabled="option.vipOnly && !hasQuickSupport"
+                class="w-full flex items-center justify-center min-h-[48px] px-2 py-3 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                :class="currentTrackValue === option.value
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'bg-gray-100 hover:bg-gray-200'"
+                @click="handleTrackChange(option.value); isSettingsDrawerOpen = false;"
+              >
+                {{ option.label }}
+                <span v-if="option.vipOnly && !hasQuickSupport" class="ml-1 text-xs opacity-60">VIP</span>
+              </button>
+            </div>
+          </div>
+          <div v-if="isUpdatingTrack" class="flex items-center justify-center space-x-2 text-gray-500 mt-4">
+            <Icon icon="lucide:loader-2" class="w-4 h-4 animate-spin" />
+            <span class="text-sm">更新中...</span>
+          </div>
+        </div>
+      </Drawer>
+
+      <!-- Track list drawer -->
+      <Drawer v-model:open="isTrackListDrawerOpen" title="轨迹点列表">
+        <div class="divide-y divide-gray-100">
+          <button
+            v-for="(point, index) in trackData?.tracks || []"
+            :key="index"
+            type="button"
+            class="w-full flex items-center px-2 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+            @click="navigateToPoint(point, index)"
+          >
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium mr-3">
+              {{ index + 1 }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm text-gray-900">
+                {{ new Date(point.created * 1000).toLocaleTimeString() }}
+              </div>
+              <div class="text-xs text-gray-500 truncate">
+                {{ point.lat.toFixed(6) }}, {{ point.lng.toFixed(6) }}
+              </div>
+            </div>
+            <Icon icon="lucide:chevron-right" class="w-4 h-4 text-gray-400 flex-shrink-0" />
+          </button>
+        </div>
+      </Drawer>
     </div>
   </BackLayout>
 </template>

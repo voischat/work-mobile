@@ -292,7 +292,7 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
     <div class="absolute left-0 right-0 top-0 bottom-0">
       <div ref="mapContainer" class="w-full h-full" />
 
-      <div class="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 ">
+      <div class="absolute top-2 sm:top-4 left-2 right-2 sm:left-4 sm:right-auto bg-white rounded-lg shadow-lg p-2 sm:p-3">
         <div class="flex space-x-2">
           <TargetSelectorPopover v-model:open="isPopoverOpen">
             <template #trigger="{ isOpen: isPopoverOpen }">
