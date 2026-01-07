@@ -242,8 +242,8 @@ function renderTrack(tracks: TrackPoint[]): void {
       />
     </template>
 
-    <div class="absolute inset-0">
-      <div ref="mapContainer" class="absolute inset-0" />
+    <div class="absolute left-0 right-0 top-0 bottom-0">
+      <div ref="mapContainer" class="absolute left-0 right-0 top-0 bottom-0" />
 
       <div class="absolute top-4 left-4  bg-white rounded-lg shadow-lg z-10 p-3 ">
         <div class="flex space-x-2">

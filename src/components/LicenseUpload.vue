@@ -109,7 +109,7 @@ function triggerFileSelect() {
       @click="triggerFileSelect"
     >
       <!-- 上传中 -->
-      <div v-if="isUploading" class="absolute inset-0 flex items-center justify-center bg-gray-100/80">
+      <div v-if="isUploading" class="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-gray-100/80">
         <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
 
@@ -124,7 +124,7 @@ function triggerFileSelect() {
           >
           <!-- 删除按钮 -->
           <div
-            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+            class="absolute left-0 right-0 top-0 bottom-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
             @click.stop="handleDelete"
           >
             <svg

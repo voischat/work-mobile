@@ -40,7 +40,7 @@ function navigateToDevices() {
     <div class="bg-gray-50 px-6 py-5 border-b border-gray-100">
       <div class="flex items-center space-x-4">
         <div class="relative flex-shrink-0">
-          <div class="absolute inset-0 bg-white rounded-full shadow-lg transform scale-110 -z-0" />
+          <div class="absolute left-0 right-0 top-0 bottom-0 bg-white rounded-full shadow-lg transform scale-110 -z-0" />
           <div class="relative z-10">
             <Avatar
               :src="org.avatar"
