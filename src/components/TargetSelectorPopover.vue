@@ -36,9 +36,9 @@ function close() {
         </button>
       </slot>
     </PopoverTrigger>
-    <PopoverPortal>
+    <PopoverPortal to="body">
       <PopoverContent
-        class="z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-0 w-[calc(min(100vw-2rem,400px))] max-h-[min(var(--reka-popover-content-available-height),60vh)] overflow-hidden"
+        class="z-[9999] bg-white rounded-lg shadow-lg border border-gray-200 p-0 w-[calc(min(100vw-2rem,300px))] overflow-hidden"
         align="start"
         :side-offset="4"
       >

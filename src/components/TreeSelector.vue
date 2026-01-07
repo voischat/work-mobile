@@ -169,85 +169,97 @@ defineExpose({
 
 <template>
   <div>
-    <div v-if="rootStatus === 'pending'" class="flex items-center justify-center py-8">
-      <div class="text-gray-600">
-        加载中...
-      </div>
+    <div v-if="rootStatus === 'pending'" class="flex items-center justify-center py-12">
+      <Icon icon="lucide:loader-2" class="w-5 h-5 text-gray-400 animate-spin" />
     </div>
 
     <div v-else-if="rootNodes && rootNodes.length > 0" class="space-y-1">
       <div
         v-for="node in rootNodes"
         :key="node.id"
-        class="border border-gray-200 rounded-lg overflow-hidden"
+        class="group"
       >
         <div
-          class="flex items-center px-4 py-3 bg-gray-50"
-          :class="{ 'cursor-pointer hover:bg-gray-100': getRowClickAction(node) !== 'none' }"
+          class="flex items-center px-3 py-3 rounded-lg transition-all duration-150"
+          :class="{
+            'hover:bg-gray-50 cursor-pointer': getRowClickAction(node) !== 'none',
+            'bg-blue-50/50': isNodeSelected(node),
+          }"
           @click="handleRowClick(node, $event)"
         >
-          <!-- Expand/Collapse Button - only when expandable -->
+          <!-- Expand/Collapse Button -->
           <button
             v-if="shouldShowChevron(node)"
             type="button"
-            class="mr-2 p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+            class="p-0.5 -ml-0.5 mr-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
             @click.stop="toggleNode(node)"
           >
             <Icon
               icon="lucide:chevron-right"
-              class="w-4 h-4 text-gray-500 transition-transform duration-200"
+              class="w-3.5 h-3.5 transition-transform duration-200"
               :class="{ 'rotate-90': expandedNodeIds.has(node.id) }"
             />
           </button>
+          <div v-else class="w-4 mr-1 flex-shrink-0" />
 
-          <!-- Selection Input - only when selectable -->
-          <input
+          <!-- Selection Checkbox -->
+          <button
             v-if="shouldShowCheckbox(node)"
-            :type="mode === 'single' ? 'radio' : 'checkbox'"
-            :checked="isNodeSelected(node)"
+            type="button"
+            class="mr-2.5 flex-shrink-0"
+            :class="{ 'cursor-not-allowed opacity-40': existingNodeIdsSet.has(node.id) }"
             :disabled="existingNodeIdsSet.has(node.id)"
-            :name="mode === 'single' ? 'node-select' : undefined"
-            class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mr-3 flex-shrink-0"
-            :class="{
-              'cursor-pointer': !existingNodeIdsSet.has(node.id),
-              'cursor-not-allowed opacity-50': existingNodeIdsSet.has(node.id),
-            }"
-            @click.stop
-            @change="selectNode(node)"
+            @click.stop="selectNode(node)"
           >
+            <Icon
+              :icon="isNodeSelected(node)
+                ? (mode === 'single' ? 'lucide:circle-dot' : 'lucide:check-circle-2')
+                : 'lucide:circle'"
+              class="w-4.5 h-4.5 transition-all duration-150"
+              :class="{
+                'text-blue-500': isNodeSelected(node),
+                'text-gray-300 group-hover:text-gray-400': !isNodeSelected(node),
+              }"
+            />
+          </button>
+          <div v-else class="w-4.5 mr-2.5 flex-shrink-0" />
 
-          <!-- Content Area -->
-          <div class="flex items-center flex-1 min-w-0">
-            <!-- Node Icon -->
-            <Icon :icon="getNodeIcon(node.type)" class="w-5 h-5 text-gray-500 flex-shrink-0 mr-3" />
-
+          <!-- Content -->
+          <div class="flex items-center flex-1 min-w-0 space-x-3">
             <!-- Avatar for members -->
-            <AvatarRoot v-if="node.type === 'member'" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden mr-3">
+            <AvatarRoot v-if="node.type === 'member'" class="w-8 h-8 rounded-full bg-gray-100 flex-shrink-0 overflow-hidden">
               <AvatarImage
                 :src="(node.raw_data as Member)?.avatar"
                 :alt="toValue(node.label)"
                 class="w-full h-full object-cover"
               />
-              <AvatarFallback class="w-full h-full flex items-center justify-center">
-                <Icon icon="lucide:user" class="w-5 h-5 text-gray-400" />
+              <AvatarFallback class="w-full h-full flex items-center justify-center text-xs text-gray-500 font-medium">
+                {{ (toValue(node.label) || '').charAt(0) }}
               </AvatarFallback>
             </AvatarRoot>
 
-            <!-- Content -->
+            <!-- Icon for non-members -->
+            <Icon
+              v-else
+              :icon="getNodeIcon(node.type)"
+              class="w-4 h-4 flex-shrink-0"
+              :class="isNodeSelected(node) ? 'text-blue-500' : 'text-gray-400'"
+            />
+
             <div class="flex-1 min-w-0">
-              <div class="flex items-center space-x-2">
-                <span class="font-medium text-gray-900">{{ toValue(node.label) }}</span>
-                <span
-                  v-if="existingNodeIdsSet.has(node.id)"
-                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"
-                >
-                  已添加
-                </span>
-                <span v-if="node.count !== undefined" class="text-sm text-gray-500">({{ node.count }}人)</span>
-              </div>
-              <div v-if="node.type === 'member' && (node.raw_data as Member)?.user_num" class="text-xs text-gray-500">
+              <span class="text-sm truncate block" :class="isNodeSelected(node) ? 'text-gray-900 font-medium' : 'text-gray-700'">
+                {{ toValue(node.label) }}
+              </span>
+              <div v-if="node.type === 'member' && (node.raw_data as Member)?.user_num" class="text-xs text-gray-400 truncate">
                 {{ (node.raw_data as Member).user_num }}
               </div>
+            </div>
+
+            <!-- Right side badges -->
+            <div class="flex items-center space-x-2 flex-shrink-0">
+              <span v-if="node.count !== undefined" class="text-xs text-gray-400">
+                {{ node.count }}
+              </span>
             </div>
           </div>
         </div>
@@ -255,87 +267,99 @@ defineExpose({
         <!-- Children -->
         <Transition
           enter-active-class="transition-all duration-200 ease-out"
-          enter-from-class="opacity-0 max-h-0"
-          enter-to-class="opacity-100 max-h-[1000px]"
-          leave-active-class="transition-all duration-200 ease-in"
-          leave-from-class="opacity-100 max-h-[1000px]"
-          leave-to-class="opacity-0 max-h-0"
+          enter-from-class="opacity-0 -translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-150 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-1"
         >
-          <div v-if="expandedNodeIds.has(node.id)" class="bg-white border-t border-gray-200">
-            <div v-if="loadingNodeIds.has(node.id)" class="px-4 py-8 text-center text-gray-500 text-sm">
-              加载中...
+          <div v-if="expandedNodeIds.has(node.id)" class="ml-5 mt-1 space-y-1">
+            <div v-if="loadingNodeIds.has(node.id)" class="px-3 py-4 text-center">
+              <Icon icon="lucide:loader-2" class="w-4 h-4 text-gray-300 animate-spin mx-auto" />
             </div>
-            <div v-else-if="nodeChildrenCache.get(node.id)?.length === 0" class="px-4 py-8 text-center text-gray-500 text-sm">
+            <div v-else-if="nodeChildrenCache.get(node.id)?.length === 0" class="px-3 py-4 text-sm text-gray-400 text-center">
               暂无数据
             </div>
-            <div v-else class="divide-y divide-gray-100">
+            <div v-else>
               <div
                 v-for="child in nodeChildrenCache.get(node.id)"
                 :key="child.id"
-                class="flex items-center px-4 py-3"
-                :class="{ 'cursor-pointer hover:bg-gray-50': getRowClickAction(child) !== 'none' }"
-                @click="handleRowClick(child, $event)"
+                class="group/child"
               >
-                <!-- Expand/Collapse Button - only when expandable -->
-                <button
-                  v-if="shouldShowChevron(child)"
-                  type="button"
-                  class="mr-2 p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-                  @click.stop="toggleNode(child)"
-                >
-                  <Icon
-                    icon="lucide:chevron-right"
-                    class="w-4 h-4 text-gray-500 transition-transform duration-200"
-                    :class="{ 'rotate-90': expandedNodeIds.has(child.id) }"
-                  />
-                </button>
-
-                <!-- Selection Input - only when selectable -->
-                <input
-                  v-if="shouldShowCheckbox(child)"
-                  :type="mode === 'single' ? 'radio' : 'checkbox'"
-                  :checked="isNodeSelected(child)"
-                  :disabled="existingNodeIdsSet.has(child.id)"
-                  :name="mode === 'single' ? 'node-select' : undefined"
-                  class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mr-3 flex-shrink-0"
+                <div
+                  class="flex items-center px-3 py-3 rounded-lg transition-all duration-150"
                   :class="{
-                    'cursor-pointer': !existingNodeIdsSet.has(child.id),
-                    'cursor-not-allowed opacity-50': existingNodeIdsSet.has(child.id),
+                    'hover:bg-gray-50 cursor-pointer': getRowClickAction(child) !== 'none',
+                    'bg-blue-50/50': isNodeSelected(child),
                   }"
-                  @click.stop
-                  @change="selectNode(child)"
+                  @click="handleRowClick(child, $event)"
                 >
-
-                <!-- Content Area -->
-                <div class="flex items-center flex-1 min-w-0">
-                  <Icon :icon="getNodeIcon(child.type)" class="w-5 h-5 text-gray-400 flex-shrink-0 mr-3" />
-
-                  <!-- Avatar for members -->
-                  <AvatarRoot v-if="child.type === 'member'" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden mr-3">
-                    <AvatarImage
-                      :src="(child.raw_data as Member)?.avatar"
-                      :alt="toValue(child.label)"
-                      class="w-full h-full object-cover"
+                  <!-- Expand/Collapse Button -->
+                  <button
+                    v-if="shouldShowChevron(child)"
+                    type="button"
+                    class="p-0.5 -ml-0.5 mr-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                    @click.stop="toggleNode(child)"
+                  >
+                    <Icon
+                      icon="lucide:chevron-right"
+                      class="w-3.5 h-3.5 transition-transform duration-200"
+                      :class="{ 'rotate-90': expandedNodeIds.has(child.id) }"
                     />
-                    <AvatarFallback class="w-full h-full flex items-center justify-center">
-                      <Icon icon="lucide:user" class="w-5 h-5 text-gray-400" />
-                    </AvatarFallback>
-                  </AvatarRoot>
+                  </button>
+                  <div v-else class="w-4 mr-1 flex-shrink-0" />
 
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center space-x-2">
-                      <div class="text-sm font-medium text-gray-900">
+                  <!-- Selection Checkbox -->
+                  <button
+                    v-if="shouldShowCheckbox(child)"
+                    type="button"
+                    class="mr-2.5 flex-shrink-0"
+                    :class="{ 'cursor-not-allowed opacity-40': existingNodeIdsSet.has(child.id) }"
+                    :disabled="existingNodeIdsSet.has(child.id)"
+                    @click.stop="selectNode(child)"
+                  >
+                    <Icon
+                      :icon="isNodeSelected(child)
+                        ? (mode === 'single' ? 'lucide:circle-dot' : 'lucide:check-circle-2')
+                        : 'lucide:circle'"
+                      class="w-4.5 h-4.5 transition-all duration-150"
+                      :class="{
+                        'text-blue-500': isNodeSelected(child),
+                        'text-gray-300 group-hover/child:text-gray-400': !isNodeSelected(child),
+                      }"
+                    />
+                  </button>
+                  <div v-else class="w-4.5 mr-2.5 flex-shrink-0" />
+
+                  <!-- Content -->
+                  <div class="flex items-center flex-1 min-w-0 space-x-3">
+                    <!-- Avatar for members -->
+                    <AvatarRoot v-if="child.type === 'member'" class="w-8 h-8 rounded-full bg-gray-100 flex-shrink-0 overflow-hidden">
+                      <AvatarImage
+                        :src="(child.raw_data as Member)?.avatar"
+                        :alt="toValue(child.label)"
+                        class="w-full h-full object-cover"
+                      />
+                      <AvatarFallback class="w-full h-full flex items-center justify-center text-xs text-gray-500 font-medium">
+                        {{ (toValue(child.label) || '').charAt(0) }}
+                      </AvatarFallback>
+                    </AvatarRoot>
+
+                    <!-- Icon for non-members -->
+                    <Icon
+                      v-else
+                      :icon="getNodeIcon(child.type)"
+                      class="w-4 h-4 flex-shrink-0"
+                      :class="isNodeSelected(child) ? 'text-blue-500' : 'text-gray-400'"
+                    />
+
+                    <div class="flex-1 min-w-0">
+                      <span class="text-sm truncate block" :class="isNodeSelected(child) ? 'text-gray-900 font-medium' : 'text-gray-700'">
                         {{ toValue(child.label) }}
-                      </div>
-                      <span
-                        v-if="existingNodeIdsSet.has(child.id)"
-                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"
-                      >
-                        已添加
                       </span>
-                    </div>
-                    <div v-if="child.type === 'member' && (child.raw_data as Member)?.user_num" class="text-xs text-gray-500">
-                      {{ (child.raw_data as Member).user_num }}
+                      <div v-if="child.type === 'member' && (child.raw_data as Member)?.user_num" class="text-xs text-gray-400 truncate">
+                        {{ (child.raw_data as Member).user_num }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -346,7 +370,7 @@ defineExpose({
       </div>
     </div>
 
-    <div v-else class="text-center py-8 text-gray-500">
+    <div v-else class="text-center py-12 text-sm text-gray-400">
       暂无数据
     </div>
   </div>
