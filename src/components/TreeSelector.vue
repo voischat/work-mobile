@@ -247,7 +247,7 @@ defineExpose({
             />
 
             <div class="flex-1 min-w-0">
-              <span class="text-sm truncate block" :class="isNodeSelected(node) ? 'text-gray-900 font-medium' : 'text-gray-700'">
+              <span class="text-sm truncate block" :class="isNodeSelected(node) ? 'text-blue-600 font-medium' : 'text-gray-700'">
                 {{ toValue(node.label) }}
               </span>
               <div v-if="node.type === 'member' && (node.raw_data as Member)?.user_num" class="text-xs text-gray-400 truncate">
@@ -354,7 +354,7 @@ defineExpose({
                     />
 
                     <div class="flex-1 min-w-0">
-                      <span class="text-sm truncate block" :class="isNodeSelected(child) ? 'text-gray-900 font-medium' : 'text-gray-700'">
+                      <span class="text-sm truncate block" :class="isNodeSelected(child) ? 'text-blue-600 font-medium' : 'text-gray-700'">
                         {{ toValue(child.label) }}
                       </span>
                       <div v-if="child.type === 'member' && (child.raw_data as Member)?.user_num" class="text-xs text-gray-400 truncate">
