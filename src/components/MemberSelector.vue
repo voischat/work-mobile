@@ -6,19 +6,13 @@ import { weilaFetch } from '~/shared/instances'
 import Modal from './Modal.vue'
 import TreeSelector from './TreeSelector.vue'
 
-const props = defineProps<{
-  userId: number
-}>()
-
-const emit = defineEmits<{
-  'update:userId': [value: number]
-}>()
+const userId = defineModel<number>({ required: true })
 
 const isOpen = ref(false)
 const selectedNodes = ref<TreeNode[]>([])
 
 // Sync prop changes to selection
-watch(() => props.userId, (newId, oldId) => {
+watch(userId, (newId, oldId) => {
   if (newId !== oldId) {
     if (newId > 0) {
       const currentNode = selectedNodes.value.find(n => n.id === newId)
@@ -41,8 +35,8 @@ watch(() => props.userId, (newId, oldId) => {
 watch(selectedNodes, (newNodes) => {
   const [node] = newNodes
   const newId = node?.id || 0
-  if (newId !== props.userId) {
-    emit('update:userId', newId)
+  if (newId !== userId.value) {
+    userId.value = newId
   }
 }, { deep: true })
 
