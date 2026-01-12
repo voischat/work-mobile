@@ -9,7 +9,7 @@ import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger, ToggleGrou
 import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
-import Drawer from '~/components/Drawer.vue'
+import GestureDialog from '~/components/GestureDialog.vue'
 import TargetSelectorPopover from '~/components/TargetSelectorPopover.vue'
 import TreeSelector from '~/components/TreeSelector.vue'
 import { useAMap } from '~/composables/useAMap'
@@ -535,8 +535,8 @@ function navigateToPoint(point: TrackPoint, index: number): void {
         </button>
       </Transition>
 
-      <!-- Mobile drawer for track settings -->
-      <Drawer v-model:open="isSettingsDrawerOpen" title="轨迹设置">
+      <!-- Mobile dialog for track settings -->
+      <GestureDialog v-model:open="isSettingsDrawerOpen" title="轨迹设置">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-3">轨迹间隔</label>
           <div class="flex flex-wrap -m-1">
@@ -560,11 +560,11 @@ function navigateToPoint(point: TrackPoint, index: number): void {
             <span class="text-sm">更新中...</span>
           </div>
         </div>
-      </Drawer>
+      </GestureDialog>
 
-      <!-- Track list drawer -->
-      <Drawer v-model:open="isTrackListDrawerOpen" title="轨迹点列表">
-        <div ref="trackListRef" class="divide-y divide-gray-100 max-h-[60vh] overflow-y-auto">
+      <!-- Track list dialog -->
+      <GestureDialog v-model:open="isTrackListDrawerOpen" title="轨迹点列表">
+        <div ref="trackListRef" class="divide-y divide-gray-100 overflow-y-auto flex-1">
           <button
             v-for="(point, index) in accumulatedTracks"
             :key="index"
@@ -595,7 +595,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
             <span class="text-sm text-gray-400">共 {{ totalCount }} 条</span>
           </div>
         </div>
-      </Drawer>
+      </GestureDialog>
     </div>
   </BackLayout>
 </template>
