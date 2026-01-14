@@ -76,7 +76,7 @@ const { mutate: registerByPhone, isLoading: isPhoneLoading } = useMutation({
 
 const { mutate: sendEmailVerifyCode, isLoading: isSendingEmail } = useMutation({
   mutation: (params: SendEmailVerifyCodeRequest) =>
-    weilaFetch('/common/send-email-verifycode', { method: 'POST', body: params }),
+    weilaFetch('/comton/send-email-verifycode', { method: 'POST', body: params }),
   onSuccess() {
     showToast('验证码已发送')
     emailCountDownButtonRef.value?.startCountdown()
