@@ -2,18 +2,11 @@
 import type { LoginByEmailRequest, LoginBySmsRequest, LoginResponse, SendEmailVerifyCodeRequest, SendSmsVerifyCodeRequest } from '~/types/auth'
 import { Icon } from '@iconify/vue'
 import { useMutation } from '@pinia/colada'
-import { useFocus, useLocalStorage } from '@vueuse/core'
 import md5 from 'md5'
 import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger, TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import CountDownButton from '~/components/CountDownButton.vue'
 import ImageVerifyCode from '~/components/ImageVerifyCode.vue'
-import { useAuth } from '~/composables/useAuth'
-import { useForm } from '~/composables/useForm'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const passwordSchema = z.object({
   account: z.string().min(1, '账号不能为空'),

@@ -4,11 +4,6 @@ import type { Dept, Member } from '~/types/management'
 import { Icon } from '@iconify/vue'
 import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import md5 from 'md5'
-import { computed, ref } from 'vue'
-import { useForm } from '~/composables/useForm'
-import { addMemberSchema, useGenerateMember } from '~/composables/useGenMember'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
 const { hasQuickSupport } = useVip()

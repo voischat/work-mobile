@@ -2,7 +2,6 @@
 import BottomNav from '~/components/BottomNav.vue'
 import Header from '~/components/Header.vue'
 import Sidebar from '~/components/Sidebar.vue'
-import { isLimitedWebview } from '~/shared/const'
 </script>
 
 <template>

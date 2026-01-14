@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { useLocalStorage } from '@vueuse/core'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-
 interface Props {
   disabled?: boolean
   loading?: boolean

@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { useBreakpoints } from '@vueuse/core'
-import { useRouter } from 'vue-router'
-
 interface BreadcrumbItem {
   name: string
   route?: string

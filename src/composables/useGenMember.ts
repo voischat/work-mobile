@@ -1,6 +1,5 @@
 import { createDeepSeek } from '@ai-sdk/deepseek'
 import { generateObject } from 'ai'
-import { ref, toValue } from 'vue'
 import { z } from 'zod'
 
 const deepseek = createDeepSeek({

@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import type { Dept, Member, MemberListResponse } from '~/types/management'
 import { useQuery, useQueryCache } from '@pinia/colada'
-import { refDebounced, useInfiniteScroll } from '@vueuse/core'
-import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
-import { weilaFetch } from '~/shared/instances'
 
 const memberAddFormRef = useTemplateRef('memberAddFormRef')
 const deviceAddFormRef = useTemplateRef('deviceAddFormRef')

@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import ResetPasswordForm from '~/components/forms/ResetPasswordForm.vue'
 import Modal from '~/components/Modal.vue'
-import { useToast } from '~/composables/useToast'
 
 defineProps<{
   memberId: number

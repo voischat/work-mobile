@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
 import { useMutation, useQueryCache } from '@pinia/colada'
-import { computed, ref, watch } from 'vue'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
   member: Member

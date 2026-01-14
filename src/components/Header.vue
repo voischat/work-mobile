@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { useRouter } from 'vue-router'
-import { bridge } from '~/utils/bridge'
 
 interface Props {
   title?: string

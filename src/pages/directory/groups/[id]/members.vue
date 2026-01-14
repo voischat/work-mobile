@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import type { Dept, Group, GroupListResponse, Member, MemberListResponse, TreeNode } from '~/types/management'
 import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
-import { useInfiniteScroll } from '@vueuse/core'
+
 import { useRouteParams } from '@vueuse/router'
-import { computed, ref, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
+
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import MemberActions from '~/components/MemberActions.vue'
 import MemberCard from '~/components/MemberCard.vue'
 import Modal from '~/components/Modal.vue'
 import TreeSelector from '~/components/TreeSelector.vue'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 const queryCache = useQueryCache()

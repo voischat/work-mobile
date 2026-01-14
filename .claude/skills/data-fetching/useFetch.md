@@ -13,8 +13,6 @@ Reference for the underlying composition API used in `useWeilaFetch`.
 ## Basic Usage
 
 ```ts
-import { useFetch } from '@vueuse/core'
-
 const { data, error, isFetching } = useFetch(url).get().json()
 ```
 

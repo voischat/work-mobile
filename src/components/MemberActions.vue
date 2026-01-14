@@ -9,8 +9,7 @@ import {
   DropdownMenuRoot,
   DropdownMenuTrigger,
 } from 'reka-ui'
-import { useRouter } from 'vue-router'
-import { weilaFetch } from '~/shared/instances'
+
 import EditMemberModal from './EditMemberModal.vue'
 import MemberStateToggle from './MemberStateToggle.vue'
 import Modal from './Modal.vue'

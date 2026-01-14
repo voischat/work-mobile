@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import type { Group } from '~/types/management'
 import { useMutation, useQueryCache } from '@pinia/colada'
-import { ref } from 'vue'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
+
 import EditGroupModal from './EditGroupModal.vue'
 import Modal from './Modal.vue'
 

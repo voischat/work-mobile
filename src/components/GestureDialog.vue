@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { useWindowSize } from '@vueuse/core'
 import { animate, AnimatePresence, Motion, useMotionValue, useMotionValueEvent, useTransform } from 'motion-v'
 import { DialogContent, DialogOverlay, DialogPortal, DialogRoot } from 'reka-ui'
-import { computed, onMounted } from 'vue'
 
 const props = withDefaults(defineProps<{
   title?: string

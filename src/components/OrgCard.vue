@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { OrgInfo } from '~/types/org'
 import { Icon } from '@iconify/vue'
-import { useRouter } from 'vue-router'
+
 import Avatar from '~/components/Avatar.vue'
 
 defineProps<{

@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import type { Dept } from '~/types/management'
 import { useMutation, useQueryCache } from '@pinia/colada'
-import { computed, ref, watch } from 'vue'
+
 import { z } from 'zod'
-import { useForm } from '~/composables/useForm'
-import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
   dept: Dept

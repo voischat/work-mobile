@@ -34,10 +34,8 @@ This implementation replaces the traditional `Drawer` component with a new `Gest
 
 ```vue
 <script setup lang="ts">
-import { useWindowSize } from '@vueuse/core'
 import { animate, AnimatePresence, Motion, useMotionValue, useMotionValueEvent, useTransform } from 'motion-v'
 import { DialogContent, DialogOverlay, DialogPortal, DialogRoot } from 'reka-ui'
-import { computed, onMounted } from 'vue'
 
 defineProps<{ title?: string }>()
 const open = defineModel<boolean>('open', { default: false })

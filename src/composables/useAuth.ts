@@ -1,5 +1,3 @@
-import { useLocalStorage } from '@vueuse/core'
-
 export function useAuth() {
   const token = useLocalStorage('token', '')
   const refreshToken = useLocalStorage('refresh_token', '')

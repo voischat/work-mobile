@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import type { Group } from '~/types/management'
-import { ref } from 'vue'
 import EditGroupForm from '~/components/EditGroupForm.vue'
 import Modal from '~/components/Modal.vue'
-import { useToast } from '~/composables/useToast'
 
 defineProps<{
   group: Group

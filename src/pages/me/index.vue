@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import type { UserInfo } from '~/types/auth'
 import { useQuery } from '@pinia/colada'
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import HomeLayout from '~/components/HomeLayout.vue'
-import { useAuth } from '~/composables/useAuth'
-import { useModal } from '~/composables/useModal'
-import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 const { clearAuth } = useAuth()

@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import type { Group, GroupListResponse } from '~/types/management'
 import { useQuery } from '@pinia/colada'
-import { useInfiniteScroll } from '@vueuse/core'
-import { computed, ref, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import GroupAddForm from '~/components/forms/GroupAddForm.vue'
 import GroupActions from '~/components/GroupActions.vue'
 import Modal from '~/components/Modal.vue'
-import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 

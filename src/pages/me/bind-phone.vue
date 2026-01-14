@@ -2,16 +2,11 @@
 import type { BindPhoneRequest, SendSmsVerifyCodeRequest } from '~/types/auth'
 import { Icon } from '@iconify/vue'
 import { useMutation } from '@pinia/colada'
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import CountDownButton from '~/components/CountDownButton.vue'
 import ImageVerifyCode from '~/components/ImageVerifyCode.vue'
-import { useForm } from '~/composables/useForm'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const bindPhoneSchema = z.object({
   phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号'),

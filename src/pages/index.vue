@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import type { OrgInfo, VipInfo } from '~/types/org'
 import { useQuery } from '@pinia/colada'
-import { computed } from 'vue'
 import HomeLayout from '~/components/HomeLayout.vue'
 import OrgCard from '~/components/OrgCard.vue'
 import VipCard from '~/components/VipCard.vue'
-import { weilaFetch } from '~/shared/instances'
 
 const {
   data: org,

@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import type { Dept } from '~/types/management'
 import { useMutation, useQueryCache } from '@pinia/colada'
-import { computed, ref } from 'vue'
 import { z } from 'zod'
-import { useForm } from '~/composables/useForm'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
 

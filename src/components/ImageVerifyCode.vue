@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import type { ImageVerifyCodeResponse } from '~/types/auth'
 import { useQuery } from '@pinia/colada'
-import { computed, ref, watch } from 'vue'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 interface Props {
   width?: number

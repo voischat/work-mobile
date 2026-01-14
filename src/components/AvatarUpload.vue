@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import { getRootUrl } from '@kvoon/utils'
-import { computed, ref } from 'vue'
-import { useToast } from '~/composables/useToast'
-import { generateV2Query } from '~/composables/useWeilaFetch'
 
 const url = defineModel<string>({ default: '' })
 

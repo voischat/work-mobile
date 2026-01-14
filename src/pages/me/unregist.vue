@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import Tab from '~/components/Tab.vue'

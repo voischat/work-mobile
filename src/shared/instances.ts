@@ -5,8 +5,7 @@ import { nanoid } from 'nanoid'
 import { createStorage } from 'unstorage'
 import localStorage from 'unstorage/drivers/localstorage'
 import { createWeilaFetch } from 'weila-auth'
-import { useAuth } from '~/composables/useAuth'
-import { appid, appkey } from '~/shared/const'
+
 import { name } from '../../package.json'
 
 export const storage = createStorage({

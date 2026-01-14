@@ -1,6 +1,3 @@
-import type { Ref } from 'vue'
-import { ref } from 'vue'
-
 export interface UsePageOptions {
   /** 每页大小，默认为 10 */
   pageSize?: number

@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import type { Dept } from '~/types/management'
-import { ref } from 'vue'
 import EditDeptForm from '~/components/EditDeptForm.vue'
 import Modal from '~/components/Modal.vue'
-import { useToast } from '~/composables/useToast'
 
 defineProps<{
   dept: Dept

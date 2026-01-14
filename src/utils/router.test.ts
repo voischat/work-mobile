@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useRoute } from 'vue-router'
+
 import { isActive, isActiveRoute } from './router'
 
 // Mock vue-router

@@ -4,7 +4,6 @@ import { createFetch } from '@vueuse/core'
 import md5 from 'md5'
 import { nanoid } from 'nanoid'
 
-import { appid, appkey } from '~/shared/const'
 import { useAuth } from './useAuth'
 
 const { token, refreshToken, saveAuth, clearAuth } = useAuth()

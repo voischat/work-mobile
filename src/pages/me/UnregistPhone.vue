@@ -2,16 +2,9 @@
 import type { SendSmsVerifyCodeRequest, UnregistRequest } from '~/types/auth'
 import { Icon } from '@iconify/vue'
 import { useMutation } from '@pinia/colada'
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import CountDownButton from '~/components/CountDownButton.vue'
 import ImageVerifyCode from '~/components/ImageVerifyCode.vue'
-import { useAuth } from '~/composables/useAuth'
-import { useForm } from '~/composables/useForm'
-import { useModal } from '~/composables/useModal'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const unregistPhoneSchema = z.object({
   phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号'),

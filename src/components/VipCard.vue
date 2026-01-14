@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { VipInfo } from '~/types/org'
 import { useQuery } from '@pinia/colada'
-import { computed } from 'vue'
-import { weilaFetch } from '~/shared/instances'
 
 defineProps<{
   vip: VipInfo

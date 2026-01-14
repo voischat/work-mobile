@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { TreeItem, TreeRoot } from 'reka-ui'
-import { useRouter } from 'vue-router'
-import { isActiveRoute } from '~/utils/router'
 
 interface NavItem {
   title: string

@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import type { BindEmailRequest, SendEmailVerifyCodeRequest } from '~/types/auth'
 import { useMutation } from '@pinia/colada'
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import CountDownButton from '~/components/CountDownButton.vue'
 import ImageVerifyCode from '~/components/ImageVerifyCode.vue'
-import { useForm } from '~/composables/useForm'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const bindEmailSchema = z.object({
   email: z.string().email('请输入正确的邮箱地址'),

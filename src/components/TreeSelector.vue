@@ -4,7 +4,6 @@ import { toArray } from '@antfu/utils'
 import { Icon } from '@iconify/vue'
 import { useQuery } from '@pinia/colada'
 import { AvatarFallback, AvatarImage, AvatarRoot } from 'reka-ui'
-import { computed, ref, toValue } from 'vue'
 
 const props = withDefaults(defineProps<{
   loadMore: (ctx: TreeNode | null) => Promise<TreeNode[]>

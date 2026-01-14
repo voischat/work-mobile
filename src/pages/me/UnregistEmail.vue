@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import type { SendEmailVerifyCodeRequest, UnregistByEmailRequest } from '~/types/auth'
 import { useMutation } from '@pinia/colada'
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import CountDownButton from '~/components/CountDownButton.vue'
 import ImageVerifyCode from '~/components/ImageVerifyCode.vue'
-import { useAuth } from '~/composables/useAuth'
-import { useForm } from '~/composables/useForm'
-import { useModal } from '~/composables/useModal'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const unregistEmailSchema = z.object({
   email: z.string().email('请输入正确的邮箱地址'),

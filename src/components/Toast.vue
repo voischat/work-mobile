@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ToastItem } from '~/composables/useToast'
-import { computed } from 'vue'
 
 const props = defineProps<{
   toasts: ToastItem[]

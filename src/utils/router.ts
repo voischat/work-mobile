@@ -1,5 +1,3 @@
-import { useRoute } from 'vue-router'
-
 /**
  * Pure function to check if a navigation path is active based on current path
  * @param currentPath - Current route path (from useRoute().path)

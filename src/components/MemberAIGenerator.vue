@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { type AddMemberForm, useGenerateMember } from '~/composables/useGenMember'
-import { useToast } from '~/composables/useToast'
-
 const props = withDefaults(defineProps<{
   disabled?: boolean
   placeholder?: string

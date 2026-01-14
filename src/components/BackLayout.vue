@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { useInfiniteScroll } from '@vueuse/core'
-import { onMounted, onUnmounted, useSlots, useTemplateRef, watch } from 'vue'
-import { useRoute } from 'vue-router'
 import Header from '~/components/Header.vue'
 import Sidebar from '~/components/Sidebar.vue'
-import { isAtBottom } from '~/shared/states'
 
 interface Props {
   title: string

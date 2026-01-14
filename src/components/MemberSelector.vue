@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Member, TreeNode } from '~/types/management'
 import { Icon } from '@iconify/vue'
-import { computed, ref, watch } from 'vue'
-import { weilaFetch } from '~/shared/instances'
+
 import Modal from './Modal.vue'
 import TreeSelector from './TreeSelector.vue'
 

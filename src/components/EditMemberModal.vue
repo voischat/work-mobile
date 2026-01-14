@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import type { Member } from '~/types/management'
-import { computed, ref } from 'vue'
 import EditMemberForm from '~/components/EditMemberForm.vue'
 import Modal from '~/components/Modal.vue'
-import { useToast } from '~/composables/useToast'
 
 const props = defineProps<{
   member: Member

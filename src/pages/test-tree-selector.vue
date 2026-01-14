@@ -2,9 +2,7 @@
 import type { Member, TreeNode } from '~/types/management'
 import { Icon } from '@iconify/vue'
 import { TabsContent, TabsList, TabsRoot, TabsTrigger, ToggleGroupItem, ToggleGroupRoot } from 'reka-ui'
-import { ref, watch } from 'vue'
 import TreeSelector from '~/components/TreeSelector.vue'
-import { weilaFetch } from '~/shared/instances'
 
 const selectedNodes = ref<TreeNode[]>([])
 const mode = ref<'single' | 'multiple'>('single')

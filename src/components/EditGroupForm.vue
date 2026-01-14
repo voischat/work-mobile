@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import type { Dept, Group } from '~/types/management'
 import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
-import { computed, ref, watch } from 'vue'
 import { z } from 'zod'
 import AvatarUpload from '~/components/AvatarUpload.vue'
-import { useForm } from '~/composables/useForm'
-import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
   group: Group

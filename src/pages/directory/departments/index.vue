@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import type { Dept, DeptListResponse } from '~/types/management'
 import { useQuery } from '@pinia/colada'
-import { useInfiniteScroll } from '@vueuse/core'
-import { computed, ref, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import DeptActions from '~/components/DeptActions.vue'
 import DeptAddForm from '~/components/forms/DeptAddForm.vue'
 import Modal from '~/components/Modal.vue'
-import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 

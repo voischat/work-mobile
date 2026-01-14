@@ -1,6 +1,4 @@
 import AMapLoader from '@amap/amap-jsapi-loader'
-import { ref } from 'vue'
-import { AMapKeys } from '~/shared/const'
 
 const isLoaded = ref(false)
 const AMapInstance = ref<any>(null)

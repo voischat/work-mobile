@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import type { LegalInfo, LegalRequest } from '~/types/legal'
 import { useMutation, useQuery } from '@pinia/colada'
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
 import LicenseUpload from '~/components/LicenseUpload.vue'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 const { showToast } = useToast()

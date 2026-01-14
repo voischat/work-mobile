@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { useMutation } from '@pinia/colada'
 import md5 from 'md5'
-import { computed, ref } from 'vue'
+
 import { z } from 'zod'
-import { useForm } from '~/composables/useForm'
-import { weilaFetch } from '~/shared/instances'
 
 const props = defineProps<{
   memberId: number

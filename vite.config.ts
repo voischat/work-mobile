@@ -74,6 +74,7 @@ export default defineConfig({
         './src/shared',
       ],
       vueTemplate: true,
+      dumpUnimportItems: './auto-imports.json',
     }),
 
     // https://github.com/antfu/vite-plugin-components

@@ -2,14 +2,9 @@
 import type { ChangePasswordRequest } from '~/types/auth'
 import { useMutation } from '@pinia/colada'
 import md5 from 'md5'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import BackLayout from '~/components/BackLayout.vue'
 import Breadcrumb from '~/components/Breadcrumb.vue'
-import { useForm } from '~/composables/useForm'
-import { useToast } from '~/composables/useToast'
-import { weilaFetch } from '~/shared/instances'
 
 const changePasswordSchema = z.object({
   old_password: z.string().min(1, '旧密码不能为空'),

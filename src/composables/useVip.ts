@@ -1,7 +1,5 @@
 import type { VipInfo, VipSupport } from '~/types/org'
 import { useQuery } from '@pinia/colada'
-import { computed } from 'vue'
-import { weilaFetch } from '~/shared/instances'
 
 export function useVip() {
   const {

@@ -1,10 +1,9 @@
 import { PiniaColada } from '@pinia/colada'
 import { createPinia } from 'pinia'
-import { createApp } from 'vue'
+
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
 import App from './App.vue'
-import { initVConsole } from './utils/vconsole'
 
 import './styles/main.css'
 
