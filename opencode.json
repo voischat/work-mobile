@@ -8,6 +8,13 @@
     }
   },
   "formatter": {
+    "oxlint": {
+      "command": ["nr", "oxlint", "--fix", "$FILE"],
+      "environment": {
+        "NODE_ENV": "development"
+      },
+      "extensions": [".js", ".ts", ".jsx", ".vue", ".json", ".md"]
+    },
     "eslint": {
       "command": ["nr", "lint", "--fix", "$FILE"],
       "environment": {
