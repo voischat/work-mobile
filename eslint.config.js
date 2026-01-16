@@ -17,5 +17,6 @@ export default antfu(
     'docs/vueuse/*.md',
     '**/api-examples.md',
     'MIGRATION_PLAN.md',
+    '.claude/**',
   ]),
 )
