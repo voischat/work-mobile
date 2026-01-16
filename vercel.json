@@ -7,7 +7,7 @@
     },
     {
       "source": "/v2/:match*",
-      "destination": "https://demo.weila.hk/v2/:match*"
+      "destination": "https://voiswork.cn/v2/:match*"
     }
   ]
 }
