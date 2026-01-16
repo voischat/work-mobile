@@ -1,89 +1,96 @@
 /// <reference types="vitest" />
 
 import path from 'node:path'
+import process from 'node:process'
 import Vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import VueMacros from 'unplugin-vue-macros/vite'
 import { VueRouterAutoImports } from 'unplugin-vue-router'
 import VueRouter from 'unplugin-vue-router/vite'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
-export default defineConfig({
-  base: './',
+export default defineConfig(({ mode }) => {
+  console.log('mode', mode)
+  const env = loadEnv(mode, process.cwd(), '')
+  console.log('env', env.VITE_APP_ID)
 
-  resolve: {
-    alias: {
-      '~/': `${path.resolve(__dirname, 'src')}/`,
-    },
-  },
+  return {
+    base: './',
 
-  server: {
-    cors: true,
-    proxy: {
-      '/v1': {
-        target: 'http://demo.weila.hk',
-        timeout: 20 * 1000,
-        // target: 'http://192.168.0.125:8088',
-        changeOrigin: true,
-        secure: false,
-      },
-      '/v2': {
-        target: 'https://demo.weila.hk',
-        timeout: 20 * 1000,
-        // target: 'http://192.168.0.125:8090',
-        changeOrigin: true,
-        secure: false,
+    resolve: {
+      alias: {
+        '~/': `${path.resolve(__dirname, 'src')}/`,
       },
     },
-  },
 
-  plugins: [
-    // https://github.com/posva/unplugin-vue-router
-    VueRouter(),
-
-    VueMacros({
-      defineOptions: false,
-      defineModels: false,
-      plugins: {
-        vue: Vue({
-          script: {
-            propsDestructure: true,
-            defineModel: true,
-          },
-        }),
-      },
-    }),
-
-    // https://github.com/antfu/unplugin-auto-import
-    AutoImport({
-      imports: [
-        'vue',
-        '@vueuse/core',
-        VueRouterAutoImports,
-        {
-          // add any other imports you were relying on
-          'vue-router/auto': ['useLink'],
+    server: {
+      cors: true,
+      proxy: {
+        '/v1': {
+          target: 'http://demo.weila.hk',
+          timeout: 20 * 1000,
+          // target: 'http://192.168.0.125:8088',
+          changeOrigin: true,
+          secure: false,
         },
-      ],
-      dts: true,
-      dirs: [
-        './src/composables',
-        './src/queries',
-        './src/utils',
-        './src/shared',
-      ],
-      vueTemplate: true,
-    }),
+        '/v2': {
+          target: 'https://demo.weila.hk',
+          timeout: 20 * 1000,
+          // target: 'http://192.168.0.125:8090',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
 
-    // https://github.com/antfu/vite-plugin-components
-    Components({
-      dts: true,
-    }),
-  ],
+    plugins: [
+    // https://github.com/posva/unplugin-vue-router
+      VueRouter(),
 
-  // https://github.com/vitest-dev/vitest
-  test: {
-    environment: 'jsdom',
-  },
+      VueMacros({
+        defineOptions: false,
+        defineModels: false,
+        plugins: {
+          vue: Vue({
+            script: {
+              propsDestructure: true,
+              defineModel: true,
+            },
+          }),
+        },
+      }),
+
+      // https://github.com/antfu/unplugin-auto-import
+      AutoImport({
+        imports: [
+          'vue',
+          '@vueuse/core',
+          VueRouterAutoImports,
+          {
+          // add any other imports you were relying on
+            'vue-router/auto': ['useLink'],
+          },
+        ],
+        dts: true,
+        dirs: [
+          './src/composables',
+          './src/queries',
+          './src/utils',
+          './src/shared',
+        ],
+        vueTemplate: true,
+      }),
+
+      // https://github.com/antfu/vite-plugin-components
+      Components({
+        dts: true,
+      }),
+    ],
+
+    // https://github.com/vitest-dev/vitest
+    test: {
+      environment: 'jsdom',
+    },
+  }
 })
