@@ -1,14 +1,60 @@
 <script setup lang="ts">
 import type { OrgInfo } from '~/types/org'
 import { Icon } from '@iconify/vue'
+import { useQuery } from '@pinia/colada'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from '~/components/Avatar.vue'
+import { weilaFetch } from '~/shared/instances'
 
 defineProps<{
   org: OrgInfo
 }>()
 
 const router = useRouter()
+
+// 认证信息接口响应类型
+interface LegalInfo {
+  id: number
+  category: number
+  type: number
+  merchant: {
+    business_license: string
+  }
+  state: 0 | 8 | 9 // 0 ~ 7 待审核 8 成功 9 失败
+}
+
+// 获取认证信息
+const {
+  data: legalInfo,
+  error: legalError,
+} = useQuery({
+  key: ['legal', 'info'],
+  query: () => weilaFetch<LegalInfo>('corp/legal/get-legal', { method: 'POST' }),
+})
+
+// 认证状态映射
+const authStatusMap = {
+  0: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
+  1: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
+  2: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
+  3: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
+  4: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
+  5: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
+  6: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
+  7: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
+  8: { label: '已认证', color: 'bg-green-100 text-green-700' },
+  9: { label: '认证失败', color: 'bg-red-100 text-red-700' },
+} as const
+
+// 计算认证状态
+const authStatus = computed(() => {
+  if (!legalInfo.value || legalError.value) {
+    return null
+  }
+  const state = legalInfo.value.state
+  return authStatusMap[state as keyof typeof authStatusMap] || { label: '未知', color: 'bg-gray-100 text-gray-700' }
+})
 
 // 格式化时间戳为日期字符串
 function formatDate(timestamp: number): string {
@@ -32,6 +78,10 @@ function navigateToDevices() {
   // 由于没有专门的设备页面，导航到成员页面（设备通常在成员管理中查看）
   router.push('/directory/members')
 }
+
+function navigateToCorpLegal() {
+  router.push('/me/corp-legal')
+}
 </script>
 
 <template>
@@ -51,9 +101,30 @@ function navigateToDevices() {
           </div>
         </div>
         <div class="flex-1 min-w-0">
-          <h2 class="text-2xl font-bold text-gray-900 mb-1">
-            {{ org.name }}
-          </h2>
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center space-x-3">
+              <h2 class="text-2xl font-bold text-gray-900">
+                {{ org.name }}
+              </h2>
+              <!-- 认证状态 -->
+              <span
+                v-if="authStatus"
+                class="px-2 py-0.5 rounded text-xs font-medium"
+                :class="authStatus.color"
+              >
+                {{ authStatus.label }}
+              </span>
+            </div>
+            <!-- 认证按钮 -->
+            <button
+              type="button"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center space-x-1.5"
+              @click="navigateToCorpLegal"
+            >
+              <Icon icon="lucide:shield-check" class="w-4 h-4" />
+              <span>企业认证</span>
+            </button>
+          </div>
           <p class="text-sm text-gray-600 flex items-center">
             <Icon icon="lucide:hash" class="w-4 h-4 mr-1.5 text-gray-400" />
             企业号: <span class="font-medium text-gray-700 ml-1">{{ org.num }}</span>

@@ -1,55 +1,9 @@
 <script setup lang="ts">
 import type { VipInfo } from '~/types/org'
-import { useQuery } from '@pinia/colada'
-import { computed } from 'vue'
-import { weilaFetch } from '~/shared/instances'
 
 defineProps<{
   vip: VipInfo
 }>()
-
-// 认证信息接口响应类型
-interface LegalInfo {
-  id: number
-  category: number
-  type: number
-  merchant: {
-    business_license: string
-  }
-  state: 0 | 8 | 9 // 0 ~ 7 待审核 8 成功 9 失败
-}
-
-// 获取认证信息
-const {
-  data: legalInfo,
-  error: legalError,
-} = useQuery({
-  key: ['legal', 'info'],
-  query: () => weilaFetch<LegalInfo>('corp/legal/get-legal', { method: 'POST' }),
-})
-
-// 认证状态映射
-const authStatusMap = {
-  0: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  1: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  2: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  3: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  4: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  5: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  6: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  7: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  8: { label: '已认证', color: 'bg-green-100 text-green-700' },
-  9: { label: '认证失败', color: 'bg-red-100 text-red-700' },
-} as const
-
-// 计算认证状态
-const authStatus = computed(() => {
-  if (!legalInfo.value || legalError.value) {
-    return null
-  }
-  const state = legalInfo.value.state
-  return authStatusMap[state as keyof typeof authStatusMap] || { label: '未知', color: 'bg-gray-100 text-gray-700' }
-})
 
 // 格式化时间戳为日期字符串
 function formatDate(timestamp: number): string {
@@ -78,22 +32,9 @@ function formatSupportName(name: string): string {
       </h2>
       <div class="flex items-center space-x-4 mt-4">
         <div class="flex-1">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">
+          <h3 class="text-xl font-bold text-gray-900">
             {{ vip.vip_name }}
           </h3>
-          <!-- 认证状态 -->
-          <div v-if="authStatus" class="flex items-center">
-            <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <span class="text-sm text-gray-600 mr-2">认证状态：</span>
-            <span
-              class="px-2 py-0.5 rounded text-xs font-medium"
-              :class="authStatus.color"
-            >
-              {{ authStatus.label }}
-            </span>
-          </div>
         </div>
       </div>
     </div>
