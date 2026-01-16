@@ -63,7 +63,7 @@ function formatSupportName(name: string): string {
     dept: '部门',
     group: '群组',
     device: '设备',
-    track: '轨迹',
+    // track: '轨迹',
   }
   return nameMap[name] || name
 }
@@ -138,7 +138,7 @@ function formatSupportName(name: string): string {
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div
-            v-for="support in vip.vip_supports"
+            v-for="support in vip.vip_supports.filter(s => s.name !== 'track')"
             :key="`${support.name}-${support.type}`"
             class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200"
           >
@@ -170,10 +170,10 @@ function formatSupportName(name: string): string {
                 <span class="text-gray-500 mr-2">设备上限：</span>
                 <span class="font-medium text-gray-700">{{ support.device_limit }}</span>
               </div>
-              <div v-if="support.quick_support !== undefined" class="mt-2 pt-2 border-t border-gray-200">
+              <!-- <div v-if="support.quick_support !== undefined" class="mt-2 pt-2 border-t border-gray-200">
                 <span class="text-gray-500 mr-2">频率：</span>
                 <span v-for="interval in ['1 小时', '15 分钟', '5 分钟', support.quick_support ? '1 分钟' : undefined].filter(Boolean)" :key="interval" class="font-medium mr-2">{{ interval }}</span>
-              </div>
+              </div> -->
             </div>
             <div v-else class="text-xs text-gray-400">
               未启用
