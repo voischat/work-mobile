@@ -1,8 +1,8 @@
 // @ts-check
 
 import antfu from '@antfu/eslint-config'
+import autoImports from 'eslint-plugin-auto-imports'
 import { globalIgnores } from 'eslint/config'
-import autoImportCleanup from './eslint-plugin-auto-import-cleanup.mjs'
 
 export default antfu(
   {
@@ -10,10 +10,10 @@ export default antfu(
   },
   {
     plugins: {
-      'auto-import-cleanup': autoImportCleanup,
+      'auto-imports': autoImports,
     },
     rules: {
-      'auto-import-cleanup/no-unnecessary-import': 'error',
+      'auto-imports/no-unnecessary-import': 'error',
       'no-alert': 'off',
       'no-console': 'off',
     },
@@ -22,6 +22,6 @@ export default antfu(
     'docs/vueuse/*.md',
     '**/api-examples.md',
     'MIGRATION_PLAN.md',
-    'auto-imports.json',
+    '.unimport-items.json',
   ]),
 )

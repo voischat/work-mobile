@@ -54,6 +54,7 @@
     "autoprefixer": "^10.4.20",
     "dotenv": "^17.2.3",
     "eslint": "^9.28.0",
+    "eslint-plugin-auto-imports": "1.0.2",
     "eslint-plugin-format": "^1.0.1",
     "esno": "^4.8.0",
     "jsdom": "^26.1.0",

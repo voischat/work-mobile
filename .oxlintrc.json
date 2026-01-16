@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "jsPlugins": ["./eslint-plugin-auto-import-cleanup.mjs"],
+  "jsPlugins": ["eslint-plugin-auto-imports"],
   "rules": {
-    "auto-import-cleanup/no-unnecessary-import": "error"
+    "auto-imports/no-unnecessary-import": "error"
   }
 }

@@ -115,6 +115,9 @@ importers:
       eslint:
         specifier: ^9.28.0
         version: 9.28.0(jiti@1.21.7)
+      eslint-plugin-auto-imports:
+        specifier: 1.0.2
+        version: 1.0.2(eslint@9.28.0(jiti@1.21.7))
       eslint-plugin-format:
         specifier: ^1.0.1
         version: 1.0.1(eslint@9.28.0(jiti@1.21.7))
@@ -2147,6 +2150,12 @@ packages:
     resolution: {integrity: sha512-7Q+NhwLfHJFvopI2HBZbSxWXngTwBLKxW1AGXLr2lEGxcEIK/AsDs8pn8fvIizl5aZjBbVbVK5ujmMpBe4Tvdg==}
     peerDependencies:
       eslint: '*'
+
+  eslint-plugin-auto-imports@1.0.2:
+    resolution: {integrity: sha512-/y1YNEgBHi8YfphMnYWX0Ti0FrZtOPOU22Kw9hOjw9NZr7cLkOrT7e9cyP7WRR/lEWeVR4IG1qziEnhmKVSl2Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      eslint: '>=8.0.0'
 
   eslint-plugin-command@3.2.1:
     resolution: {integrity: sha512-PcpzWe8dvAPaBobxE9zgz1w94fO4JYvzciDzw6thlUb9Uqf5e2/gJz97itOGxvdq+mFeudi71m1OGFgvWmb93w==}
@@ -6011,6 +6020,10 @@ snapshots:
   eslint-parser-plain@0.1.1: {}
 
   eslint-plugin-antfu@3.1.1(eslint@9.28.0(jiti@1.21.7)):
+    dependencies:
+      eslint: 9.28.0(jiti@1.21.7)
+
+  eslint-plugin-auto-imports@1.0.2(eslint@9.28.0(jiti@1.21.7)):
     dependencies:
       eslint: 9.28.0(jiti@1.21.7)
 
