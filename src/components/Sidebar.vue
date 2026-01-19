@@ -12,58 +12,59 @@ interface NavItem {
 }
 
 const router = useRouter()
+const { t } = useI18n()
 
-const items: NavItem[] = [
+const items = computed<NavItem[]>(() => [
   {
-    title: '主页',
+    title: t('nav.home'),
     icon: 'lucide:home',
     route: '/',
   },
   {
-    title: '通讯录',
+    title: t('directory.title'),
     icon: 'lucide:book',
     route: '/directory',
     children: [
       {
-        title: '部门管理',
+        title: t('directory.department.management'),
         icon: 'lucide:building',
         route: '/directory/departments',
       },
       {
-        title: '群组管理',
+        title: t('directory.group.management'),
         icon: 'lucide:users',
         route: '/directory/groups',
       },
       {
-        title: '成员管理',
+        title: t('directory.member.management'),
         icon: 'lucide:user',
         route: '/directory/members',
       },
     ],
   },
   {
-    title: '工作台',
+    title: t('nav.workbench'),
     icon: 'lucide:layout-dashboard',
     route: '/workbench',
     children: [
       {
-        title: '轨迹',
+        title: t('nav.track'),
         icon: 'lucide:route',
         route: '/workbench/track',
       },
       {
-        title: '实时位置',
+        title: t('nav.realtimeLocation'),
         icon: 'lucide:map-pin',
         route: '/workbench/realtime-location',
       },
     ],
   },
   {
-    title: '我的',
+    title: t('nav.me'),
     icon: 'lucide:user-circle',
     route: '/me',
   },
-]
+])
 
 function handleItemClick(item: NavItem) {
   if (item.route) {
@@ -78,10 +79,10 @@ function handleItemClick(item: NavItem) {
     class="list-none select-none w-56 bg-white text-stone-700 border-r shadow-sm p-2 text-sm font-medium"
     :items="items"
     :get-key="(item) => item.title"
-    :default-expanded="['通讯录', '工作台']"
+    :default-expanded="[t('directory.title'), t('nav.workbench')]"
   >
     <h2 class="font-semibold text-sm text-neutral-400 px-2 pt-1 pb-3">
-      微喇企业版
+      {{ t('app.name') }}
     </h2>
     <TransitionGroup name="tree-item" tag="div">
       <TreeItem

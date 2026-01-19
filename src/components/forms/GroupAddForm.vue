@@ -8,11 +8,12 @@ import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
+const { t } = useI18n()
 
 // 表单验证 schema
 const addGroupSchema = z.object({
-  name: z.string().min(1, '群组名称不能为空'),
-  dept_id: z.number().int().min(0, '请选择部门'),
+  name: z.string().min(1, t('directory.group.validation.nameRequired')),
+  dept_id: z.number().int().min(0, t('directory.group.validation.deptRequired')),
   avatar: z.string().optional().or(z.literal('')),
   burst_mode: z.number().int().min(0).max(1),
 })
@@ -61,19 +62,19 @@ const errorMessage = computed(() => {
 // 主要提交方法 - 暴露给父组件
 async function submit(): Promise<false | { group: Group }> {
   if (!validate(formData.value)) {
-    throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
+    throw new Error(Object.values(errors.value)?.[0] || t('directory.group.validationFailed'))
   }
 
   try {
     const result = await createGroup(formData.value)
 
     if (error.value) {
-      showToast(error.value.message || '群组创建失败')
+      showToast(error.value.message || t('directory.group.createFailed'))
       return false
     }
 
     if (result) {
-      showToast('群组创建成功')
+      showToast(t('directory.group.createSuccess'))
       return result
     }
 
@@ -81,7 +82,7 @@ async function submit(): Promise<false | { group: Group }> {
   }
   catch (err) {
     console.error('群组创建失败:', err)
-    showToast('群组创建失败')
+    showToast(t('directory.group.createFailed'))
     return false
   }
 }
@@ -108,13 +109,13 @@ defineExpose({
     <!-- 群组名称输入框 -->
     <div>
       <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-        群组名称
+        {{ t('directory.group.fields.name') }}
       </label>
       <input
         id="name"
         v-model="formData.name"
         type="text"
-        placeholder="请输入群组名称"
+        :placeholder="t('directory.group.placeholders.name')"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.name ? 'border-red-500' : 'border-gray-300'"
       >
@@ -126,7 +127,7 @@ defineExpose({
     <!-- 部门选择 -->
     <div>
       <label for="dept_id" class="block text-sm font-medium text-gray-700 mb-1">
-        所属部门
+        {{ t('directory.group.fields.department') }}
       </label>
       <select
         id="dept_id"
@@ -135,7 +136,7 @@ defineExpose({
         :class="errors.dept_id ? 'border-red-500' : 'border-gray-300'"
       >
         <option :value="0">
-          无部门
+          {{ t('directory.department.noDepartment') }}
         </option>
         <option
           v-for="dept in depts"
@@ -153,7 +154,7 @@ defineExpose({
     <!-- 头像上传按钮 -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">
-        头像
+        {{ t('directory.group.fields.avatar') }}
       </label>
       <AvatarUpload v-model="formData.avatar" />
     </div>
@@ -161,7 +162,7 @@ defineExpose({
     <!-- 对讲模式 -->
     <div>
       <label for="burst_mode" class="block text-sm font-medium text-gray-700 mb-1">
-        对讲模式
+        {{ t('directory.group.fields.intercomMode') }}
       </label>
       <select
         id="burst_mode"
@@ -170,10 +171,10 @@ defineExpose({
         :class="errors.burst_mode ? 'border-red-500' : 'border-gray-300'"
       >
         <option :value="0">
-          排麦
+          {{ t('directory.group.intercomModes.queue') }}
         </option>
         <option :value="1">
-          抢麦
+          {{ t('directory.group.intercomModes.free') }}
         </option>
       </select>
       <div v-if="errors.burst_mode" class="mt-1 text-sm text-red-600">

@@ -9,6 +9,7 @@ const memberAddFormRef = useTemplateRef('memberAddFormRef')
 const deviceAddFormRef = useTemplateRef('deviceAddFormRef')
 const queryCache = useQueryCache()
 const { showToast } = useToast()
+const { t } = useI18n()
 
 const isMemberModalOpen = ref(false)
 const isDeviceModalOpen = ref(false)
@@ -226,31 +227,31 @@ function handleEditMember(member: Member) {
               class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               @click="handleAddMember"
             >
-              创建成员
+              {{ t('directory.member.create') }}
             </button>
             <button
               class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               @click="handleAddDevice"
             >
-              添加设备
+              {{ t('directory.member.addDevice') }}
             </button>
           </div>
         </div>
 
         <div v-if="status === 'pending' && accumulatedMembers.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
-            加载中...
+            {{ t('common.status.loading') }}
           </div>
         </div>
 
         <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取成员列表失败: {{ error.message }}</p>
+            <p>{{ t('errors.fetchMembersFailed') }}: {{ error.message }}</p>
           </div>
         </div>
 
         <div v-if="accumulatedMembers.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
-          暂无成员数据
+          {{ t('directory.member.noData') }}
         </div>
 
         <div v-else class="space-y-4">
@@ -272,13 +273,13 @@ function handleEditMember(member: Member) {
 
         <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
-            加载中...
+            {{ t('common.messages.loadMoreLoading') }}
           </div>
         </div>
 
         <div v-else-if="accumulatedMembers.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ data?.count || 0 }} 条）
+            {{ t('common.messages.loadMoreEnd', { count: data?.count || 0 }) }}
           </div>
         </div>
       </div>
@@ -286,9 +287,9 @@ function handleEditMember(member: Member) {
 
     <Modal
       v-model:open="isMemberModalOpen"
-      title="创建成员"
-      confirm-text="确认创建"
-      cancel-text="取消"
+      :title="t('directory.member.create')"
+      :confirm-text="t('common.actions.confirmCreate')"
+      :cancel-text="t('common.actions.cancel')"
       :on-confirm="handleMemberConfirm"
       :on-cancel="handleMemberCancel"
     >
@@ -297,9 +298,9 @@ function handleEditMember(member: Member) {
 
     <Modal
       v-model:open="isDeviceModalOpen"
-      title="添加设备"
-      confirm-text="确认添加"
-      cancel-text="取消"
+      :title="t('directory.device.add')"
+      :confirm-text="t('common.actions.confirmAdd')"
+      :cancel-text="t('common.actions.cancel')"
       :on-confirm="handleDeviceConfirm"
       :on-cancel="handleDeviceCancel"
     >

@@ -16,6 +16,7 @@ const router = useRouter()
 
 const deptAddFormRef = ref<InstanceType<typeof DeptAddForm>>()
 const isDeptModalOpen = ref(false)
+const { t } = useI18n()
 
 const currentPage = ref(0)
 const accumulatedDepts = ref<Dept[]>([])
@@ -109,24 +110,24 @@ function handleDeptClick(deptId: number) {
             class="bg-blue-600 text-white px-4 py-2 rounded"
             @click="handleAddDept"
           >
-            创建部门
+            {{ t('directory.department.create') }}
           </button>
         </div>
 
         <div v-if="status === 'pending' && accumulatedDepts.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
-            加载中...
+            {{ t('common.status.loading') }}
           </div>
         </div>
 
         <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取部门列表失败: {{ error.message }}</p>
+            <p>{{ t('errors.fetchDepartmentsFailed') }}: {{ error.message }}</p>
           </div>
         </div>
 
         <div v-if="accumulatedDepts.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
-          暂无部门数据
+          {{ t('directory.department.noData') }}
         </div>
 
         <div v-else class="space-y-4">
@@ -151,7 +152,7 @@ function handleDeptClick(deptId: number) {
                     {{ dept.name }}
                   </h3>
                   <p class="text-sm text-gray-600">
-                    成员数量: {{ dept.user_count }}
+                    {{ t('directory.department.memberCount') }}: {{ dept.user_count }}
                   </p>
                 </div>
               </div>
@@ -165,14 +166,14 @@ function handleDeptClick(deptId: number) {
         <!-- 加载更多指示器 -->
         <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
-            加载中...
+            {{ t('common.messages.loadMoreLoading') }}
           </div>
         </div>
 
         <!-- 已加载完成 -->
         <div v-else-if="accumulatedDepts.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ accumulatedDepts.length }} 条）
+            {{ t('common.messages.loadMoreEnd', { count: accumulatedDepts.length }) }}
           </div>
         </div>
       </div>
@@ -181,9 +182,9 @@ function handleDeptClick(deptId: number) {
     <!-- 创建部门模态框 -->
     <Modal
       v-model:open="isDeptModalOpen"
-      title="创建部门"
-      confirm-text="确认创建"
-      cancel-text="取消"
+      :title="t('directory.department.create')"
+      :confirm-text="t('common.actions.confirmCreate')"
+      :cancel-text="t('common.actions.cancel')"
       :on-confirm="handleDeptConfirm"
       :on-cancel="handleDeptCancel"
     >

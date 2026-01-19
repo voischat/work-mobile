@@ -12,6 +12,7 @@ defineProps<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 
 // 认证信息接口响应类型
 interface LegalInfo {
@@ -35,16 +36,16 @@ const {
 
 // 认证状态映射
 const authStatusMap = {
-  0: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  1: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  2: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  3: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  4: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  5: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  6: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  7: { label: '待审核', color: 'bg-yellow-100 text-yellow-700' },
-  8: { label: '已认证', color: 'bg-green-100 text-green-700' },
-  9: { label: '认证失败', color: 'bg-red-100 text-red-700' },
+  0: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
+  1: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
+  2: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
+  3: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
+  4: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
+  5: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
+  6: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
+  7: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
+  8: { label: t('organization.authStatus.verified'), color: 'bg-green-100 text-green-700' },
+  9: { label: t('organization.authStatus.failed'), color: 'bg-red-100 text-red-700' },
 } as const
 
 // 计算认证状态
@@ -53,7 +54,7 @@ const authStatus = computed(() => {
     return null
   }
   const state = legalInfo.value.state
-  return authStatusMap[state as keyof typeof authStatusMap] || { label: '未知', color: 'bg-gray-100 text-gray-700' }
+  return authStatusMap[state as keyof typeof authStatusMap] || { label: t('organization.authStatus.unknown'), color: 'bg-gray-100 text-gray-700' }
 })
 
 // 格式化时间戳为日期字符串
@@ -114,7 +115,7 @@ function navigateToCorpLegal() {
               @click="navigateToCorpLegal"
             >
               <Icon icon="lucide:shield-check" class="w-4 h-4" />
-              <span class="hidden md:inline">企业认证</span>
+              <span class="hidden md:inline">{{ t('organization.verified') }}</span>
             </button>
           </div>
           <p class="text-sm text-gray-600 flex items-center mb-1">
@@ -128,7 +129,7 @@ function navigateToCorpLegal() {
           </p>
           <p class="text-sm text-gray-600 flex items-center">
             <Icon icon="lucide:hash" class="w-4 h-4 mr-1.5 text-gray-400" />
-            企业号: <span class="font-medium text-gray-700 ml-1">{{ org.num }}</span>
+            {{ t('organization.orgId') }}: <span class="font-medium text-gray-700 ml-1">{{ org.num }}</span>
           </p>
         </div>
       </div>
@@ -148,7 +149,7 @@ function navigateToCorpLegal() {
             {{ org.member_cnt }}
           </div>
           <div class="text-xs font-medium text-gray-600">
-            成员数
+            {{ t('organization.stats.members') }}
           </div>
         </div>
 
@@ -163,7 +164,7 @@ function navigateToCorpLegal() {
             {{ org.dept_cnt }}
           </div>
           <div class="text-xs font-medium text-gray-600">
-            部门数
+            {{ t('organization.stats.departments') }}
           </div>
         </div>
 
@@ -178,7 +179,7 @@ function navigateToCorpLegal() {
             {{ org.group_cnt }}
           </div>
           <div class="text-xs font-medium text-gray-600">
-            群组数
+            {{ t('organization.stats.groups') }}
           </div>
         </div>
 
@@ -193,7 +194,7 @@ function navigateToCorpLegal() {
             {{ org.device_cnt }}
           </div>
           <div class="text-xs font-medium text-gray-600">
-            设备数
+            {{ t('organization.stats.devices') }}
           </div>
         </div>
       </div>
@@ -202,10 +203,10 @@ function navigateToCorpLegal() {
       <div v-if="org.intro" class="mb-5 p-4 bg-gray-50 rounded-lg border border-gray-200">
         <div class="flex items-center mb-2">
           <Icon icon="lucide:info" class="w-4 h-4 mr-2 text-gray-500" />
-          <span class="text-sm font-medium text-gray-700">简介</span>
+          <span class="text-sm font-medium text-gray-700">{{ t('organization.description') }}</span>
         </div>
         <p class="text-sm text-gray-700 leading-relaxed pl-6">
-          {{ org.intro || '暂无简介' }}
+          {{ org.intro || t('organization.descriptionEmpty') }}
         </p>
       </div>
 
@@ -213,7 +214,7 @@ function navigateToCorpLegal() {
       <div class="flex items-center justify-end pt-4 border-t border-gray-100">
         <div class="flex items-center text-xs text-gray-500">
           <Icon icon="lucide:clock" class="w-4 h-4 mr-1.5" />
-          <span>创建于 {{ formatDate(org.created) }}</span>
+          <span>{{ t('organization.createdAt') }} {{ formatDate(org.created) }}</span>
         </div>
       </div>
     </div>

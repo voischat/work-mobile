@@ -21,6 +21,8 @@ const emit = defineEmits<{
   select: [node: TreeNode]
 }>()
 
+const { t } = useI18n()
+
 const selectedNodes = defineModel<TreeNode[]>('selectedNodes', {
   default: () => [],
   required: true,
@@ -278,7 +280,7 @@ defineExpose({
               <Icon icon="lucide:loader-2" class="w-4 h-4 text-gray-300 animate-spin mx-auto" />
             </div>
             <div v-else-if="nodeChildrenCache.get(node.id)?.length === 0" class="px-3 py-4 text-sm text-gray-400 text-center">
-              暂无数据
+              {{ t('common.status.noData') }}
             </div>
             <div v-else>
               <div
@@ -371,7 +373,7 @@ defineExpose({
     </div>
 
     <div v-else class="text-center py-12 text-sm text-gray-400">
-      暂无数据
+      {{ t('common.status.noData') }}
     </div>
   </div>
 </template>

@@ -7,6 +7,8 @@ import OrgCard from '~/components/OrgCard.vue'
 import VipCard from '~/components/VipCard.vue'
 import { weilaFetch } from '~/shared/instances'
 
+const { t } = useI18n()
+
 const {
   data: org,
   error: orgError,
@@ -36,7 +38,7 @@ const hasError = computed(() => !!orgError.value || !!vipError.value)
         <!-- 加载状态 -->
         <div v-if="isLoading" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
-            加载中...
+            {{ t('common.status.loading') }}
           </div>
         </div>
 
@@ -44,10 +46,10 @@ const hasError = computed(() => !!orgError.value || !!vipError.value)
         <div v-else-if="hasError" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
             <p v-if="orgError" class="mb-2">
-              获取组织信息失败: {{ orgError.message }}
+              {{ t('organization.errors.fetchFailed') }}: {{ orgError.message }}
             </p>
             <p v-if="vipError">
-              获取 VIP 信息失败: {{ vipError.message }}
+              {{ t('organization.errors.fetchVipFailed') }}: {{ vipError.message }}
             </p>
           </div>
         </div>
@@ -62,7 +64,7 @@ const hasError = computed(() => !!orgError.value || !!vipError.value)
 
           <!-- 无数据提示 -->
           <div v-if="!org && !vip" class="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
-            暂无数据
+            {{ t('common.status.noData') }}
           </div>
         </div>
       </div>

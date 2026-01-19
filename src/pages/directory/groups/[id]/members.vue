@@ -17,6 +17,7 @@ import { weilaFetch } from '~/shared/instances'
 const router = useRouter()
 const queryCache = useQueryCache()
 const { showToast } = useToast()
+const { t } = useI18n()
 
 const groupId = computed(() => Number(useRouteParams('id').value))
 
@@ -152,14 +153,14 @@ const { mutate: addMembersToGroup, isLoading: isAddingMembers } = useMutation({
       },
     }),
   async onSuccess() {
-    showToast('添加成员成功')
+    showToast(t('directory.member.addSuccess'))
     isAddMemberModalOpen.value = false
     treeSelectorRef.value?.clearSelection()
     await queryCache.invalidateQueries({ key: ['group', groupId.value, 'members'] })
   },
   onError(error) {
     console.error('添加成员失败:', error)
-    showToast('添加成员失败')
+    showToast(t('directory.member.addFailed'))
   },
 })
 
@@ -305,7 +306,7 @@ function handleEditGroupMember(member: Member) {
         <div class="mb-4 space-y-4">
           <div>
             <label for="group-select" class="block text-sm font-medium text-gray-700 mb-2">
-              选择群组
+              {{ t('directory.group.selectGroup') }}
             </label>
             <select
               id="group-select"
@@ -328,7 +329,7 @@ function handleEditGroupMember(member: Member) {
               class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               @click="openAddMemberModal"
             >
-              添加成员
+              {{ t('directory.member.add') }}
             </button>
           </div>
         </div>
@@ -389,7 +390,7 @@ function handleEditGroupMember(member: Member) {
     <!-- 添加成员Modal -->
     <Modal
       v-model:open="isAddMemberModalOpen"
-      title="选择成员"
+      :title="t('directory.member.add')"
     >
       <TreeSelector
         ref="treeSelectorRef"
@@ -402,7 +403,7 @@ function handleEditGroupMember(member: Member) {
         <div class="flex items-center justify-between">
           <!-- 左侧显示选中数量 -->
           <div class="text-sm text-gray-600">
-            <span class="font-medium text-blue-600">{{ selectedNodes.length }}</span> 位成员已选择
+            {{ t('common.messages.selectCount', { count: selectedNodes.length }) }}
           </div>
           <!-- 右侧按钮组 -->
           <div class="flex space-x-3">
@@ -411,7 +412,7 @@ function handleEditGroupMember(member: Member) {
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
               @click="isAddMemberModalOpen = false"
             >
-              取消
+              {{ t('common.actions.cancel') }}
             </button>
             <button
               type="button"
@@ -419,7 +420,7 @@ function handleEditGroupMember(member: Member) {
               :disabled="isAddingMembers"
               @click="handleAddMembersConfirm"
             >
-              {{ isAddingMembers ? '添加中...' : '确认添加' }}
+              {{ isAddingMembers ? t('common.actions.adding') : t('common.actions.confirmAdd') }}
             </button>
           </div>
         </div>

@@ -244,7 +244,7 @@ function handleSubmit() {
               :disabled="isSubmitting"
               @click="handleSubmit"
             >
-              {{ isSubmitting ? '提交中...' : (legalInfo?.id ? '更新认证信息' : '提交认证') }}
+              {{ isSubmitting ? '提交中...' : (legalInfo?.id ? '更新认证' : '提交认证') }}
             </button>
           </div>
         </div>

@@ -10,6 +10,7 @@ const fileInputRef = ref<HTMLInputElement>()
 const isUploading = ref(false)
 const imageError = ref(false)
 const { showToast } = useToast()
+const { t } = useI18n()
 
 const imagePreview = computed(() => url.value || '')
 
@@ -20,13 +21,13 @@ function handleFileSelect(event: Event) {
     return
 
   if (!file.type.startsWith('image/')) {
-    showToast('请选择图片文件')
+    showToast(t('common.messages.selectImageFile'))
     return
   }
 
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
-    showToast('图片大小不能超过 5MB')
+    showToast(t('common.messages.imageSizeLimit'))
     return
   }
 
@@ -58,15 +59,15 @@ async function uploadImage(file: File) {
 
     if (result.errcode === 0 && result.data?.url) {
       url.value = result.data.url
-      showToast('上传成功')
+      showToast(t('common.messages.uploadSuccess'))
     }
     else {
-      throw new Error(result.errmsg || '上传失败')
+      throw new Error(result.errmsg || t('common.messages.uploadFailed'))
     }
   }
   catch (error) {
     console.error('上传失败:', error)
-    showToast(error instanceof Error ? error.message : '上传失败，请重试')
+    showToast(error instanceof Error ? error.message : t('common.messages.uploadFailed'))
     url.value = previousUrl
   }
   finally {
@@ -84,7 +85,7 @@ function handleImageError() {
 function handleDelete(event: Event) {
   event.stopPropagation()
   url.value = ''
-  showToast('已删除图片')
+  showToast(t('common.messages.imageDeleted'))
   imageError.value = false
 }
 
@@ -159,7 +160,7 @@ function triggerFileSelect() {
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
-        <span class="text-sm">加载失败</span>
+        <span class="text-sm">{{ t('common.messages.loadFailed') }}</span>
       </div>
 
       <!-- 无图片 -->
@@ -177,8 +178,8 @@ function triggerFileSelect() {
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
-        <span class="text-sm">点击上传营业执照</span>
-        <span class="text-xs text-gray-400 mt-1">支持 JPG、PNG 格式，不超过 5MB</span>
+        <span class="text-sm">{{ t('organization.uploadLicense') }}</span>
+        <span class="text-xs text-gray-400 mt-1">{{ t('organization.uploadLicenseTip') }}</span>
       </div>
     </button>
   </div>

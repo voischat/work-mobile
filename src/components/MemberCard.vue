@@ -13,16 +13,18 @@ defineProps<{
   deptName?: string
 }>()
 
+const { t } = useI18n()
+
 const memberTypeMap = {
-  0: { label: '成员' },
-  1: { label: '设备' },
-  2: { label: '管理员' },
-  255: { label: '企业主' },
+  0: { label: t('directory.member.memberType.member') },
+  1: { label: t('directory.member.memberType.device') },
+  2: { label: t('directory.member.memberType.admin') },
+  255: { label: t('directory.member.memberType.owner') },
 } as const
 
 const onlineStatusMap = {
-  0: { label: '离线', icon: 'lucide:circle' },
-  1: { label: '在线', icon: 'lucide:circle' },
+  0: { label: t('directory.member.onlineStatus.offline'), icon: 'lucide:circle' },
+  1: { label: t('directory.member.onlineStatus.online'), icon: 'lucide:circle' },
 } as const
 
 const sexMap = {
@@ -31,16 +33,16 @@ const sexMap = {
 } as const
 
 const trackTypeMap = {
-  0: { label: '关闭', speed: '' },
-  1: { label: '1 小时', speed: '慢' },
-  2: { label: '15 分钟', speed: '中' },
-  3: { label: '5 分钟', speed: '快' },
-  4: { label: '1 分钟', speed: '极快' },
+  0: { label: t('directory.member.trackOptions.off'), speed: '' },
+  1: { label: t('directory.member.trackOptions.oneHour'), speed: t('directory.member.trackSpeed.slow') },
+  2: { label: t('directory.member.trackOptions.fifteenMinutes'), speed: t('directory.member.trackSpeed.medium') },
+  3: { label: t('directory.member.trackOptions.fiveMinutes'), speed: t('directory.member.trackSpeed.fast') },
+  4: { label: t('directory.member.trackOptions.oneMinute'), speed: t('directory.member.trackSpeed.veryFast') },
 } as const
 
 const locShareMap = {
-  0: { label: '关闭' },
-  1: { label: '开启' },
+  0: { label: t('directory.member.locationShareOptions.off') },
+  1: { label: t('directory.member.locationShareOptions.on') },
 } as const
 
 function formatDate(timestamp: number): string {
@@ -69,7 +71,7 @@ function formatDate(timestamp: number): string {
         <div class="flex-1 min-w-0">
           <div class="flex items-center space-x-2 mb-2">
             <h3 class="text-base font-semibold text-gray-900 tracking-tight">
-              {{ member.name || '未命名' }}
+              {{ member.name || t('directory.member.fields.unnamed') }}
             </h3>
             <Icon
               v-if="member.sex && sexMap[member.sex as keyof typeof sexMap]"
@@ -96,7 +98,7 @@ function formatDate(timestamp: number): string {
                 ? 'bg-green-50 text-green-700 border-green-200'
                 : 'bg-gray-50 text-gray-600 border-gray-200'"
             >
-              <span>{{ onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.label || '未知' }}</span>
+              <span>{{ onlineStatusMap[member.online_status as keyof typeof onlineStatusMap]?.label || t('directory.member.onlineStatus.unknown') }}</span>
             </span>
           </div>
         </div>
@@ -114,19 +116,19 @@ function formatDate(timestamp: number): string {
         <!-- Details Table -->
         <div class="space-y-2.5 text-sm pt-4">
           <div v-if="member.job_num" class="flex items-center">
-            <span class="w-20 text-gray-500 font-medium">工号</span>
+            <span class="w-20 text-gray-500 font-medium">{{ t('directory.member.fields.employeeId') }}</span>
             <span class="text-gray-900 font-medium">{{ member.job_num }}</span>
           </div>
           <div v-if="member.phone" class="flex items-center">
-            <span class="w-20 text-gray-500 font-medium">手机号</span>
+            <span class="w-20 text-gray-500 font-medium">{{ t('directory.member.fields.phone') }}</span>
             <span class="text-gray-900">{{ member.phone }}</span>
           </div>
           <div class="flex items-center">
-            <span class="w-20 text-gray-500 font-medium">微喇号</span>
+            <span class="w-20 text-gray-500 font-medium">{{ t('directory.member.fields.weilaId') }}</span>
             <span class="text-gray-900">{{ member.user_num }}</span>
           </div>
           <div v-if="member.grp_cnt !== undefined && member.grp_lmt !== undefined" class="flex items-center">
-            <span class="w-20 text-gray-500 font-medium">群组</span>
+            <span class="w-20 text-gray-500 font-medium">{{ t('directory.member.fields.groups') }}</span>
             <span
               :class="member.grp_cnt >= member.grp_lmt
                 ? 'bg-red-50 text-red-700 border border-red-200'
@@ -136,7 +138,7 @@ function formatDate(timestamp: number): string {
             </span>
           </div>
           <div class="flex items-center">
-            <span class="w-20 text-gray-500 font-medium">创建时间</span>
+            <span class="w-20 text-gray-500 font-medium">{{ t('directory.member.fields.createTime') }}</span>
             <span class="text-gray-600">{{ formatDate(member.created) }}</span>
           </div>
         </div>
@@ -145,11 +147,11 @@ function formatDate(timestamp: number): string {
         <div class="flex items-center flex-wrap space-x-2 pt-3 border-t border-gray-100">
           <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
             <Icon icon="lucide:route" class="w-3.5 h-3.5" />
-            <span>轨迹: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || '未知' }}</span>
+            <span>{{ t('directory.member.fields.track') }}: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || t('directory.member.onlineStatus.unknown') }}</span>
           </span>
           <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
             <Icon icon="lucide:map-pin" class="w-3.5 h-3.5" />
-            <span>位置共享: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || '未知' }}</span>
+            <span>{{ t('directory.member.fields.locationShare') }}: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || t('directory.member.onlineStatus.unknown') }}</span>
           </span>
         </div>
 

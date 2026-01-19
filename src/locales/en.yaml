@@ -1,14 +1,380 @@
-hello: Hello
-welcome: Welcome
-login: Login
-logout: Logout
+# Global
+app:
+  name: Weila Enterprise
 
-# Common actions
-edit: Edit
-delete: Delete
-save: Save
-cancel: Cancel
-confirm: Confirm
-add: Add
-create: Create
-loading: Loading...
+# Language
+language:
+  en: English
+  zh-CN: 简体中文
+  select: Select language
+
+# Navigation
+nav:
+  home: Home
+  workbench: Workbench
+  track: Track
+  realtimeLocation: Real-time Location
+  me: Me
+
+# Common
+common:
+  actions:
+    edit: Edit
+    delete: Delete
+    save: Save
+    cancel: Cancel
+    confirm: Confirm
+    add: Add
+    create: Create
+    confirmCreate: Confirm Create
+    confirmAdd: Confirm Add
+    adding: Adding...
+    close: Close
+    search: Search
+    refresh: Refresh
+    reset: Reset
+    submit: Submit
+    back: Back
+    next: Next
+    previous: Previous
+    upload: Upload
+    download: Download
+    export: Export
+    import: Import
+    enable: Enable
+    disable: Disable
+    view: View
+  status:
+    loading: Loading...
+    loadFailed: Load failed
+    noData: No data
+    success: Success
+    failed: Failed
+    processing: Processing...
+  messages:
+    confirmDelete: Confirm delete?
+    deleteSuccess: Deleted successfully
+    deleteFailed: Delete failed
+    saveSuccess: Saved successfully
+    saveFailed: Save failed
+    loadMoreLoading: Loading...
+    loadMoreEnd: 'All data loaded ({count} items)'
+    selectCount: '{count} members selected'
+    selectImageFile: Please select an image file
+    imageSizeLimit: Image size cannot exceed 5MB
+    uploadSuccess: Upload successful
+    uploadFailed: Upload failed, please retry
+    avatarDeleted: Avatar deleted
+    imageDeleted: Image deleted
+    loadFailed: Load failed
+  validation:
+    required: Required
+    requiredMark: '*'
+    validationFailed: Form validation failed
+  placeholders:
+    select: Please select
+    input: Please enter
+    clickToUpload: Click to upload
+  punctuation:
+    colon: ': '
+    comma: ', '
+    period: '. '
+    slash: ' / '
+
+# Authentication
+auth:
+  logout: Logout
+  loginTitle: Login
+  loginMethods:
+    password: Password Login
+    phone: Phone Login
+    email: Email Login
+  fields:
+    account: Account
+    password: Password
+    phone: Phone
+    email: Email
+    verifyCode: Verification Code
+    imageVerifyCode: Image Verification
+    smsVerifyCode: SMS Code
+    emailVerifyCode: Email Code
+    newPassword: New Password
+    confirmPassword: Confirm Password
+  actions:
+    rememberPassword: Remember password
+    forgotPassword: Forgot password?
+    loggingIn: Logging in...
+    registering: Registering...
+    register: Register
+    resetPassword: Reset Password
+    resettingPassword: Resetting...
+    sendVerifyCode: Send Code
+    sending: Sending...
+  messages:
+    loginSuccess: Login successful
+    registerSuccess: Registration successful, please login
+    registerFailed: Registration failed
+    verifyCodeSent: Verification code sent
+    sendVerifyCodeFailed: Failed to send verification code
+    refreshImageHint: Click image to refresh verification code
+  register:
+    title: Register
+    phoneTab: Register by Phone
+    emailTab: Register by Email
+    haveAccount: Already have an account?
+    loginNow: Login now
+  login:
+    noAccount: Don't have an account?
+    registerNow: Register now
+  tips:
+    refreshVerifyCode: Click image to refresh
+    phonePrefix: '+86'
+  placeholders:
+    newPassword: Enter new password (at least 6 characters)
+    confirmPassword: Enter password again
+    passwordMin: Enter password (at least 6 characters)
+    imageVerifyCode: Enter verification code
+    account: Enter account
+    password: Enter password
+    phone: Enter phone number
+    email: Enter email address
+    smsVerifyCode: Enter SMS verification code
+    emailVerifyCode: Enter email verification code
+  validation:
+    passwordMin: Password must be at least 6 characters
+    confirmPasswordMin: Confirmation password must be at least 6 characters
+    confirmPasswordRequired: Please confirm password
+    passwordMismatch: Passwords do not match
+    imageVerifyCodeFailed: Failed to get image verification code, please retry
+    accountRequired: Account is required
+    passwordRequired: Password is required
+    phoneInvalid: Please enter a valid phone number
+    imageVerifyCodeRequired: Please enter image verification code
+    verifyCodeMin: Verification code must be at least 4 characters
+    emailInvalid: Please enter a valid email address
+
+# Directory
+directory:
+  title: Directory
+  member:
+    title: Member
+    titlePlural: Members
+    management: Member Management
+    add: Add Member
+    addDevice: Add Device
+    create: Create Member
+    edit: Edit Member
+    delete: Delete Member
+    resetPassword: Reset Password
+    viewTrack: View Track
+    viewLocation: Real-time Location
+    noData: No members
+    count: Members
+    stateEnabled: Enabled
+    stateDisabled: Disabled
+    stateChangeFailed: Failed to change state
+    confirmDelete: Confirm Delete
+    confirmDeleteMessage: 'Are you sure to delete member "{name}"? This action cannot be undone.'
+    validationFailed: Form validation failed
+    createSuccess: Member created successfully
+    createFailed: Failed to create member
+    updateSuccess: Member updated successfully
+    updateFailed: Failed to update member
+    addSuccess: Members added successfully
+    addFailed: Failed to add members
+    deleteSuccess: Deactivated successfully
+    deleteFailed: Failed to deactivate
+    selectAtLeastOne: Please select at least one member
+    selectMembers: Select Members
+    listTitle: Department Member List
+    searchPlaceholder: Enter member name, phone, or employee ID
+    fetchFailed: Failed to fetch member list
+    fields:
+      name: Name
+      weilaId: Weila ID
+      employeeId: Employee ID
+      phone: Phone
+      gender: Gender
+      department: Department
+      avatar: Avatar
+      isDeptAdmin: Is Department Admin
+      groups: Groups
+      createTime: Create Time
+      productModel: Product Model
+      imei: IMEI
+      locationShare: Location Sharing
+      track: Track
+      unnamed: Unnamed
+    placeholders:
+      name: Enter name
+      employeeId: Enter employee ID (optional)
+      phone: Enter phone number (optional)
+    memberType:
+      member: Member
+      device: Device
+      admin: Admin
+      owner: Owner
+    onlineStatus:
+      offline: Offline
+      online: Online
+      unknown: Unknown
+    trackSpeed:
+      slow: Slow
+      medium: Medium
+      fast: Fast
+      veryFast: Very Fast
+    genderOptions:
+      unknown: Unknown
+      male: Male
+      female: Female
+    adminOptions:
+      yes: Yes
+      no: No
+    locationShareOptions:
+      on: On
+      off: Off
+    trackOptions:
+      off: Off
+      oneHour: 1 hour
+      fifteenMinutes: 15 minutes
+      fiveMinutes: 5 minutes
+      oneMinute: 1 minute
+      vipRequired: ' (VIP Required)'
+    ai:
+      title: AI Smart Create
+      generating: Generating...
+      generate: Generate
+      generateBatch: Auto Generate
+      tip: 'Tip: Input natural language description, AI will extract member info and fill the form'
+      formFilled: Form filled
+    form:
+      sectionInfo: Member Information
+  group:
+    title: Group
+    titlePlural: Groups
+    management: Group Management
+    add: Add Group
+    create: Create Group
+    edit: Edit Group
+    delete: Delete Group
+    noData: No groups
+    count: Groups
+    memberCount: Member Count
+    selectGroup: Select Group
+    confirmDelete: Confirm Delete
+    confirmDeleteMessage: 'Are you sure to delete group "{name}"? This action cannot be undone.'
+    createSuccess: Group created successfully
+    createFailed: Failed to create group
+    validationFailed: Form validation failed
+    fields:
+      name: Group Name
+      department: Department
+      avatar: Avatar
+      intercomMode: Intercom Mode
+    intercomModes:
+      queue: Queue
+      free: Free
+    validation:
+      nameRequired: Group name is required
+      deptRequired: Please select a department
+    placeholders:
+      name: Enter group name
+  department:
+    title: Department
+    titlePlural: Departments
+    management: Department Management
+    manage: Department Management
+    add: Add Department
+    create: Create Department
+    edit: Edit Department
+    delete: Delete Department
+    noData: No departments
+    count: Departments
+    memberCount: Members
+    maxMembers: Max Members
+    selectDept: Select Department
+    select: Select Department
+    noDepartment: No Department
+    confirmDelete: Confirm Delete
+    confirmDeleteMessage: 'Are you sure to delete department "{name}"? This action cannot be undone.'
+    fields:
+      name: Department Name
+  device:
+    title: Device
+    count: Devices
+    add: Add Device
+    addSuccess: Device added successfully
+    addFailed: Failed to add device
+    validationFailed: Form validation failed
+    fields:
+      name: Name
+      department: Department
+      employeeId: Employee ID
+      verifyCode: Verification Code
+      phone: Phone Number
+      avatar: Avatar
+      locationShare: Location Sharing
+      track: Track
+    validation:
+      nameRequired: Name is required
+      deptRequired: Please select a department
+      verifyCodeRequired: Verification code is required
+      phoneInvalid: Please enter a valid phone number
+    placeholders:
+      name: Enter name
+      employeeId: Enter employee ID (optional)
+      verifyCode: Enter verification code
+      phone: Enter phone number (optional)
+
+# Organization
+organization:
+  title: Organization
+  verified: Enterprise Verified
+  orgId: Organization ID
+  description: Description
+  descriptionEmpty: No description
+  createdAt: Created at
+  uploadLicense: Click to upload business license
+  uploadLicenseTip: Supports JPG, PNG formats, max 5MB
+  stats:
+    members: Members
+    departments: Departments
+    groups: Groups
+    devices: Devices
+  authStatus:
+    pending: Pending
+    verified: Verified
+    failed: Failed
+    unknown: Unknown
+  errors:
+    fetchFailed: Failed to fetch organization info
+    fetchVipFailed: Failed to fetch VIP info
+
+# VIP
+vip:
+  title: VIP Information
+  createTime: Create Time
+  expireTime: Expire Time
+  features:
+    title: Supported Features
+    notEnabled: Not Enabled
+    member: Member
+    dept: Department
+    group: Group
+    device: Device
+  limits:
+    maxMembers: Max Members
+    maxDepartments: Max Departments
+    maxDeptMembers: Max Department Members
+    maxGroups: Max Groups
+    maxGroupMembers: Max Group Members
+    maxDevices: Max Devices
+
+# Errors
+errors:
+  fetchMembersFailed: Failed to fetch members
+  addMembersFailed: Failed to add members
+  deleteMemberFailed: Failed to delete member
+  updateMemberFailed: Failed to update member
+  fetchGroupsFailed: Failed to fetch groups
+  fetchDepartmentsFailed: Failed to fetch departments

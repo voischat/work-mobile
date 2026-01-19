@@ -14,19 +14,16 @@ const emit = defineEmits<{
 }>()
 
 const { showToast } = useToast()
+const { t } = useI18n()
 
-// 使用 ref 管理状态（0=启用, 1=停用）
 const state = ref(props.member.state)
 
-// 监听 member 变化，同步状态
 watch(() => props.member.state, (newState) => {
   state.value = newState
 }, { immediate: true })
 
-// 切换状态
 const newState = computed(() => state.value === 0 ? 1 : 0)
 
-// 调用修改状态 API
 const { mutate: changeState, isLoading: isFetching } = useMutation({
   mutation: (payload: { user_id: number, state: number }) => weilaFetch('/corp/address/change-member-state', {
     method: 'POST',
@@ -35,7 +32,6 @@ const { mutate: changeState, isLoading: isFetching } = useMutation({
   onMutate(payload) {
     const queryCache = useQueryCache()
 
-    // Helper function to update member state in a list
     const updateMemberState = (list: any[] | undefined) => {
       if (!list)
         return list
@@ -46,13 +42,11 @@ const { mutate: changeState, isLoading: isFetching } = useMutation({
       )
     }
 
-    // Get all query entries and update them optimistically
     const entries = queryCache.getEntries()
     const oldData: Record<string, any> = {}
 
     entries.forEach((entry) => {
       const key = entry.key
-      // Match member list queries
       if (Array.isArray(key)
         && ((key[0] === 'member' && key[1] === 'list')
           || (key[0] === 'dept' && key[2] === 'members')
@@ -68,7 +62,6 @@ const { mutate: changeState, isLoading: isFetching } = useMutation({
       }
     })
 
-    // Cancel queries to prevent overwriting
     queryCache.cancelQueries({ key: ['member', 'list'] })
     queryCache.cancelQueries({ key: ['dept'] })
     queryCache.cancelQueries({ key: ['group'] })
@@ -77,9 +70,7 @@ const { mutate: changeState, isLoading: isFetching } = useMutation({
   },
   onSuccess(_data, payload) {
     const queryCache = useQueryCache()
-    // Update local state
     state.value = payload.state
-    // Invalidate to refetch in background
     queryCache.invalidateQueries({ key: ['member', 'list'] })
     queryCache.invalidateQueries({ key: ['dept'] })
     queryCache.invalidateQueries({ key: ['group'] })
@@ -87,12 +78,10 @@ const { mutate: changeState, isLoading: isFetching } = useMutation({
   onError(_error, _payload, context) {
     const queryCache = useQueryCache()
 
-    // Rollback state
     if (context?.oldState !== undefined) {
       state.value = context.oldState
     }
 
-    // Rollback cache
     if (context?.oldData) {
       Object.entries(context.oldData).forEach(([keyStr, data]) => {
         const key = JSON.parse(keyStr)
@@ -111,12 +100,12 @@ async function handleToggle() {
       user_id: props.member.user_id,
       state: newState.value,
     })
-    showToast(newState.value === 0 ? '已启用' : '已停用')
+    showToast(newState.value === 0 ? t('directory.member.stateEnabled') : t('directory.member.stateDisabled'))
     emit('updated', { ...props.member, state: newState.value })
   }
   catch (error) {
     console.error('修改状态失败:', error)
-    showToast('修改状态失败')
+    showToast(t('directory.member.stateChangeFailed'))
   }
 }
 </script>
@@ -134,6 +123,6 @@ async function handleToggle() {
     :disabled="isFetching"
     @click="handleToggle"
   >
-    {{ state === 0 ? '启用' : '停用' }}
+    {{ state === 0 ? t('common.actions.enable') : t('common.actions.disable') }}
   </button>
 </template>

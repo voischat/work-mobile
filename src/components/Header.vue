@@ -2,6 +2,7 @@
 import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
 import { bridge } from '~/utils/bridge'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 
 interface Props {
   title?: string
@@ -41,14 +42,17 @@ function handleExit() {
       <h1 class="absolute left-1/2 transform -translate-x-1/2 text-lg font-semibold text-gray-900">
         {{ title }}
       </h1>
-      <!-- 退出按钮 -->
-      <button
-        v-if="showExit"
-        class="bg-transparent ml-auto p-2 -mr-2 text-gray-600 hover:text-gray-900"
-        @click="handleExit"
-      >
-        <Icon icon="lucide:x" class="w-6 h-6" />
-      </button>
+      <!-- 右侧按钮组 -->
+      <div class="ml-auto flex items-center gap-1">
+        <LanguageSwitcher />
+        <button
+          v-if="showExit"
+          class="bg-transparent p-2 -mr-2 text-gray-600 hover:text-gray-900"
+          @click="handleExit"
+        >
+          <Icon icon="lucide:x" class="w-6 h-6" />
+        </button>
+      </div>
     </div>
   </header>
 </template>

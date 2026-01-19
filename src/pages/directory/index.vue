@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import HomeLayout from '~/components/HomeLayout.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 
 // 处理菜单点击
 function handleMenuClick(path: string) {
@@ -25,7 +26,7 @@ function handleMenuClick(path: string) {
             <div class="p-3 rounded-lg">
               <Icon icon="lucide:users" class="w-12 h-12 text-gray-600" />
             </div>
-            <span class="text-lg font-bold text-gray-900">成员管理</span>
+            <span class="text-lg font-bold text-gray-900">{{ t('directory.member.management') }}</span>
           </button>
 
           <!-- 群组管理 -->
@@ -36,7 +37,7 @@ function handleMenuClick(path: string) {
             <div class="p-3 rounded-lg">
               <Icon icon="lucide:users-round" class="w-12 h-12 text-gray-600" />
             </div>
-            <span class="text-lg font-bold text-gray-900">群组管理</span>
+            <span class="text-lg font-bold text-gray-900">{{ t('directory.group.management') }}</span>
           </button>
 
           <!-- 部门管理 -->
@@ -47,7 +48,7 @@ function handleMenuClick(path: string) {
             <div class="p-3 rounded-lg">
               <Icon icon="lucide:building" class="w-12 h-12 text-gray-600" />
             </div>
-            <span class="text-lg font-bold text-gray-900">部门管理</span>
+            <span class="text-lg font-bold text-gray-900">{{ t('directory.department.management') }}</span>
           </button>
         </div>
       </div>

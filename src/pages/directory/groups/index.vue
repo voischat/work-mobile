@@ -16,6 +16,7 @@ const router = useRouter()
 
 const groupAddFormRef = ref<InstanceType<typeof GroupAddForm>>()
 const isGroupModalOpen = ref(false)
+const { t } = useI18n()
 
 const currentPage = ref(0)
 const accumulatedGroups = ref<Group[]>([])
@@ -104,18 +105,18 @@ function handleGroupCancel() {
             class="bg-blue-600 text-white px-4 py-2 rounded"
             @click="handleAddGroup"
           >
-            创建群组
+            {{ t('directory.group.create') }}
           </button>
         </div>
 
         <div v-if="status === 'pending' && accumulatedGroups.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
-            加载中...
+            {{ t('common.status.loading') }}
           </div>
         </div>
 
         <div v-if="accumulatedGroups.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
-          暂无群组数据
+          {{ t('directory.group.noData') }}
         </div>
 
         <div v-else class="space-y-4">
@@ -138,7 +139,7 @@ function handleGroupCancel() {
                     {{ group.name }}
                   </h3>
                   <p class="text-sm text-gray-600">
-                    成员数量: {{ group.user_count }}
+                    {{ t('directory.group.memberCount') }}: {{ group.user_count }}
                   </p>
                 </div>
               </div>
@@ -151,13 +152,13 @@ function handleGroupCancel() {
 
         <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
-            加载中...
+            {{ t('common.messages.loadMoreLoading') }}
           </div>
         </div>
 
         <div v-else-if="accumulatedGroups.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ data?.count || 0 }} 条）
+            {{ t('common.messages.loadMoreEnd', { count: data?.count || 0 }) }}
           </div>
         </div>
       </div>
@@ -165,9 +166,9 @@ function handleGroupCancel() {
 
     <Modal
       v-model:open="isGroupModalOpen"
-      title="创建群组"
-      confirm-text="确认创建"
-      cancel-text="取消"
+      :title="t('directory.group.create')"
+      :confirm-text="t('common.actions.confirmCreate')"
+      :cancel-text="t('common.actions.cancel')"
       :on-confirm="handleGroupConfirm"
       :on-cancel="handleGroupCancel"
     >

@@ -20,39 +20,35 @@ const props = defineProps<{
   member: Member
   handleDelete?: (member: Member) => Promise<void>
   handleEditSuccess?: (updatedMember: Member) => void
-  // 上下文信息：用于确定实时位置跳转目标
-  // - 'dept': 跳转到成员所在部门的实时位置（默认）
-  // - 'group': 跳转到当前群组的实时位置
   context?: {
     type: 'dept' | 'group'
-    id: number // dept_id 或 group_id
+    id: number
   }
 }>()
 
 const router = useRouter()
 const { showToast } = useToast()
 const queryCache = useQueryCache()
+const { t } = useI18n()
 
 const showDeleteModal = ref(false)
 const showEditModal = ref(false)
 const showResetPasswordModal = ref(false)
 
-// 删除成员 API (only used if handleDelete is not provided)
 const { mutate: deleteMember } = useMutation({
   mutation: (userId: number) => weilaFetch('/corp/address/delete-member', {
     method: 'POST',
     body: { user_id: userId },
   }),
   onSuccess: () => {
-    showToast('删除成功')
-    // Invalidate all member-related queries
+    showToast(t('common.messages.deleteSuccess'))
     queryCache.invalidateQueries({ key: ['member', 'list'] })
     queryCache.invalidateQueries({ key: ['dept'] })
     queryCache.invalidateQueries({ key: ['group'] })
   },
   onError: (error) => {
     console.error('删除失败:', error)
-    showToast('删除失败')
+    showToast(t('common.messages.deleteFailed'))
   },
 })
 
@@ -60,27 +56,20 @@ function handleEdit() {
   showEditModal.value = true
 }
 
-// 处理编辑成功 - Call custom handler if provided
 function handleEditSuccess() {
   if (props?.handleEditSuccess) {
-    // Custom handler will update accumulated members
-    // Note: We don't have the updated member data here,
-    // but EditMemberForm's optimistic update already handled the cache
     props.handleEditSuccess(props.member)
   }
 }
 
 function handleResetPasswordSuccess() {
-  // 密码重置成功，不需要刷新列表
 }
 
 async function handleDeleteConfirm() {
   if (props?.handleDelete) {
-    // Use custom delete handler if provided (handles optimistic updates)
     await props.handleDelete(props.member)
   }
   else {
-    // Use default delete mutation (as fallback)
     await deleteMember(props.member.user_id)
   }
 }
@@ -90,22 +79,17 @@ function handleResetPassword() {
 }
 
 function handleStateUpdated(_updatedMember: Member) {
-  // 状态更新后，组件内部状态已同步，无需刷新列表
 }
 
-// 导航到轨迹页面
 function handleViewTrack() {
   router.push(`/workbench/track?userId=${props.member.user_id}&userName=${encodeURIComponent(props.member.name)}`)
 }
 
-// 导航到实时位置页面
 function handleViewRealtime() {
   if (props.context) {
-    // 使用提供的上下文（群组或部门）
     router.push(`/workbench/realtime-location?type=${props.context.type}&${props.context.type}Id=${props.context.id}`)
   }
   else {
-    // 默认跳转到成员所在部门的实时位置
     router.push(`/workbench/realtime-location?type=dept&deptId=${props.member.dept_id}`)
   }
 }
@@ -113,20 +97,17 @@ function handleViewRealtime() {
 
 <template>
   <div class="flex items-center space-x-2">
-    <!-- State Toggle -->
     <MemberStateToggle v-if="member.type !== 255" :member="member" @updated="handleStateUpdated" />
 
-    <!-- Edit Button -->
     <button
       type="button"
       class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
       @click="handleEdit"
     >
       <Icon icon="lucide:edit" class="w-3.5 h-3.5" />
-      <span>编辑</span>
+      <span>{{ t('common.actions.edit') }}</span>
     </button>
 
-    <!-- Reset Password Button -->
     <button
       v-if="member.type !== 255"
       type="button"
@@ -134,10 +115,9 @@ function handleViewRealtime() {
       @click="handleResetPassword"
     >
       <Icon icon="lucide:key" class="w-3.5 h-3.5" />
-      <span>重置密码</span>
+      <span>{{ t('directory.member.resetPassword') }}</span>
     </button>
 
-    <!-- More Actions Menu (Dangerous actions only) -->
     <DropdownMenuRoot v-if="member.type !== 255">
       <DropdownMenuTrigger
         class="inline-flex items-center justify-center rounded p-1.5 text-gray-500 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 transition-colors"
@@ -151,54 +131,48 @@ function handleViewRealtime() {
           :side-offset="5"
           align="end"
         >
-          <!-- View Track -->
           <DropdownMenuItem
             class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 rounded cursor-pointer hover:bg-gray-50 focus:bg-gray-50 outline-none transition-colors"
             @select="handleViewTrack"
           >
             <Icon icon="lucide:route" class="w-4 h-4" />
-            <span>查看轨迹</span>
+            <span>{{ t('directory.member.viewTrack') }}</span>
           </DropdownMenuItem>
 
-          <!-- View Realtime Location -->
           <DropdownMenuItem
             class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 rounded cursor-pointer hover:bg-gray-50 focus:bg-gray-50 outline-none transition-colors"
             @select="handleViewRealtime"
           >
             <Icon icon="lucide:map-pin" class="w-4 h-4" />
-            <span>实时位置</span>
+            <span>{{ t('directory.member.viewLocation') }}</span>
           </DropdownMenuItem>
 
-          <!-- Delete -->
           <DropdownMenuItem
             class="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 rounded cursor-pointer hover:bg-red-50 focus:bg-red-50 outline-none transition-colors"
             @select="showDeleteModal = true"
           >
             <Icon icon="lucide:trash-2" class="w-4 h-4" />
-            <span>删除成员</span>
+            <span>{{ t('directory.member.delete') }}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenuRoot>
   </div>
 
-  <!-- Delete Confirmation Modal -->
   <Modal
     v-model:open="showDeleteModal"
-    title="确认删除"
-    :message="`确定要删除成员「${member.name}」吗？此操作不可恢复。`"
+    :title="t('directory.member.confirmDelete')"
+    :message="t('directory.member.confirmDeleteMessage', { name: member.name })"
     confirm-button-type="danger"
     :on-confirm="handleDeleteConfirm"
   />
 
-  <!-- Edit Member Modal -->
   <EditMemberModal
     v-model:open="showEditModal"
     :member="member"
     @success="handleEditSuccess"
   />
 
-  <!-- Reset Password Modal -->
   <ResetPasswordModal
     v-model:open="showResetPasswordModal"
     :member-id="member.user_id"

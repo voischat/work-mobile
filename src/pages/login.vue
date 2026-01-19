@@ -15,26 +15,27 @@ import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
-const passwordSchema = z.object({
-  account: z.string().min(1, '账号不能为空'),
-  password: z.string().min(1, '密码不能为空'),
-})
-
-const phoneSchema = z.object({
-  phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号'),
-  imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
-  verifycode: z.string().min(4, '验证码至少4位'),
-})
-
-const emailSchema = z.object({
-  email: z.string().email('请输入正确的邮箱地址'),
-  imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
-  verifycode: z.string().min(4, '验证码至少4位'),
-})
-
 const router = useRouter()
 const { saveAuth } = useAuth()
 const { showToast } = useToast()
+const { t } = useI18n()
+
+const passwordSchema = z.object({
+  account: z.string().min(1, 'auth.validation.accountRequired'),
+  password: z.string().min(1, 'auth.validation.passwordRequired'),
+})
+
+const phoneSchema = z.object({
+  phone: z.string().regex(/^1[3-9]\d{9}$/, 'auth.validation.phoneInvalid'),
+  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
+  verifycode: z.string().min(4, 'auth.validation.verifyCodeMin'),
+})
+
+const emailSchema = z.object({
+  email: z.string().email('auth.validation.emailInvalid'),
+  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
+  verifycode: z.string().min(4, 'auth.validation.verifyCodeMin'),
+})
 
 const passwordForm = ref({ account: '', password: '' })
 const phoneForm = ref({ phone: '', imageVerifyAnswer: '', verifycode: '' })
@@ -104,7 +105,7 @@ const { errors: phoneErrors, validate: validatePhone } = useForm(phoneSchema)
 const { errors: emailErrors, validate: validateEmail } = useForm(emailSchema)
 
 function handleLoginSuccess(loginData: LoginResponse) {
-  showToast('登录成功')
+  showToast(t('auth.messages.loginSuccess'))
   saveAuth(loginData.access_token, loginData.refresh_token, loginData.expires_in)
   if (rememberPassword.value) {
     const passwordHash = isPasswordFromStorage.value
@@ -192,11 +193,11 @@ const canSendEmail = computed(() => {
 
 function handleSendSmsVerifyCode() {
   if (!phoneForm.value.phone || !/^1[3-9]\d{9}$/.test(phoneForm.value.phone)) {
-    showToast('请输入正确的手机号')
+    showToast(t('auth.validation.phoneInvalid'))
     return
   }
   if (!phoneForm.value.imageVerifyAnswer) {
-    showToast('请输入图形验证码')
+    showToast(t('auth.validation.imageVerifyCodeRequired'))
     return
   }
   sendSmsVerifyCode({
@@ -211,11 +212,11 @@ function handleSendSmsVerifyCode() {
 function handleSendEmailVerifyCode() {
   const emailRegex = /^[\w.-]+@[a-z0-9.-]+\.[a-z]{2,}$/i
   if (!emailForm.value.email || !emailRegex.test(emailForm.value.email)) {
-    showToast('请输入正确的邮箱地址')
+    showToast(t('auth.validation.emailInvalid'))
     return
   }
   if (!emailForm.value.imageVerifyAnswer) {
-    showToast('请输入图形验证码')
+    showToast(t('auth.validation.imageVerifyCodeRequired'))
     return
   }
   sendEmailVerifyCode({
@@ -228,7 +229,8 @@ function handleSendEmailVerifyCode() {
 
 function handlePasswordLogin() {
   if (!validatePassword(passwordForm.value)) {
-    showToast(Object.values(passwordErrors.value)?.[0] || '表单验证失败')
+    const firstError = Object.values(passwordErrors.value)?.[0]
+    showToast(firstError ? t(firstError) : t('common.messages.validationFailed'))
     return
   }
   loginByPassword()
@@ -236,7 +238,8 @@ function handlePasswordLogin() {
 
 function handlePhoneLogin() {
   if (!validatePhone(phoneForm.value)) {
-    showToast(Object.values(phoneErrors.value)?.[0] || '表单验证失败')
+    const firstError = Object.values(phoneErrors.value)?.[0]
+    showToast(firstError ? t(firstError) : t('common.messages.validationFailed'))
     return
   }
   loginBySms({
@@ -248,7 +251,8 @@ function handlePhoneLogin() {
 
 function handleEmailLogin() {
   if (!validateEmail(emailForm.value)) {
-    showToast(Object.values(emailErrors.value)?.[0] || '表单验证失败')
+    const firstError = Object.values(emailErrors.value)?.[0]
+    showToast(firstError ? t(firstError) : t('common.messages.validationFailed'))
     return
   }
   loginByEmail({
@@ -263,7 +267,7 @@ function handleEmailLogin() {
     <div class="w-full max-w-sm">
       <div class="bg-white rounded-lg shadow-md p-6">
         <h1 class="text-2xl font-bold text-gray-900 mb-6 text-center">
-          登录
+          {{ t('auth.loginTitle') }}
         </h1>
 
         <TabsRoot default-value="password">
@@ -272,19 +276,19 @@ function handleEmailLogin() {
               value="password"
               class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
-              密码登录
+              {{ t('auth.loginMethods.password') }}
             </TabsTrigger>
             <TabsTrigger
               value="phone"
               class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
-              手机号登录
+              {{ t('auth.loginMethods.phone') }}
             </TabsTrigger>
             <TabsTrigger
               value="email"
               class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
-              邮箱登录
+              {{ t('auth.loginMethods.email') }}
             </TabsTrigger>
           </TabsList>
 
@@ -292,7 +296,7 @@ function handleEmailLogin() {
             <form class="space-y-4" @submit.prevent="handlePasswordLogin">
               <div>
                 <label for="account" class="block text-sm font-medium text-gray-700 mb-1">
-                  账号
+                  {{ t('auth.fields.account') }}
                 </label>
                 <PopoverRoot :open="showAccountHints">
                   <div class="relative">
@@ -302,7 +306,7 @@ function handleEmailLogin() {
                       as="input"
                       type="text"
                       :value="passwordForm.account"
-                      placeholder="请输入账号"
+                      :placeholder="t('auth.placeholders.account')"
                       class="w-full px-3 py-2 pr-8 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       :class="passwordErrors.account ? 'border-red-500' : 'border-gray-300'"
                       :disabled="isLoading"
@@ -348,26 +352,26 @@ function handleEmailLogin() {
                   </PopoverPortal>
                 </PopoverRoot>
                 <div v-if="passwordErrors.account" class="mt-1 text-sm text-red-600">
-                  {{ passwordErrors.account }}
+                  {{ t(passwordErrors.account) }}
                 </div>
               </div>
 
               <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-                  密码
+                  {{ t('auth.fields.password') }}
                 </label>
                 <input
                   id="password"
                   v-model="passwordForm.password"
                   type="password"
-                  placeholder="请输入密码"
+                  :placeholder="t('auth.placeholders.password')"
                   class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="passwordErrors.password ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
                   @input="isPasswordFromStorage = false"
                 >
                 <div v-if="passwordErrors.password" class="mt-1 text-sm text-red-600">
-                  {{ passwordErrors.password }}
+                  {{ t(passwordErrors.password) }}
                 </div>
               </div>
 
@@ -378,10 +382,10 @@ function handleEmailLogin() {
                     type="checkbox"
                     class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   >
-                  <span class="ml-2 text-sm text-gray-600">记住密码</span>
+                  <span class="ml-2 text-sm text-gray-600">{{ t('auth.actions.rememberPassword') }}</span>
                 </label>
                 <router-link to="/reset-password" class="text-sm text-blue-600 hover:text-blue-700">
-                  忘记密码？
+                  {{ t('auth.actions.forgotPassword') }}
                 </router-link>
               </div>
 
@@ -390,7 +394,7 @@ function handleEmailLogin() {
                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 :disabled="isLoading"
               >
-                {{ isPasswordLoading ? '登录中...' : '登录' }}
+                {{ isPasswordLoading ? t('auth.actions.loggingIn') : t('auth.loginTitle') }}
               </button>
             </form>
           </TabsContent>
@@ -399,31 +403,31 @@ function handleEmailLogin() {
             <form class="space-y-4" @submit.prevent="handlePhoneLogin">
               <div>
                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-                  手机号
+                  {{ t('auth.fields.phone') }}
                 </label>
                 <div class="flex items-center">
                   <div class="flex items-center px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md">
-                    <span class="text-gray-700">+86</span>
+                    <span class="text-gray-700">{{ t('auth.tips.phonePrefix') }}</span>
                     <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 ml-1" />
                   </div>
                   <input
                     id="phone"
                     v-model="phoneForm.phone"
                     type="tel"
-                    placeholder="请输入手机号"
+                    :placeholder="t('auth.placeholders.phone')"
                     class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="phoneErrors.phone ? 'border-red-500' : 'border-gray-300'"
                     :disabled="isLoading"
                   >
                 </div>
                 <div v-if="phoneErrors.phone" class="mt-1 text-sm text-red-600">
-                  {{ phoneErrors.phone }}
+                  {{ t(phoneErrors.phone) }}
                 </div>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                  图形验证码
+                  {{ t('auth.fields.imageVerifyCode') }}
                 </label>
                 <ImageVerifyCode
                   ref="phoneImageVerifyCodeRef"
@@ -434,23 +438,23 @@ function handleEmailLogin() {
                   :error="!!phoneErrors.imageVerifyAnswer"
                 />
                 <div v-if="phoneErrors.imageVerifyAnswer" class="mt-1 text-sm text-red-600">
-                  {{ phoneErrors.imageVerifyAnswer }}
+                  {{ t(phoneErrors.imageVerifyAnswer) }}
                 </div>
                 <p class="mt-1 text-xs text-gray-500">
-                  点击图片可刷新验证码
+                  {{ t('auth.tips.refreshVerifyCode') }}
                 </p>
               </div>
 
               <div>
                 <label for="phone-verifycode" class="block text-sm font-medium text-gray-700 mb-1">
-                  短信验证码
+                  {{ t('auth.fields.smsVerifyCode') }}
                 </label>
                 <div class="flex items-center space-x-2">
                   <input
                     id="phone-verifycode"
                     v-model="phoneForm.verifycode"
                     type="text"
-                    placeholder="请输入短信验证码"
+                    :placeholder="t('auth.placeholders.smsVerifyCode')"
                     class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="phoneErrors.verifycode ? 'border-red-500' : 'border-gray-300'"
                     :disabled="isLoading"
@@ -468,7 +472,7 @@ function handleEmailLogin() {
                   />
                 </div>
                 <div v-if="phoneErrors.verifycode" class="mt-1 text-sm text-red-600">
-                  {{ phoneErrors.verifycode }}
+                  {{ t(phoneErrors.verifycode) }}
                 </div>
               </div>
 
@@ -477,7 +481,7 @@ function handleEmailLogin() {
                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 :disabled="isLoading"
               >
-                {{ isSmsLoading ? '登录中...' : '登录' }}
+                {{ isSmsLoading ? t('auth.actions.loggingIn') : t('auth.loginTitle') }}
               </button>
             </form>
           </TabsContent>
@@ -486,25 +490,25 @@ function handleEmailLogin() {
             <form class="space-y-4" @submit.prevent="handleEmailLogin">
               <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                  邮箱
+                  {{ t('auth.fields.email') }}
                 </label>
                 <input
                   id="email"
                   v-model="emailForm.email"
                   type="email"
-                  placeholder="请输入邮箱地址"
+                  :placeholder="t('auth.placeholders.email')"
                   class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="emailErrors.email ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
                 >
                 <div v-if="emailErrors.email" class="mt-1 text-sm text-red-600">
-                  {{ emailErrors.email }}
+                  {{ t(emailErrors.email) }}
                 </div>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                  图形验证码
+                  {{ t('auth.fields.imageVerifyCode') }}
                 </label>
                 <ImageVerifyCode
                   ref="emailImageVerifyCodeRef"
@@ -515,23 +519,23 @@ function handleEmailLogin() {
                   :error="!!emailErrors.imageVerifyAnswer"
                 />
                 <div v-if="emailErrors.imageVerifyAnswer" class="mt-1 text-sm text-red-600">
-                  {{ emailErrors.imageVerifyAnswer }}
+                  {{ t(emailErrors.imageVerifyAnswer) }}
                 </div>
                 <p class="mt-1 text-xs text-gray-500">
-                  点击图片可刷新验证码
+                  {{ t('auth.tips.refreshVerifyCode') }}
                 </p>
               </div>
 
               <div>
                 <label for="email-verifycode" class="block text-sm font-medium text-gray-700 mb-1">
-                  邮箱验证码
+                  {{ t('auth.fields.emailVerifyCode') }}
                 </label>
                 <div class="flex items-center space-x-2">
                   <input
                     id="email-verifycode"
                     v-model="emailForm.verifycode"
                     type="text"
-                    placeholder="请输入邮箱验证码"
+                    :placeholder="t('auth.placeholders.emailVerifyCode')"
                     class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="emailErrors.verifycode ? 'border-red-500' : 'border-gray-300'"
                     :disabled="isLoading"
@@ -549,7 +553,7 @@ function handleEmailLogin() {
                   />
                 </div>
                 <div v-if="emailErrors.verifycode" class="mt-1 text-sm text-red-600">
-                  {{ emailErrors.verifycode }}
+                  {{ t(emailErrors.verifycode) }}
                 </div>
               </div>
 
@@ -558,17 +562,21 @@ function handleEmailLogin() {
                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 :disabled="isLoading"
               >
-                {{ isEmailLoading ? '登录中...' : '登录' }}
+                {{ isEmailLoading ? t('auth.actions.loggingIn') : t('auth.loginTitle') }}
               </button>
             </form>
           </TabsContent>
         </TabsRoot>
 
         <div class="mt-6 text-center text-sm text-gray-600">
-          还没有账号？
+          {{ t('auth.login.noAccount') }}
           <router-link to="/register" class="text-blue-600 hover:text-blue-700 font-medium">
-            立即注册
+            {{ t('auth.login.registerNow') }}
           </router-link>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200 flex justify-center">
+          <LanguageSwitcher />
         </div>
       </div>
     </div>

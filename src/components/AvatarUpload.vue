@@ -10,6 +10,7 @@ const fileInputRef = ref<HTMLInputElement>()
 const isUploading = ref(false)
 const imageError = ref(false)
 const { showToast } = useToast()
+const { t } = useI18n()
 
 // 头像预览URL（用于显示预览，实际提交时使用 url）
 const avatarPreview = computed(() => url.value || '')
@@ -23,14 +24,14 @@ function handleFileSelect(event: Event) {
 
   // 验证文件类型
   if (!file.type.startsWith('image/')) {
-    showToast('请选择图片文件')
+    showToast(t('common.messages.selectImageFile'))
     return
   }
 
   // 验证文件大小（例如：5MB）
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
-    showToast('图片大小不能超过 5MB')
+    showToast(t('common.messages.imageSizeLimit'))
     return
   }
 
@@ -65,15 +66,15 @@ async function uploadAvatar(file: File) {
 
     if (result.errcode === 0 && result.data?.url) {
       url.value = result.data.url
-      showToast('上传成功')
+      showToast(t('common.messages.uploadSuccess'))
     }
     else {
-      throw new Error(result.errmsg || '上传失败')
+      throw new Error(result.errmsg || t('common.messages.uploadFailed'))
     }
   }
   catch (error) {
     console.error('上传失败:', error)
-    showToast(error instanceof Error ? error.message : '上传失败，请重试')
+    showToast(error instanceof Error ? error.message : t('common.messages.uploadFailed'))
     // 上传失败时恢复之前的 URL
     url.value = previousUrl
   }
@@ -95,7 +96,7 @@ function handleImageError() {
 function handleDelete(event: Event) {
   event.stopPropagation()
   url.value = ''
-  showToast('已删除头像')
+  showToast(t('common.messages.avatarDeleted'))
   imageError.value = false
 }
 
@@ -171,7 +172,7 @@ function triggerFileSelect() {
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
-        <span class="text-xs">加载失败</span>
+        <span class="text-xs">{{ t('common.messages.loadFailed') }}</span>
       </div>
 
       <!-- 无图片占位 -->

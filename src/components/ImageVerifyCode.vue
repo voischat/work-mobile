@@ -26,6 +26,7 @@ const imageVerifyAnswer = defineModel<string>({ default: '' })
 const imageVerifyCode = ref<string>('')
 const verifyId = ref<string>('')
 const { showToast } = useToast()
+const { t } = useI18n()
 
 // 构建 query key (响应式)
 const queryKey = computed(() => ['verifycode', 'image', props.width, props.height])
@@ -56,7 +57,7 @@ async function loadImageVerifyCode() {
   }
   catch (err) {
     console.error('获取图形验证码失败:', err)
-    showToast('获取图形验证码失败，请重试')
+    showToast(t('auth.validation.imageVerifyCodeFailed'))
   }
 }
 
@@ -87,13 +88,13 @@ defineExpose({
         v-else
         class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs"
       >
-        加载中...
+        {{ t('common.status.loading') }}
       </div>
     </div>
     <input
       v-model="imageVerifyAnswer"
       type="text"
-      placeholder="请输入验证码"
+      :placeholder="t('auth.placeholders.imageVerifyCode')"
       class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       :class="error ? 'border-red-500' : 'border-gray-300'"
       :disabled="disabled"

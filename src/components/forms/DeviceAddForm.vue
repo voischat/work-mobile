@@ -9,14 +9,15 @@ import { weilaFetch } from '~/shared/instances'
 
 const { showToast } = useToast()
 const { hasQuickSupport } = useVip()
+const { t } = useI18n()
 
 // 表单验证 schema
 const addDeviceSchema = z.object({
-  name: z.string().min(1, '名称不能为空'),
-  dept_id: z.number().int().min(0, '请选择部门'),
+  name: z.string().min(1, t('directory.device.validation.nameRequired')),
+  dept_id: z.number().int().min(0, t('directory.device.validation.deptRequired')),
   job_num: z.string().optional(),
-  verifycode: z.string().min(1, '验证码不能为空'),
-  phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号').optional().or(z.literal('')),
+  verifycode: z.string().min(1, t('directory.device.validation.verifyCodeRequired')),
+  phone: z.string().regex(/^1[3-9]\d{9}$/, t('directory.device.validation.phoneInvalid')).optional().or(z.literal('')),
   avatar: z.string().optional().or(z.literal('')),
   loc_share: z.number().int().min(0).max(1),
   track: z.number().int().min(0).max(4),
@@ -78,7 +79,7 @@ const errorMessage = computed(() => {
 // 主要提交方法 - 暴露给父组件
 async function submit(): Promise<false | { member: Member }> {
   if (!validate(formData.value)) {
-    throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
+    throw new Error(Object.values(errors.value)?.[0] || t('directory.device.validationFailed'))
   }
 
   isLoading.value = true
@@ -87,12 +88,12 @@ async function submit(): Promise<false | { member: Member }> {
     const result = await addDevice(formData.value)
 
     if (error.value) {
-      showToast(error.value.message || '设备添加失败')
+      showToast(error.value.message || t('directory.device.addFailed'))
       return false
     }
 
     if (result) {
-      showToast('设备添加成功')
+      showToast(t('directory.device.addSuccess'))
       return result
     }
 
@@ -100,7 +101,7 @@ async function submit(): Promise<false | { member: Member }> {
   }
   catch (err) {
     console.error('添加设备失败:', err)
-    showToast('设备添加失败')
+    showToast(t('directory.device.addFailed'))
     return false
   }
   finally {
@@ -134,13 +135,13 @@ defineExpose({
     <!-- 名称输入框 -->
     <div>
       <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-        名称 <span class="text-red-500">*</span>
+        {{ t('directory.device.fields.name') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
       </label>
       <input
         id="name"
         v-model="formData.name"
         type="text"
-        placeholder="请输入名称"
+        :placeholder="t('directory.device.placeholders.name')"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.name ? 'border-red-500' : 'border-gray-300'"
         :disabled="isLoading"
@@ -153,7 +154,7 @@ defineExpose({
     <!-- 部门选择 -->
     <div>
       <label for="dept_id" class="block text-sm font-medium text-gray-700 mb-1">
-        部门 <span class="text-red-500">*</span>
+        {{ t('directory.device.fields.department') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
       </label>
       <select
         id="dept_id"
@@ -163,7 +164,7 @@ defineExpose({
         :disabled="isLoading"
       >
         <option :value="0">
-          无部门
+          {{ t('directory.department.noDepartment') }}
         </option>
         <option
           v-for="dept in depts"
@@ -181,13 +182,13 @@ defineExpose({
     <!-- 工号输入框 -->
     <div>
       <label for="job_num" class="block text-sm font-medium text-gray-700 mb-1">
-        工号
+        {{ t('directory.device.fields.employeeId') }}
       </label>
       <input
         id="job_num"
         v-model="formData.job_num"
         type="text"
-        placeholder="请输入工号（可选）"
+        :placeholder="t('directory.device.placeholders.employeeId')"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.job_num ? 'border-red-500' : 'border-gray-300'"
         :disabled="isLoading"
@@ -200,13 +201,13 @@ defineExpose({
     <!-- 验证码输入框 -->
     <div>
       <label for="verifycode" class="block text-sm font-medium text-gray-700 mb-1">
-        验证码 <span class="text-red-500">*</span>
+        {{ t('directory.device.fields.verifyCode') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
       </label>
       <input
         id="verifycode"
         v-model="formData.verifycode"
         type="text"
-        placeholder="请输入验证码"
+        :placeholder="t('directory.device.placeholders.verifyCode')"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.verifycode ? 'border-red-500' : 'border-gray-300'"
         :disabled="isLoading"
@@ -219,13 +220,13 @@ defineExpose({
     <!-- 电话号码输入框 -->
     <div>
       <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-        电话号码
+        {{ t('directory.device.fields.phone') }}
       </label>
       <input
         id="phone"
         v-model="formData.phone"
         type="tel"
-        placeholder="请输入电话号码（可选）"
+        :placeholder="t('directory.device.placeholders.phone')"
         class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.phone ? 'border-red-500' : 'border-gray-300'"
         :disabled="isLoading"
@@ -238,7 +239,7 @@ defineExpose({
     <!-- 头像上传按钮 -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">
-        头像
+        {{ t('directory.device.fields.avatar') }}
       </label>
       <AvatarUpload v-model="formData.avatar" :disabled="isLoading" />
     </div>
@@ -246,7 +247,7 @@ defineExpose({
     <!-- 位置共享 -->
     <div>
       <label for="loc_share" class="block text-sm font-medium text-gray-700 mb-1">
-        位置共享
+        {{ t('directory.device.fields.locationShare') }}
       </label>
       <select
         id="loc_share"
@@ -256,10 +257,10 @@ defineExpose({
         :disabled="isLoading"
       >
         <option :value="0">
-          关闭
+          {{ t('directory.member.locationShareOptions.off') }}
         </option>
         <option :value="1">
-          开启
+          {{ t('directory.member.locationShareOptions.on') }}
         </option>
       </select>
       <div v-if="errors.loc_share" class="mt-1 text-sm text-red-600">
@@ -270,7 +271,7 @@ defineExpose({
     <!-- 轨迹 -->
     <div>
       <label for="track" class="block text-sm font-medium text-gray-700 mb-1">
-        轨迹
+        {{ t('directory.device.fields.track') }}
       </label>
       <select
         id="track"
@@ -280,19 +281,19 @@ defineExpose({
         :disabled="isLoading"
       >
         <option :value="0">
-          关闭
+          {{ t('directory.member.trackOptions.off') }}
         </option>
         <option :value="1">
-          1 小时
+          {{ t('directory.member.trackOptions.oneHour') }}
         </option>
         <option :value="2">
-          15 分钟
+          {{ t('directory.member.trackOptions.fifteenMinutes') }}
         </option>
         <option :value="3">
-          5 分钟
+          {{ t('directory.member.trackOptions.fiveMinutes') }}
         </option>
         <option :value="4" :disabled="!hasQuickSupport">
-          1 分钟{{ !hasQuickSupport ? ' (需要 VIP)' : '' }}
+          {{ t('directory.member.trackOptions.oneMinute') }}{{ !hasQuickSupport ? t('directory.member.trackOptions.vipRequired') : '' }}
         </option>
       </select>
       <div v-if="errors.track" class="mt-1 text-sm text-red-600">

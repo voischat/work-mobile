@@ -17,6 +17,7 @@ import { weilaFetch } from '~/shared/instances'
 const router = useRouter()
 const queryCache = useQueryCache()
 const { showToast } = useToast()
+const { t } = useI18n()
 
 const deptId = computed(() => Number(useRouteParams('id').value))
 
@@ -155,20 +156,20 @@ const { mutate: addMembersToDept, isLoading: isAddingMembers } = useMutation({
       },
     }),
   async onSuccess() {
-    showToast('添加成员成功')
+    showToast(t('directory.member.addSuccess'))
     isAddMemberModalOpen.value = false
     treeSelectorRef.value?.clearSelection()
     await queryCache.invalidateQueries({ key: ['dept', deptId.value, 'members'] })
   },
   onError(error) {
     console.error('添加成员失败:', error)
-    showToast('添加成员失败')
+    showToast(t('directory.member.addFailed'))
   },
 })
 
 async function handleAddMembersConfirm() {
   if (selectedNodes.value.length === 0) {
-    showToast('请至少选择一个成员')
+    showToast(t('directory.member.selectAtLeastOne'))
     return
   }
 
@@ -235,14 +236,14 @@ async function handleDeleteDeptMember(member: Member) {
     })
 
     // Show success toast
-    showToast('注销成功')
+    showToast(t('directory.member.deleteSuccess'))
 
     // On success, invalidate to refetch in background
     await queryCache.invalidateQueries({ key: ['dept', deptId.value, 'members'] })
   }
   catch (error) {
     // Show error toast
-    showToast('注销失败')
+    showToast(t('directory.member.deleteFailed'))
 
     // Rollback accumulated members
     accumulatedMembers.value = oldAccumulatedMembers
@@ -281,13 +282,13 @@ function handleEditDeptMember(member: Member) {
 </script>
 
 <template>
-  <BackLayout :title="getDeptName(deptId) || '部门成员列表'">
+  <BackLayout :title="getDeptName(deptId) || t('directory.member.listTitle')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '通讯录', route: '/directory' },
-          { name: '部门管理', route: '/directory/departments' },
-          { name: '部门成员列表' },
+          { name: t('directory.title'), route: '/directory' },
+          { name: t('directory.department.manage'), route: '/directory/departments' },
+          { name: t('directory.member.listTitle') },
         ]"
       />
     </template>
@@ -297,7 +298,7 @@ function handleEditDeptMember(member: Member) {
         <div class="mb-4 space-y-4">
           <div>
             <label for="dept-select" class="block text-sm font-medium text-gray-700 mb-2">
-              选择部门
+              {{ t('directory.department.select') }}
             </label>
             <select
               id="dept-select"
@@ -319,7 +320,7 @@ function handleEditDeptMember(member: Member) {
               id="search-input"
               v-model="searchKey"
               type="text"
-              placeholder="请输入成员姓名、手机号或工号"
+              :placeholder="t('directory.member.searchPlaceholder')"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
           </div>
@@ -329,25 +330,25 @@ function handleEditDeptMember(member: Member) {
               class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               @click="openAddMemberModal"
             >
-              添加成员
+              {{ t('directory.member.add') }}
             </button>
           </div>
         </div>
 
         <div v-if="status === 'pending' && accumulatedMembers.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
-            加载中...
+            {{ t('common.status.loading') }}
           </div>
         </div>
 
         <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取成员列表失败: {{ error.message }}</p>
+            <p>{{ t('directory.member.fetchFailed') }}: {{ error.message }}</p>
           </div>
         </div>
 
         <div v-if="accumulatedMembers.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
-          暂无成员数据
+          {{ t('common.status.noData') }}
         </div>
 
         <div v-else class="space-y-4">
@@ -372,13 +373,13 @@ function handleEditDeptMember(member: Member) {
 
         <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
-            加载中...
+            {{ t('common.messages.loadMoreLoading') }}
           </div>
         </div>
 
         <div v-else-if="accumulatedMembers.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ data?.count || 0 }} 条）
+            {{ t('common.messages.loadMoreEnd', { count: data?.count || 0 }) }}
           </div>
         </div>
       </div>
@@ -387,7 +388,7 @@ function handleEditDeptMember(member: Member) {
     <!-- 添加成员Modal -->
     <Modal
       v-model:open="isAddMemberModalOpen"
-      title="选择成员"
+      :title="t('directory.member.selectMembers')"
     >
       <TreeSelector
         ref="treeSelectorRef"
@@ -400,7 +401,7 @@ function handleEditDeptMember(member: Member) {
         <div class="flex items-center justify-between">
           <!-- 左侧显示选中数量 -->
           <div class="text-sm text-gray-600">
-            <span class="font-medium text-blue-600">{{ selectedNodes.length }}</span> 位成员已选择
+            {{ t('common.messages.selectCount', { count: selectedNodes.length }) }}
           </div>
           <!-- 右侧按钮组 -->
           <div class="flex space-x-3">
@@ -409,7 +410,7 @@ function handleEditDeptMember(member: Member) {
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
               @click="isAddMemberModalOpen = false"
             >
-              取消
+              {{ t('common.actions.cancel') }}
             </button>
             <button
               type="button"
@@ -417,7 +418,7 @@ function handleEditDeptMember(member: Member) {
               :disabled="isAddingMembers"
               @click="handleAddMembersConfirm"
             >
-              {{ isAddingMembers ? '添加中...' : '确认添加' }}
+              {{ isAddingMembers ? t('common.actions.adding') : t('common.actions.confirmAdd') }}
             </button>
           </div>
         </div>
