@@ -96,6 +96,9 @@ const mainComp = useTemplateRef<any>('mainComp')
 watchEffect(() => {
   console.log('mainComp.value', mainComp.value)
 })
+
+const { currentTitle } = useBreadcrumb()
+useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - VoisWork` : 'VoisWork'))
 </script>
 
 <template>

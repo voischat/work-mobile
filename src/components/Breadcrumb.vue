@@ -1,17 +1,19 @@
 <script setup lang="ts">
+import type { BreadcrumbItem } from '~/composables/useBreadcrumb'
 import { useBreakpoints } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-
-interface BreadcrumbItem {
-  name: string
-  route?: string
-}
 
 const props = withDefaults(defineProps<{
   items: BreadcrumbItem[]
   separator?: string
 }>(), {
   separator: '/',
+})
+
+const { setBreadcrumb } = useBreadcrumb()
+
+watchEffect(() => {
+  setBreadcrumb(props.items)
 })
 
 const breakpoints = useBreakpoints({
