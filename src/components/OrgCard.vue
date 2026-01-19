@@ -102,18 +102,10 @@ function navigateToCorpLegal() {
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between mb-1">
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2">
               <h2 class="text-2xl font-bold text-gray-900">
                 {{ org.name }}
               </h2>
-              <!-- 认证状态 -->
-              <span
-                v-if="authStatus"
-                class="px-2 py-0.5 rounded text-xs font-medium"
-                :class="authStatus.color"
-              >
-                {{ authStatus.label }}
-              </span>
             </div>
             <!-- 认证按钮 -->
             <button
@@ -122,9 +114,18 @@ function navigateToCorpLegal() {
               @click="navigateToCorpLegal"
             >
               <Icon icon="lucide:shield-check" class="w-4 h-4" />
-              <span>企业认证</span>
+              <span class="hidden md:inline">企业认证</span>
             </button>
           </div>
+          <p class="text-sm text-gray-600 flex items-center mb-1">
+            <span
+              v-if="authStatus"
+              class="px-2 py-1 rounded text-xs font-medium"
+              :class="authStatus.color"
+            >
+              {{ authStatus.label }}
+            </span>
+          </p>
           <p class="text-sm text-gray-600 flex items-center">
             <Icon icon="lucide:hash" class="w-4 h-4 mr-1.5 text-gray-400" />
             企业号: <span class="font-medium text-gray-700 ml-1">{{ org.num }}</span>
