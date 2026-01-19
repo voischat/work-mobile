@@ -438,7 +438,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
           </TargetSelectorPopover>
           <input
             id="date" v-model="date" type="date"
-            class="px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-28"
+            class="px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-28 bg-opacity-0"
           >
         </div>
 
