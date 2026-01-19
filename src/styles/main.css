@@ -15,7 +15,8 @@ body,
 }
 
 /* reset */
-button {
+button,
+input {
   background: transparent;
 }
 
