@@ -13,7 +13,7 @@ import { defineConfig, loadEnv } from 'vite'
 export default defineConfig(({ mode }) => {
   console.log('mode', mode)
   const env = loadEnv(mode, process.cwd(), '')
-  console.log('env', env.VITE_APP_ID)
+  console.log('env', env.VITE_APP_ID.split(''))
 
   return {
     base: './',
