@@ -1,0 +1,14 @@
+hello: Hello
+welcome: Welcome
+login: Login
+logout: Logout
+
+# Common actions
+edit: Edit
+delete: Delete
+save: Save
+cancel: Cancel
+confirm: Confirm
+add: Add
+create: Create
+loading: Loading...

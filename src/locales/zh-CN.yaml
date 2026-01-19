@@ -1,0 +1,14 @@
+hello: 你好
+welcome: 欢迎
+login: 登录
+logout: 退出
+
+# 常用操作
+edit: 编辑
+delete: 删除
+save: 保存
+cancel: 取消
+confirm: 确认
+add: 添加
+create: 创建
+loading: 加载中...

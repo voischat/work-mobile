@@ -209,6 +209,7 @@ declare global {
   const useGamepad: typeof import('@vueuse/core')['useGamepad']
   const useGenerateMember: typeof import('./src/composables/useGenMember')['useGenerateMember']
   const useGeolocation: typeof import('@vueuse/core')['useGeolocation']
+  const useI18n: typeof import('vue-i18n')['useI18n']
   const useId: typeof import('vue')['useId']
   const useIdle: typeof import('@vueuse/core')['useIdle']
   const useImage: typeof import('@vueuse/core')['useImage']
@@ -345,9 +346,6 @@ declare global {
   // @ts-ignore
   export type { UsePageOptions, UsePageReturn } from './src/composables/usePage'
   import('./src/composables/usePage')
-  // @ts-ignore
-  export type { BreadcrumbItem } from './src/composables/useBreadcrumb'
-  import('./src/composables/useBreadcrumb')
   // @ts-ignore
   export type { ModalOptions } from './src/composables/useModal'
   import('./src/composables/useModal')
@@ -511,7 +509,6 @@ declare module 'vue' {
     readonly useBase64: UnwrapRef<typeof import('@vueuse/core')['useBase64']>
     readonly useBattery: UnwrapRef<typeof import('@vueuse/core')['useBattery']>
     readonly useBluetooth: UnwrapRef<typeof import('@vueuse/core')['useBluetooth']>
-    readonly useBreadcrumb: UnwrapRef<typeof import('./src/composables/useBreadcrumb')['useBreadcrumb']>
     readonly useBreakpoints: UnwrapRef<typeof import('@vueuse/core')['useBreakpoints']>
     readonly useBroadcastChannel: UnwrapRef<typeof import('@vueuse/core')['useBroadcastChannel']>
     readonly useBrowserLocation: UnwrapRef<typeof import('@vueuse/core')['useBrowserLocation']>

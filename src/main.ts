@@ -4,11 +4,11 @@ import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
 import App from './App.vue'
+import { i18n } from './i18n'
 import { initVConsole } from './utils/vconsole'
 
 import './styles/main.css'
 
-// Initialize VConsole before app renders
 initVConsole().then(() => {
   const app = createApp(App)
   const pinia = createPinia()
@@ -19,9 +19,10 @@ initVConsole().then(() => {
   app.use(pinia)
   app.use(PiniaColada, {
     queryOptions: {
-      gcTime: 300_000, // 5 minutes
+      gcTime: 300_000,
     },
   })
   app.use(router)
+  app.use(i18n)
   app.mount('#app')
 })

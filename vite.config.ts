@@ -2,6 +2,7 @@
 
 import path from 'node:path'
 import process from 'node:process'
+import VueI18n from '@intlify/unplugin-vue-i18n/vite'
 import Vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
@@ -61,6 +62,11 @@ export default defineConfig(({ mode }) => {
         },
       }),
 
+      // https://github.com/intlify/bundle-tools/tree/main/packages/unplugin-vue-i18n
+      VueI18n({
+        include: [path.resolve(__dirname, './src/locales/**')],
+      }),
+
       // https://github.com/antfu/unplugin-auto-import
       AutoImport({
         imports: [
@@ -70,6 +76,7 @@ export default defineConfig(({ mode }) => {
           {
           // add any other imports you were relying on
             'vue-router/auto': ['useLink'],
+            'vue-i18n': ['useI18n'],
           },
         ],
         dts: true,
