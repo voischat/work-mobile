@@ -11,9 +11,9 @@ import {
   SelectValue,
   SelectViewport,
 } from 'reka-ui'
-import { useI18n } from 'vue-i18n'
+import { useLocale } from '~/composables/useLocale'
 
-const { locale, availableLocales } = useI18n()
+const { locale, availableLocales, setLocale } = useLocale()
 
 const localeOptions = computed(() => {
   const localeMap: Record<string, string> = {
@@ -25,22 +25,10 @@ const localeOptions = computed(() => {
     label: localeMap[lang] || lang,
   }))
 })
-
-function handleLocaleChange(value: string) {
-  locale.value = value
-  localStorage.setItem('locale', value)
-}
-
-onMounted(() => {
-  const savedLocale = localStorage.getItem('locale')
-  if (savedLocale && availableLocales.includes(savedLocale)) {
-    locale.value = savedLocale
-  }
-})
 </script>
 
 <template>
-  <SelectRoot :model-value="locale" @update:model-value="handleLocaleChange">
+  <SelectRoot :model-value="locale" @update:model-value="setLocale">
     <SelectTrigger
       class="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm bg-transparent hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
       aria-label="Select language"

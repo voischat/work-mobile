@@ -2,11 +2,13 @@
 import type { LoginResponse } from '~/types/auth'
 import { useMutation } from '@pinia/colada'
 import { useRouteQuery } from '@vueuse/router'
+import { useLocale } from './composables/useLocale'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
 import { isLimitedWebview } from './shared/const'
 import { weilaFetch } from './shared/instances'
 
 const { showToast } = useToast()
+useLocale()
 
 const REFRESH_INTERVAL = 3 * 60 * 1000 // 3分钟
 const { token, refreshToken, clearAuth, saveAuth } = useAuth()
