@@ -11,8 +11,7 @@ import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 const { clearAuth } = useAuth()
-
-// 获取用户信息
+const { t, locale } = useI18n()
 const {
   data: userInfo,
   error: userError,
@@ -30,10 +29,10 @@ const { showModal } = useModal()
 
 function handleLogout() {
   showModal({
-    title: '确认退出',
-    message: '确定要退出登录吗？',
-    confirmText: '确认退出',
-    cancelText: '取消',
+    title: t('me.logout.title'),
+    message: t('me.logout.message'),
+    confirmText: t('me.logout.confirm'),
+    cancelText: t('me.logout.cancel'),
     onConfirm() {
       clearAuth()
       router.push('/login')
@@ -41,11 +40,10 @@ function handleLogout() {
   })
 }
 
-// 格式化日期
 function formatDate(timestamp: number) {
   if (!timestamp)
     return '-'
-  return new Date(timestamp * 1000).toLocaleDateString('zh-CN')
+  return new Date(timestamp * 1000).toLocaleDateString(locale.value)
 }
 </script>
 
@@ -56,14 +54,14 @@ function formatDate(timestamp: number) {
         <!-- 加载状态 -->
         <div v-if="isLoading" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
-            加载中...
+            {{ t('me.status.loading') }}
           </div>
         </div>
 
         <!-- 错误状态 -->
         <div v-else-if="hasError" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取用户信息失败: {{ userError?.message }}</p>
+            <p>{{ t('me.error.fetchFailed') }}: {{ userError?.message }}</p>
           </div>
         </div>
 
@@ -78,10 +76,10 @@ function formatDate(timestamp: number) {
             />
             <div class="flex-1">
               <h2 class="text-2xl font-bold text-gray-900">
-                {{ userInfo.name || '未设置' }}
+                {{ userInfo.name || t('me.fields.notSet') }}
               </h2>
               <p class="text-sm text-gray-500 mt-1">
-                用户编号: {{ userInfo.user_num }}
+                {{ t('me.fields.userId') }}: {{ userInfo.user_num }}
               </p>
             </div>
           </div>
@@ -89,7 +87,7 @@ function formatDate(timestamp: number) {
           <div class="grid grid-cols-1 md:grid-cols-2 -m-2 mb-6">
             <div class="border-b pb-2 m-2">
               <p class="text-sm text-gray-500">
-                工号
+                {{ t('me.fields.employeeId') }}
               </p>
               <p class="text-base font-medium text-gray-900 mt-1">
                 {{ userInfo.job_num || '-' }}
@@ -97,7 +95,7 @@ function formatDate(timestamp: number) {
             </div>
             <div class="border-b pb-2 m-2">
               <p class="text-sm text-gray-500">
-                手机号
+                {{ t('me.fields.phone') }}
               </p>
               <p class="text-base font-medium text-gray-900 mt-1">
                 {{ userInfo.bind_phone || userInfo.phone || '-' }}
@@ -105,7 +103,7 @@ function formatDate(timestamp: number) {
             </div>
             <div class="border-b pb-2 m-2">
               <p class="text-sm text-gray-500">
-                邮箱
+                {{ t('me.fields.email') }}
               </p>
               <p class="text-base font-medium text-gray-900 mt-1">
                 {{ userInfo.bind_email || '-' }}
@@ -113,7 +111,7 @@ function formatDate(timestamp: number) {
             </div>
             <div class="border-b pb-2 m-2">
               <p class="text-sm text-gray-500">
-                创建时间
+                {{ t('me.fields.createTime') }}
               </p>
               <p class="text-base font-medium text-gray-900 mt-1">
                 {{ formatDate(userInfo.created) }}
@@ -127,35 +125,35 @@ function formatDate(timestamp: number) {
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/corp-legal')"
             >
-              <span class="text-gray-900 font-medium">企业认证</span>
+              <span class="text-gray-900 font-medium">{{ t('me.actions.corpAuth') }}</span>
               <span class="text-gray-400">›</span>
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/change-password')"
             >
-              <span class="text-gray-900 font-medium">修改密码</span>
+              <span class="text-gray-900 font-medium">{{ t('me.actions.changePassword') }}</span>
               <span class="text-gray-400">›</span>
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/bind-phone')"
             >
-              <span class="text-gray-900 font-medium">绑定手机</span>
+              <span class="text-gray-900 font-medium">{{ t('me.actions.bindPhone') }}</span>
               <span class="text-gray-400">›</span>
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/bind-email')"
             >
-              <span class="text-gray-900 font-medium">绑定邮箱</span>
+              <span class="text-gray-900 font-medium">{{ t('me.actions.bindEmail') }}</span>
               <span class="text-gray-400">›</span>
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/unregist')"
             >
-              <span class="text-red-600 font-medium">注销账号</span>
+              <span class="text-red-600 font-medium">{{ t('me.actions.unregister') }}</span>
               <span class="text-gray-400">›</span>
             </button>
           </div>
@@ -163,14 +161,14 @@ function formatDate(timestamp: number) {
 
         <!-- 无数据提示 -->
         <div v-else class="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
-          暂无数据
+          {{ t('me.status.noData') }}
         </div>
 
         <button
           class="w-full text-left px-4 py-3 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-between mt-4"
           @click="handleLogout"
         >
-          <span class="text-red-600 font-medium">退出登录</span>
+          <span class="text-red-600 font-medium">{{ t('me.actions.logout') }}</span>
           <span class="text-gray-400">›</span>
         </button>
       </div>

@@ -110,6 +110,7 @@ auth:
     resettingPassword: Resetting...
     sendVerifyCode: Send Code
     sending: Sending...
+    countdownSeconds: '{seconds}s'
   messages:
     loginSuccess: Login successful
     registerSuccess: Registration successful, please login
@@ -378,3 +379,31 @@ errors:
   updateMemberFailed: Failed to update member
   fetchGroupsFailed: Failed to fetch groups
   fetchDepartmentsFailed: Failed to fetch departments
+
+# Me / Profile
+me:
+  title: My Profile
+  status:
+    loading: Loading...
+    noData: No data available
+  error:
+    fetchFailed: Failed to fetch user information
+  fields:
+    userId: User ID
+    employeeId: Employee ID
+    phone: Phone
+    email: Email
+    createTime: Create Time
+    notSet: Not set
+  actions:
+    corpAuth: Enterprise Authentication
+    changePassword: Change Password
+    bindPhone: Bind Phone
+    bindEmail: Bind Email
+    unregister: Unregister Account
+    logout: Logout
+  logout:
+    title: Confirm Logout
+    message: Are you sure you want to logout?
+    confirm: Confirm Logout
+    cancel: Cancel

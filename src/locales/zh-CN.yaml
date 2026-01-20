@@ -110,6 +110,7 @@ auth:
     resettingPassword: 重置中...
     sendVerifyCode: 发送验证码
     sending: 发送中...
+    countdownSeconds: '{seconds}秒'
   messages:
     loginSuccess: 登录成功
     registerSuccess: 注册成功，请登录
@@ -378,3 +379,31 @@ errors:
   updateMemberFailed: 更新成员失败
   fetchGroupsFailed: 获取群组列表失败
   fetchDepartmentsFailed: 获取部门列表失败
+
+# 个人中心
+me:
+  title: 我的
+  status:
+    loading: 加载中...
+    noData: 暂无数据
+  error:
+    fetchFailed: 获取用户信息失败
+  fields:
+    userId: 用户编号
+    employeeId: 工号
+    phone: 手机号
+    email: 邮箱
+    createTime: 创建时间
+    notSet: 未设置
+  actions:
+    corpAuth: 企业认证
+    changePassword: 修改密码
+    bindPhone: 绑定手机
+    bindEmail: 绑定邮箱
+    unregister: 注销账号
+    logout: 退出登录
+  logout:
+    title: 确认退出
+    message: 确定要退出登录吗？
+    confirm: 确认退出
+    cancel: 取消

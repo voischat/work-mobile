@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 interface Props {
   disabled?: boolean
@@ -16,13 +17,11 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   storageKey: 'countdown-time',
   countdownSeconds: 60,
-  loadingText: '发送中...',
-  defaultText: '发送验证码',
+  loadingText: undefined,
+  defaultText: undefined,
 })
 
-const emit = defineEmits<{
-  click: []
-}>()
+const { t } = useI18n()
 
 const countdownTime = useLocalStorage(props.storageKey, 0)
 const countdown = ref<number>(0)
@@ -36,10 +35,10 @@ const canClick = computed(() => {
 // 按钮文本
 const buttonText = computed(() => {
   if (countdown.value > 0)
-    return `${countdown.value}秒`
+    return t('auth.actions.countdownSeconds', { seconds: countdown.value })
   if (props.loading)
-    return props.loadingText
-  return props.defaultText
+    return props.loadingText ?? t('auth.actions.sending')
+  return props.defaultText ?? t('auth.actions.sendVerifyCode')
 })
 
 // 初始化倒计时
