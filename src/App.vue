@@ -36,7 +36,7 @@ const { mutate: login } = useMutation({
   onSuccess(data) {
     saveAuth(data.access_token, data.refresh_token, data.expires_in)
     isLimitedWebview.value = true
-    router.replace('/login')
+    router.replace('/directory')
   },
   onError(error) {
     showToast(error.message)
