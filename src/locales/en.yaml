@@ -120,6 +120,7 @@ auth:
     sendVerifyCode: Send Code
     sending: Sending...
     countdownSeconds: '{seconds}s'
+    back: Back
   messages:
     loginSuccess: Login successful
     registerSuccess: Registration successful, please login
@@ -440,3 +441,68 @@ me:
     emailInvalid: Please enter a valid email address
     passwordMin: Password must be at least 6 characters
     verifyCodeMin: Verification code must be at least 4 digits
+  unregisterEmail:
+    title: Unregister Email
+    email: Email
+    imageVerifyCode: Image Verification Code
+    emailVerifyCode: Email Verification Code
+    refreshHint: Click image to refresh verification code
+    sendHint: Please enter image verification code first, then click send verification code
+    submitting: Unregistering...
+    confirmSubmit: Confirm Unregister
+    cancel: Cancel
+  unregisterPhone:
+    title: Unregister Phone
+    phone: Phone
+    imageVerifyCode: Image Verification Code
+    smsVerifyCode: SMS Verification Code
+    refreshHint: Click image to refresh verification code
+    sendHint: Please enter image verification code first, then click send verification code
+    submitting: Unregistering...
+    confirmSubmit: Confirm Unregister
+    cancel: Cancel
+  bindEmail:
+    title: Bind Email
+    email: Email
+    imageVerifyCode: Image Verification Code
+    emailVerifyCode: Email Verification Code
+    refreshHint: Click image to refresh verification code
+    sendHint: Please enter image verification code first, then click send verification code
+    submitting: Binding...
+    confirmSubmit: Confirm Bind
+    cancel: Cancel
+  bindPhone:
+    title: Bind Phone
+    phone: Phone
+    imageVerifyCode: Image Verification Code
+    smsVerifyCode: SMS Verification Code
+    refreshHint: Click image to refresh verification code
+    sendHint: Please enter image verification code first, then click send verification code
+    submitting: Binding...
+    confirmSubmit: Confirm Bind
+    cancel: Cancel
+  changePassword:
+    title: Change Password
+    oldPassword: Old Password
+    newPassword: New Password
+    confirmPassword: Confirm Password
+    submitting: Changing...
+    confirmSubmit: Confirm Change
+    cancel: Cancel
+  corpAuth:
+    title: Enterprise Authentication Info
+    loading: Loading...
+    fetchFailed: Failed to fetch authentication info
+    pending: Your enterprise authentication is under review, you can continue to modify authentication info
+    verified: Your enterprise has been verified, you can modify authentication info
+    failed: Your enterprise authentication failed, please modify and resubmit
+    companyName: Company Name
+    creditCode: Unified Social Credit Code
+    creditCodeHint: 18-digit unified social credit code, composed of numbers and uppercase English letters
+    businessLicense: Business License
+    submitting: Submitting...
+    cancel: Cancel
+  unregister:
+    warning: 'Warning: After unregistering the account, all data will be permanently deleted, this operation cannot be undone!'
+  navigation:
+    arrow: ›

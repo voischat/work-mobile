@@ -389,7 +389,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
       <div class="absolute top-2 sm:top-4 left-2 right-2 sm:left-4 sm:right-auto bg-white rounded-lg shadow-lg p-2 sm:p-3">
         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <TargetSelectorPopover v-model:open="isPopoverOpen">
-            <template #trigger="{ isOpen: isPopoverOpen }">
+            <template #trigger="{ isOpen: isOpen }">
               <button
                 type="button"
                 class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 transition-colors min-w-[120px]"
@@ -400,7 +400,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
                 <Icon
                   icon="lucide:chevron-down"
                   class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200"
-                  :class="{ 'rotate-180': isPopoverOpen }"
+                  :class="{ 'rotate-180': isOpen }"
                 />
               </button>
             </template>
@@ -414,13 +414,13 @@ function navigateToPoint(point: TrackPoint, index: number): void {
                     value="dept"
                     class="relative inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-500 transition-all duration-200 data-[state=active]:text-blue-500 hover:text-gray-700 flex-1"
                   >
-                    部门
+                    {{ t('directory.department.title') }}
                   </TabsTrigger>
                   <TabsTrigger
                     value="group"
                     class="relative inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-500 transition-all duration-200 data-[state=active]:text-blue-500 hover:text-gray-700 flex-1"
                   >
-                    群组
+                    {{ t('directory.group.title') }}
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="dept" class="flex-1 overflow-y-auto min-h-0 max-h-[300px]">

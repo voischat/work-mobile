@@ -23,6 +23,7 @@ type BindPhoneForm = z.infer<typeof bindPhoneSchema>
 
 const router = useRouter()
 const { showToast } = useToast()
+const { t } = useI18n()
 
 const formData = ref<BindPhoneForm>({
   phone: '',
@@ -135,18 +136,18 @@ function handleSubmit() {
             <!-- 手机号输入框（带国家代码） -->
             <div>
               <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-                手机号
+                {{ t('me.bindPhone.phone') }}
               </label>
               <div class="flex items-center">
                 <div class="flex items-center px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md">
-                  <span class="text-gray-700">+86</span>
+                  <span class="text-gray-700">{{ t('auth.tips.phonePrefix') }}</span>
                   <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 ml-1" />
                 </div>
                 <input
                   id="phone"
                   v-model="formData.phone"
                   type="tel"
-                  placeholder="请输入手机号"
+                  :placeholder="t('auth.placeholders.phone')"
                   class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="errors.phone ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
@@ -160,7 +161,7 @@ function handleSubmit() {
             <!-- 图形验证码 -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                图形验证码
+                {{ t('me.bindPhone.imageVerifyCode') }}
               </label>
               <ImageVerifyCode
                 ref="imageVerifyCodeRef"
@@ -174,21 +175,21 @@ function handleSubmit() {
                 {{ errors.imageVerifyAnswer }}
               </div>
               <p class="mt-1 text-xs text-gray-500">
-                点击图片可刷新验证码
+                {{ t('me.bindPhone.refreshHint') }}
               </p>
             </div>
 
             <!-- 短信验证码输入框 -->
             <div>
               <label for="verifycode" class="block text-sm font-medium text-gray-700 mb-1">
-                短信验证码
+                {{ t('me.bindPhone.smsVerifyCode') }}
               </label>
               <div class="flex items-center space-x-2">
                 <input
                   id="verifycode"
                   v-model="formData.verifycode"
                   type="text"
-                  placeholder="请输入短信验证码"
+                  :placeholder="t('auth.placeholders.smsVerifyCode')"
                   class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="errors.verifycode ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
@@ -200,8 +201,8 @@ function handleSubmit() {
                   :loading="isSendingSms"
                   storage-key="send-sms-time"
                   :countdown-seconds="60"
-                  loading-text="发送中..."
-                  default-text="发送验证码"
+                  :loading-text="t('auth.actions.sending')"
+                  :default-text="t('auth.actions.sendVerifyCode')"
                   @click="handleSendSmsVerifyCode"
                 />
               </div>
@@ -209,7 +210,7 @@ function handleSubmit() {
                 {{ errors.verifycode }}
               </div>
               <p class="mt-1 text-xs text-gray-500">
-                请先输入图形验证码，然后点击发送验证码
+                {{ t('me.bindPhone.sendHint') }}
               </p>
             </div>
 
@@ -226,14 +227,14 @@ function handleSubmit() {
                 :disabled="isLoading"
                 @click="router.back()"
               >
-                取消
+                {{ t('me.bindPhone.cancel') }}
               </button>
               <button
                 type="submit"
                 class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 :disabled="isLoading"
               >
-                {{ isLoading ? '绑定中...' : '确认绑定' }}
+                {{ isLoading ? t('me.bindPhone.submitting') : t('me.bindPhone.confirmSubmit') }}
               </button>
             </div>
           </form>

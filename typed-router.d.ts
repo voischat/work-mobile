@@ -19,14 +19,12 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
-    '/comparison-demo': RouteRecordInfo<'/comparison-demo', '/comparison-demo', Record<never, never>, Record<never, never>>,
     '/directory/': RouteRecordInfo<'/directory/', '/directory', Record<never, never>, Record<never, never>>,
     '/directory/departments/': RouteRecordInfo<'/directory/departments/', '/directory/departments', Record<never, never>, Record<never, never>>,
     '/directory/departments/[id]/members': RouteRecordInfo<'/directory/departments/[id]/members', '/directory/departments/:id/members', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/directory/groups/': RouteRecordInfo<'/directory/groups/', '/directory/groups', Record<never, never>, Record<never, never>>,
     '/directory/groups/[id]/members': RouteRecordInfo<'/directory/groups/[id]/members', '/directory/groups/:id/members', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/directory/members/': RouteRecordInfo<'/directory/members/', '/directory/members', Record<never, never>, Record<never, never>>,
-    '/gesture-dialog-demo': RouteRecordInfo<'/gesture-dialog-demo', '/gesture-dialog-demo', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/me/': RouteRecordInfo<'/me/', '/me', Record<never, never>, Record<never, never>>,
     '/me/bind-email': RouteRecordInfo<'/me/bind-email', '/me/bind-email', Record<never, never>, Record<never, never>>,
@@ -38,7 +36,6 @@ declare module 'vue-router/auto-routes' {
     '/me/UnregistPhone': RouteRecordInfo<'/me/UnregistPhone', '/me/UnregistPhone', Record<never, never>, Record<never, never>>,
     '/register': RouteRecordInfo<'/register', '/register', Record<never, never>, Record<never, never>>,
     '/reset-password': RouteRecordInfo<'/reset-password', '/reset-password', Record<never, never>, Record<never, never>>,
-    '/test-tree-selector': RouteRecordInfo<'/test-tree-selector', '/test-tree-selector', Record<never, never>, Record<never, never>>,
     '/workbench/': RouteRecordInfo<'/workbench/', '/workbench', Record<never, never>, Record<never, never>>,
     '/workbench/realtime-location/': RouteRecordInfo<'/workbench/realtime-location/', '/workbench/realtime-location', Record<never, never>, Record<never, never>>,
     '/workbench/track/': RouteRecordInfo<'/workbench/track/', '/workbench/track', Record<never, never>, Record<never, never>>,

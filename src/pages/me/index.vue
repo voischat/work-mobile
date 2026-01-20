@@ -61,7 +61,7 @@ function formatDate(timestamp: number) {
         <!-- 错误状态 -->
         <div v-else-if="hasError" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>{{ t('me.error.fetchFailed') }}: {{ userError?.message }}</p>
+            <p>{{ t('me.error.fetchFailed') }}{{ t('common.punctuation.colon') }} {{ userError?.message }}</p>
           </div>
         </div>
 
@@ -79,7 +79,7 @@ function formatDate(timestamp: number) {
                 {{ userInfo.name || t('me.fields.notSet') }}
               </h2>
               <p class="text-sm text-gray-500 mt-1">
-                {{ t('me.fields.userId') }}: {{ userInfo.user_num }}
+                {{ t('me.fields.userId') }}{{ t('common.punctuation.colon') }} {{ userInfo.user_num }}
               </p>
             </div>
           </div>
@@ -126,35 +126,35 @@ function formatDate(timestamp: number) {
               @click="router.push('/me/corp-legal')"
             >
               <span class="text-gray-900 font-medium">{{ t('me.actions.corpAuth') }}</span>
-              <span class="text-gray-400">›</span>
+              <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/change-password')"
             >
               <span class="text-gray-900 font-medium">{{ t('me.actions.changePassword') }}</span>
-              <span class="text-gray-400">›</span>
+              <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/bind-phone')"
             >
               <span class="text-gray-900 font-medium">{{ t('me.actions.bindPhone') }}</span>
-              <span class="text-gray-400">›</span>
+              <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/bind-email')"
             >
               <span class="text-gray-900 font-medium">{{ t('me.actions.bindEmail') }}</span>
-              <span class="text-gray-400">›</span>
+              <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/unregist')"
             >
               <span class="text-red-600 font-medium">{{ t('me.actions.unregister') }}</span>
-              <span class="text-gray-400">›</span>
+              <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
             </button>
           </div>
         </div>
@@ -169,7 +169,7 @@ function formatDate(timestamp: number) {
           @click="handleLogout"
         >
           <span class="text-red-600 font-medium">{{ t('me.actions.logout') }}</span>
-          <span class="text-gray-400">›</span>
+          <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
         </button>
       </div>
     </div>

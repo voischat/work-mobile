@@ -46,10 +46,10 @@ const hasError = computed(() => !!orgError.value || !!vipError.value)
         <div v-else-if="hasError" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
             <p v-if="orgError" class="mb-2">
-              {{ t('organization.errors.fetchFailed') }}: {{ orgError.message }}
+              {{ t('organization.errors.fetchFailed') }}{{ t('common.punctuation.colon') }} {{ orgError.message }}
             </p>
             <p v-if="vipError">
-              {{ t('organization.errors.fetchVipFailed') }}: {{ vipError.message }}
+              {{ t('organization.errors.fetchVipFailed') }}{{ t('common.punctuation.colon') }} {{ vipError.message }}
             </p>
           </div>
         </div>

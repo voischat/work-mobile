@@ -6,6 +6,8 @@ import Tab from '~/components/Tab.vue'
 import UnregistEmail from './UnregistEmail.vue'
 import UnregistPhone from './UnregistPhone.vue'
 
+const { t } = useI18n()
+
 // 注销方式：phone 或 email
 const activeTab = ref<'phone' | 'email'>('phone')
 
@@ -30,7 +32,7 @@ const tabs = [
         <div class="bg-white rounded-lg shadow-md p-6">
           <div class="mb-6">
             <p class="text-sm text-red-600 mb-4">
-              警告：注销账号后，所有数据将被永久删除，此操作不可恢复！
+              {{ t('me.unregister.warning') }}
             </p>
             <Tab v-model="activeTab" :tabs="tabs" />
           </div>

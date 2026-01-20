@@ -24,6 +24,7 @@ type ChangePasswordForm = z.infer<typeof changePasswordSchema>
 
 const router = useRouter()
 const { showToast } = useToast()
+const { t } = useI18n()
 
 const formData = ref<ChangePasswordForm>({
   old_password: '',
@@ -77,13 +78,13 @@ function handleSubmit() {
             <!-- 旧密码输入框 -->
             <div>
               <label for="old_password" class="block text-sm font-medium text-gray-700 mb-1">
-                旧密码
+                {{ t('me.changePassword.oldPassword') }}
               </label>
               <input
                 id="old_password"
                 v-model="formData.old_password"
                 type="password"
-                placeholder="请输入旧密码"
+                :placeholder="t('auth.validation.oldPasswordRequired')"
                 class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.old_password ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isLoading"
@@ -96,13 +97,13 @@ function handleSubmit() {
             <!-- 新密码输入框 -->
             <div>
               <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">
-                新密码
+                {{ t('me.changePassword.newPassword') }}
               </label>
               <input
                 id="new_password"
                 v-model="formData.new_password"
                 type="password"
-                placeholder="请输入新密码（至少6位）"
+                :placeholder="t('auth.validation.newPasswordMin')"
                 class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.new_password ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isLoading"
@@ -115,13 +116,13 @@ function handleSubmit() {
             <!-- 确认密码输入框 -->
             <div>
               <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
-                确认密码
+                {{ t('me.changePassword.confirmPassword') }}
               </label>
               <input
                 id="confirm_password"
                 v-model="formData.confirm_password"
                 type="password"
-                placeholder="请再次输入新密码"
+                :placeholder="t('auth.placeholders.confirmPassword')"
                 class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.confirm_password ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isLoading"
@@ -139,14 +140,14 @@ function handleSubmit() {
                 :disabled="isLoading"
                 @click="router.push('/me')"
               >
-                取消
+                {{ t('me.changePassword.cancel') }}
               </button>
               <button
                 type="submit"
                 class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 :disabled="isLoading"
               >
-                {{ isLoading ? '修改中...' : '确认修改' }}
+                {{ isLoading ? t('me.changePassword.submitting') : t('me.changePassword.confirmSubmit') }}
               </button>
             </div>
           </form>

@@ -11,6 +11,7 @@ import { weilaFetch } from '~/shared/instances'
 
 const router = useRouter()
 const { showToast } = useToast()
+const { t } = useI18n()
 
 // 获取企业认证信息
 const {
@@ -149,14 +150,14 @@ function handleSubmit() {
         <!-- 加载状态 -->
         <div v-if="isLoading" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
-            加载中...
+            {{ t('me.corpAuth.loading') }}
           </div>
         </div>
 
         <!-- 错误状态 -->
         <div v-else-if="legalError" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取认证信息失败: {{ legalError.message }}</p>
+            <p>{{ t('me.corpAuth.fetchFailed') }}{{ t('common.punctuation.colon') }} {{ legalError.message }}</p>
           </div>
         </div>
 
@@ -165,7 +166,7 @@ function handleSubmit() {
           <!-- 认证状态 -->
           <div class="flex items-center justify-between pb-4 border-b">
             <h2 class="text-lg font-semibold text-gray-900">
-              企业认证信息
+              {{ t('me.corpAuth.title') }}
             </h2>
             <span class="px-3 py-1 rounded-full text-sm font-medium" :class="[statusColor]">
               {{ statusText }}
@@ -175,31 +176,31 @@ function handleSubmit() {
           <!-- 待审核/已认证/审核失败提示 -->
           <div v-if="authStatus === 'pending'" class="bg-orange-50 border border-orange-200 rounded-lg p-4">
             <p class="text-orange-800 text-sm">
-              您的企业认证正在审核中，可以继续修改认证信息
+              {{ t('me.corpAuth.pending') }}
             </p>
           </div>
 
           <div v-if="authStatus === 'verified'" class="bg-green-50 border border-green-200 rounded-lg p-4">
             <p class="text-green-800 text-sm">
-              您的企业已通过认证，可以修改认证信息
+              {{ t('me.corpAuth.verified') }}
             </p>
           </div>
 
           <div v-if="authStatus === 'failed'" class="bg-red-50 border border-red-200 rounded-lg p-4">
             <p class="text-red-800 text-sm">
-              您的企业认证审核失败，请修改后重新提交
+              {{ t('me.corpAuth.failed') }}
             </p>
           </div>
 
           <!-- 企业名称 -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              企业名称 <span class="text-red-500">*</span>
+              {{ t('me.corpAuth.companyName') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
             </label>
             <input
               v-model="formData.name"
               type="text"
-              placeholder="请输入企业名称"
+              :placeholder="t('common.placeholders.input')"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
           </div>
@@ -207,24 +208,24 @@ function handleSubmit() {
           <!-- 统一社会信用代码 -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              统一社会信用代码 <span class="text-red-500">*</span>
+              {{ t('me.corpAuth.creditCode') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
             </label>
             <input
               v-model="formData.identify"
               type="text"
-              placeholder="请输入18位统一社会信用代码"
+              :placeholder="t('me.corpAuth.creditCode')"
               maxlength="18"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
             <p class="text-xs text-gray-500 mt-1">
-              18位统一社会信用代码，由数字、大写英文字母组成
+              {{ t('me.corpAuth.creditCodeHint') }}
             </p>
           </div>
 
           <!-- 营业执照 -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              营业执照 <span class="text-red-500">*</span>
+              {{ t('me.corpAuth.businessLicense') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
             </label>
             <LicenseUpload v-model="formData.business_license" />
           </div>
@@ -236,7 +237,7 @@ function handleSubmit() {
               class="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
               @click="router.back()"
             >
-              取消
+              {{ t('me.corpAuth.cancel') }}
             </button>
             <button
               type="button"
@@ -244,7 +245,7 @@ function handleSubmit() {
               :disabled="isSubmitting"
               @click="handleSubmit"
             >
-              {{ isSubmitting ? '提交中...' : (legalInfo?.id ? '更新认证' : '提交认证') }}
+              {{ isSubmitting ? t('me.corpAuth.submitting') : (legalInfo?.id ? t('common.actions.update') : t('common.actions.submit')) }}
             </button>
           </div>
         </div>

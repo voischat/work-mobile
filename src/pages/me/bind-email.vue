@@ -22,6 +22,7 @@ type BindEmailForm = z.infer<typeof bindEmailSchema>
 
 const router = useRouter()
 const { showToast } = useToast()
+const { t } = useI18n()
 
 const formData = ref<BindEmailForm>({
   email: '',
@@ -134,13 +135,13 @@ function handleSubmit() {
             <!-- 邮箱输入框 -->
             <div>
               <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                邮箱
+                {{ t('me.bindEmail.email') }}
               </label>
               <input
                 id="email"
                 v-model="formData.email"
                 type="email"
-                placeholder="请输入邮箱地址"
+                :placeholder="t('auth.placeholders.email')"
                 class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :class="errors.email ? 'border-red-500' : 'border-gray-300'"
                 :disabled="isLoading"
@@ -153,7 +154,7 @@ function handleSubmit() {
             <!-- 图形验证码 -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                图形验证码
+                {{ t('me.bindEmail.imageVerifyCode') }}
               </label>
               <ImageVerifyCode
                 ref="imageVerifyCodeRef"
@@ -167,21 +168,21 @@ function handleSubmit() {
                 {{ errors.imageVerifyAnswer }}
               </div>
               <p class="mt-1 text-xs text-gray-500">
-                点击图片可刷新验证码
+                {{ t('me.bindEmail.refreshHint') }}
               </p>
             </div>
 
             <!-- 邮箱验证码输入框 -->
             <div>
               <label for="verifycode" class="block text-sm font-medium text-gray-700 mb-1">
-                邮箱验证码
+                {{ t('me.bindEmail.emailVerifyCode') }}
               </label>
               <div class="flex items-center space-x-2">
                 <input
                   id="verifycode"
                   v-model="formData.verifycode"
                   type="text"
-                  placeholder="请输入邮箱验证码"
+                  :placeholder="t('auth.placeholders.emailVerifyCode')"
                   class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="errors.verifycode ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
@@ -193,8 +194,8 @@ function handleSubmit() {
                   :loading="isSendingEmail"
                   storage-key="send-email-time"
                   :countdown-seconds="60"
-                  loading-text="发送中..."
-                  default-text="发送验证码"
+                  :loading-text="t('auth.actions.sending')"
+                  :default-text="t('auth.actions.sendVerifyCode')"
                   @click="handleSendEmailVerifyCode"
                 />
               </div>
@@ -202,7 +203,7 @@ function handleSubmit() {
                 {{ errors.verifycode }}
               </div>
               <p class="mt-1 text-xs text-gray-500">
-                请先输入图形验证码，然后点击发送验证码
+                {{ t('me.bindEmail.sendHint') }}
               </p>
             </div>
 
@@ -214,14 +215,14 @@ function handleSubmit() {
                 :disabled="isLoading"
                 @click="router.push('/me')"
               >
-                取消
+                {{ t('me.bindEmail.cancel') }}
               </button>
               <button
                 type="submit"
                 class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 :disabled="isLoading"
               >
-                {{ isLoading ? '绑定中...' : '确认绑定' }}
+                {{ isLoading ? t('me.bindEmail.submitting') : t('me.bindEmail.confirmSubmit') }}
               </button>
             </div>
           </form>
