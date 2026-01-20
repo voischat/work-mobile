@@ -246,7 +246,7 @@ function handleEditMember(member: Member) {
 
         <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>{{ t('errors.fetchMembersFailed') }}: {{ error.message }}</p>
+            <p>{{ t('errors.fetchMembersFailed') }}{{ t('common.punctuation.colon') }} {{ error.message }}</p>
           </div>
         </div>
 

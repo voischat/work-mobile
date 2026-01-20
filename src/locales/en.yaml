@@ -2,6 +2,14 @@
 app:
   name: Weila Enterprise
 
+# Demo pages
+demo:
+  hello: Hello
+  login: Login
+  welcome: Welcome
+  logout: Logout
+  user: User
+
 # Language
 language:
   en: English
@@ -67,6 +75,7 @@ common:
     avatarDeleted: Avatar deleted
     imageDeleted: Image deleted
     loadFailed: Load failed
+    validationFailed: Form validation failed
   validation:
     required: Required
     requiredMark: '*'
@@ -127,8 +136,11 @@ auth:
   login:
     noAccount: Don't have an account?
     registerNow: Register now
+    back: Back
+    resettingPassword: Resetting...
   tips:
     refreshVerifyCode: Click image to refresh
+    forgotPassword: Remembered password?
     phonePrefix: '+86'
   placeholders:
     newPassword: Enter new password (at least 6 characters)
@@ -306,10 +318,13 @@ directory:
     noDepartment: No Department
     confirmDelete: Confirm Delete
     confirmDeleteMessage: 'Are you sure to delete department "{name}"? This action cannot be undone.'
+    createSuccess: Department created successfully
+    createFailed: Failed to create department
     fields:
       name: Department Name
     validation:
       nameRequired: Department name is required
+    loading: Loading department...
   device:
     title: Device
     count: Devices
@@ -405,6 +420,9 @@ me:
     email: Email
     createTime: Create Time
     notSet: Not set
+    person: people
+    interval: Interval
+    total: Total
   actions:
     corpAuth: Enterprise Authentication
     changePassword: Change Password

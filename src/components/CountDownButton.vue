@@ -21,6 +21,10 @@ const props = withDefaults(defineProps<Props>(), {
   defaultText: undefined,
 })
 
+const emit = defineEmits<{
+  click: []
+}>()
+
 const { t } = useI18n()
 
 const countdownTime = useLocalStorage(props.storageKey, 0)

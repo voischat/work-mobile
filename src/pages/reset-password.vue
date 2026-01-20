@@ -36,6 +36,7 @@ const emailSchema = z.object({
 })
 
 const router = useRouter()
+const { t } = useI18n()
 const { showToast } = useToast()
 
 const phoneForm = ref({ phone: '', imageVerifyAnswer: '', verifycode: '', password: '', confirmPassword: '' })
@@ -175,7 +176,7 @@ function handleEmailReset() {
     <div class="w-full max-w-sm">
       <div class="bg-white rounded-lg shadow-md p-6">
         <h1 class="text-2xl font-bold text-gray-900 mb-6 text-center">
-          重置密码
+          {{ t('auth.actions.resetPassword') }}
         </h1>
 
         <TabsRoot default-value="phone">
@@ -184,13 +185,13 @@ function handleEmailReset() {
               value="phone"
               class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
-              手机号重置
+              {{ t('auth.fields.phone') }}{{ t('auth.actions.resetPassword') }}
             </TabsTrigger>
             <TabsTrigger
               value="email"
               class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
-              邮箱重置
+              {{ t('auth.fields.email') }}{{ t('auth.actions.resetPassword') }}
             </TabsTrigger>
           </TabsList>
 
@@ -198,11 +199,11 @@ function handleEmailReset() {
             <form class="space-y-4" @submit.prevent="handlePhoneReset">
               <div>
                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-                  手机号
+                  {{ t('auth.fields.phone') }}
                 </label>
                 <div class="flex items-center">
                   <div class="flex items-center px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md">
-                    <span class="text-gray-700">+86</span>
+                    <span class="text-gray-700">{{ t('auth.tips.phonePrefix') }}</span>
                     <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 ml-1" />
                   </div>
                   <input
@@ -222,7 +223,7 @@ function handleEmailReset() {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                  图形验证码
+                  {{ t('auth.fields.imageVerifyCode') }}
                 </label>
                 <ImageVerifyCode
                   ref="phoneImageVerifyCodeRef"
@@ -236,13 +237,13 @@ function handleEmailReset() {
                   {{ phoneErrors.imageVerifyAnswer }}
                 </div>
                 <p class="mt-1 text-xs text-gray-500">
-                  点击图片可刷新验证码
+                  {{ t('auth.tips.refreshVerifyCode') }}
                 </p>
               </div>
 
               <div>
                 <label for="phone-verifycode" class="block text-sm font-medium text-gray-700 mb-1">
-                  短信验证码
+                  {{ t('auth.fields.smsVerifyCode') }}
                 </label>
                 <div class="flex items-center space-x-2">
                   <input
@@ -273,13 +274,13 @@ function handleEmailReset() {
 
               <div>
                 <label for="phone-password" class="block text-sm font-medium text-gray-700 mb-1">
-                  新密码
+                  {{ t('auth.fields.newPassword') }}
                 </label>
                 <input
                   id="phone-password"
                   v-model="phoneForm.password"
                   type="password"
-                  placeholder="请输入新密码（至少6位）"
+                  :placeholder="t('auth.placeholders.newPassword')"
                   class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="phoneErrors.password ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
@@ -291,13 +292,13 @@ function handleEmailReset() {
 
               <div>
                 <label for="phone-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">
-                  确认新密码
+                  {{ t('auth.fields.confirmPassword') }}
                 </label>
                 <input
                   id="phone-confirm-password"
                   v-model="phoneForm.confirmPassword"
                   type="password"
-                  placeholder="请再次输入新密码"
+                  :placeholder="t('auth.placeholders.confirmPassword')"
                   class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="phoneErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
@@ -312,7 +313,7 @@ function handleEmailReset() {
                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 :disabled="isLoading"
               >
-                {{ isPhoneLoading ? '重置中...' : '重置密码' }}
+                {{ isPhoneLoading ? t('auth.actions.resettingPassword') : t('auth.actions.resetPassword') }}
               </button>
             </form>
           </TabsContent>
@@ -321,13 +322,13 @@ function handleEmailReset() {
             <form class="space-y-4" @submit.prevent="handleEmailReset">
               <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                  邮箱
+                  {{ t('auth.fields.email') }}
                 </label>
                 <input
                   id="email"
                   v-model="emailForm.email"
                   type="email"
-                  placeholder="请输入邮箱地址"
+                  :placeholder="t('auth.placeholders.email')"
                   class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="emailErrors.email ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
@@ -339,7 +340,7 @@ function handleEmailReset() {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                  图形验证码
+                  {{ t('auth.fields.imageVerifyCode') }}
                 </label>
                 <ImageVerifyCode
                   ref="emailImageVerifyCodeRef"
@@ -353,20 +354,20 @@ function handleEmailReset() {
                   {{ emailErrors.imageVerifyAnswer }}
                 </div>
                 <p class="mt-1 text-xs text-gray-500">
-                  点击图片可刷新验证码
+                  {{ t('auth.tips.refreshVerifyCode') }}
                 </p>
               </div>
 
               <div>
                 <label for="email-verifycode" class="block text-sm font-medium text-gray-700 mb-1">
-                  邮箱验证码
+                  {{ t('auth.fields.emailVerifyCode') }}
                 </label>
                 <div class="flex items-center space-x-2">
                   <input
                     id="email-verifycode"
                     v-model="emailForm.verifycode"
                     type="text"
-                    placeholder="请输入邮箱验证码"
+                    :placeholder="t('auth.placeholders.emailVerifyCode')"
                     class="flex-1 min-w-0 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="emailErrors.verifycode ? 'border-red-500' : 'border-gray-300'"
                     :disabled="isLoading"
@@ -390,13 +391,13 @@ function handleEmailReset() {
 
               <div>
                 <label for="email-password" class="block text-sm font-medium text-gray-700 mb-1">
-                  新密码
+                  {{ t('auth.fields.newPassword') }}
                 </label>
                 <input
                   id="email-password"
                   v-model="emailForm.password"
                   type="password"
-                  placeholder="请输入新密码（至少6位）"
+                  :placeholder="t('auth.placeholders.newPassword')"
                   class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="emailErrors.password ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
@@ -408,13 +409,13 @@ function handleEmailReset() {
 
               <div>
                 <label for="email-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">
-                  确认新密码
+                  {{ t('auth.fields.confirmPassword') }}
                 </label>
                 <input
                   id="email-confirm-password"
                   v-model="emailForm.confirmPassword"
                   type="password"
-                  placeholder="请再次输入新密码"
+                  :placeholder="t('auth.placeholders.confirmPassword')"
                   class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="emailErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'"
                   :disabled="isLoading"
@@ -429,16 +430,16 @@ function handleEmailReset() {
                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 :disabled="isLoading"
               >
-                {{ isEmailLoading ? '重置中...' : '重置密码' }}
+                {{ isEmailLoading ? t('auth.actions.resettingPassword') : t('auth.actions.resetPassword') }}
               </button>
             </form>
           </TabsContent>
         </TabsRoot>
 
         <div class="mt-6 text-center text-sm text-gray-600">
-          想起密码了？
+          {{ t('auth.tips.forgotPassword') }}
           <router-link to="/login" class="text-blue-600 hover:text-blue-700 font-medium">
-            返回登录
+            {{ t('auth.actions.back') }}
           </router-link>
         </div>
       </div>

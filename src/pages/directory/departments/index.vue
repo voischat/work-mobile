@@ -122,7 +122,7 @@ function handleDeptClick(deptId: number) {
 
         <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>{{ t('errors.fetchDepartmentsFailed') }}: {{ error.message }}</p>
+            <p>{{ t('errors.fetchDepartmentsFailed') }}{{ t('common.punctuation.colon') }} {{ error.message }}</p>
           </div>
         </div>
 
@@ -152,7 +152,7 @@ function handleDeptClick(deptId: number) {
                     {{ dept.name }}
                   </h3>
                   <p class="text-sm text-gray-600">
-                    {{ t('directory.department.memberCount') }}: {{ dept.user_count }}
+                    {{ t('directory.department.memberCount') }}{{ t('common.punctuation.colon') }} {{ dept.user_count }}
                   </p>
                 </div>
               </div>

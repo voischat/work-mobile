@@ -139,7 +139,7 @@ function handleGroupCancel() {
                     {{ group.name }}
                   </h3>
                   <p class="text-sm text-gray-600">
-                    {{ t('directory.group.memberCount') }}: {{ group.user_count }}
+                    {{ t('directory.group.memberCount') }}{{ t('common.punctuation.colon') }} {{ group.user_count }}
                   </p>
                 </div>
               </div>

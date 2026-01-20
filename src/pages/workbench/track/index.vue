@@ -13,11 +13,13 @@ import GestureDialog from '~/components/GestureDialog.vue'
 import TargetSelectorPopover from '~/components/TargetSelectorPopover.vue'
 import TreeSelector from '~/components/TreeSelector.vue'
 import { useAMap } from '~/composables/useAMap'
+import { useToast } from '~/composables/useToast'
 import { useVip } from '~/composables/useVip'
 import { weilaFetch } from '~/shared/instances'
 
 const { loadAMap, isLoaded: isMapLoaded } = useAMap()
 const { hasQuickSupport } = useVip()
+const { t } = useI18n()
 const { showToast } = useToast()
 
 const userId = useRouteQuery('userId', -1, { transform: Number })
@@ -379,7 +381,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
         <div v-if="!isMapLoaded" class="absolute inset-0 bg-gray-100 flex items-center justify-center">
           <div class="flex flex-col items-center space-y-3">
             <Icon icon="lucide:loader-2" class="w-8 h-8 text-blue-500 animate-spin" />
-            <span class="text-sm text-gray-500">地图加载中...</span>
+            <span class="text-sm text-gray-500">{{ t('directory.department.loading') }}</span>
           </div>
         </div>
       </Transition>
@@ -393,7 +395,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
                 class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 transition-colors min-w-[120px]"
               >
                 <span class="truncate">
-                  {{ member?.name || '选择成员' }}
+                  {{ member?.name || t('directory.member.selectMembers') }}
                 </span>
                 <Icon
                   icon="lucide:chevron-down"
@@ -444,16 +446,16 @@ function navigateToPoint(point: TrackPoint, index: number): void {
 
         <div class="flex items-center text-xs mt-2">
           <span v-if="!isValid" class="text-orange-600 whitespace-nowrap">
-            请选择成员和日期
+            {{ t('common.placeholders.select') }}{{ t('directory.member.title') }}{{ t('common.punctuation.comma') }}{{ t('directory.member.fields.createTime') }}
           </span>
           <span v-else-if="status === 'pending' && accumulatedTracks.length === 0" class="text-gray-500 whitespace-nowrap">
-            加载中...
+            {{ t('common.status.loading') }}
           </span>
           <span v-else-if="error" class="text-red-600 whitespace-nowrap">
-            加载失败
+            {{ t('common.status.loadFailed') }}
           </span>
           <span v-else-if="totalCount === 0" class="text-gray-500 whitespace-nowrap">
-            暂无数据
+            {{ t('common.status.noData') }}
           </span>
         </div>
       </div>
@@ -490,7 +492,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
           v-if="member"
           class="hidden lg:flex absolute bottom-4 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg px-4 py-3 items-center space-x-3"
         >
-          <span class="text-sm text-gray-600 whitespace-nowrap">轨迹间隔</span>
+          <span class="text-sm text-gray-600 whitespace-nowrap">{{ t('nav.track') }}{{ t('me.fields.interval') }}</span>
           <ToggleGroupRoot
             type="single"
             :model-value="currentTrackValue"
@@ -536,9 +538,9 @@ function navigateToPoint(point: TrackPoint, index: number): void {
       </Transition>
 
       <!-- Mobile dialog for track settings -->
-      <GestureDialog v-model:open="isSettingsDrawerOpen" title="轨迹设置">
+      <GestureDialog v-model:open="isSettingsDrawerOpen" :title="`${t('nav.track')}设置`">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-3">轨迹间隔</label>
+          <label class="block text-sm font-medium text-gray-700 mb-3">{{ t('nav.track') }}{{ t('me.fields.interval') }}</label>
           <div class="flex flex-wrap -m-1">
             <div v-for="option in trackOptions" :key="option.value" class="w-1/3 p-1">
               <button
@@ -551,19 +553,19 @@ function navigateToPoint(point: TrackPoint, index: number): void {
                 @click="handleTrackChange(option.value); isSettingsDrawerOpen = false;"
               >
                 {{ option.label }}
-                <span v-if="option.vipOnly && !hasQuickSupport" class="ml-1 text-xs opacity-60">VIP</span>
+                <span v-if="option.vipOnly && !hasQuickSupport" class="ml-1 text-xs opacity-60">{{ t('vip.title') }}</span>
               </button>
             </div>
           </div>
           <div v-if="isUpdatingTrack" class="flex items-center justify-center space-x-2 text-gray-500 mt-4">
             <Icon icon="lucide:loader-2" class="w-4 h-4 animate-spin" />
-            <span class="text-sm">更新中...</span>
+            <span class="text-sm">{{ t('common.actions.refresh') }}{{ t('common.status.loading') }}</span>
           </div>
         </div>
       </GestureDialog>
 
       <!-- Track list dialog -->
-      <GestureDialog v-model:open="isTrackListDrawerOpen" title="轨迹点列表">
+      <GestureDialog v-model:open="isTrackListDrawerOpen" :title="`${t('nav.track')}点列表`">
         <div ref="trackListRef" class="divide-y divide-gray-100 overflow-y-auto flex-1">
           <button
             v-for="(point, index) in accumulatedTracks"
@@ -580,7 +582,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
                 {{ new Date(point.created * 1000).toLocaleTimeString() }}
               </div>
               <div class="text-xs text-gray-500 truncate">
-                {{ point.lat.toFixed(6) }}, {{ point.lng.toFixed(6) }}
+                {{ point.lat.toFixed(6) }}{{ t('common.punctuation.comma') }} {{ point.lng.toFixed(6) }}
               </div>
             </div>
             <Icon icon="lucide:chevron-right" class="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -588,11 +590,11 @@ function navigateToPoint(point: TrackPoint, index: number): void {
 
           <div v-if="hasNextPage" class="flex items-center justify-center py-4">
             <Icon icon="lucide:loader-2" class="w-4 h-4 text-gray-400 animate-spin mr-2" />
-            <span class="text-sm text-gray-500">加载中...</span>
+            <span class="text-sm text-gray-500">{{ t('common.status.loading') }}</span>
           </div>
 
           <div v-else-if="accumulatedTracks.length > 0" class="flex items-center justify-center py-4">
-            <span class="text-sm text-gray-400">共 {{ totalCount }} 条</span>
+            <span class="text-sm text-gray-400">{{ t('me.fields.total') }} {{ totalCount }} {{ t('vip.limits.maxDepartments') }}</span>
           </div>
         </div>
       </GestureDialog>

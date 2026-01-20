@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import HomeLayout from '~/components/HomeLayout.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 
 // 处理菜单点击
 function handleMenuClick(path: string) {
@@ -17,7 +19,7 @@ function handleMenuClick(path: string) {
       <div class="max-w-4xl mx-auto space-y-6">
         <div class="mb-6">
           <h1 class="text-2xl font-bold text-gray-900">
-            工作台
+            {{ t('nav.workbench') }}
           </h1>
         </div>
 
@@ -29,7 +31,7 @@ function handleMenuClick(path: string) {
             <div class="p-3 rounded-lg">
               <Icon icon="lucide:route" class="w-12 h-12 text-blue-600" />
             </div>
-            <span class="text-lg font-bold text-gray-900">轨迹</span>
+            <span class="text-lg font-bold text-gray-900">{{ t('nav.track') }}</span>
           </button>
 
           <button
@@ -39,7 +41,7 @@ function handleMenuClick(path: string) {
             <div class="p-3 rounded-lg">
               <Icon icon="lucide:map-pin" class="w-12 h-12 text-green-600" />
             </div>
-            <span class="text-lg font-bold text-gray-900">实时位置</span>
+            <span class="text-lg font-bold text-gray-900">{{ t('nav.realtimeLocation') }}</span>
           </button>
         </div>
       </div>

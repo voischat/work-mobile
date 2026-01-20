@@ -134,7 +134,7 @@ function formatDate(timestamp: number): string {
                 ? 'bg-red-50 text-red-700 border border-red-200'
                 : 'text-gray-900'"
             >
-              {{ member.grp_cnt }} / {{ member.grp_lmt }}
+              {{ member.grp_cnt }} {{ t('common.punctuation.slash') }} {{ member.grp_lmt }}
             </span>
           </div>
           <div class="flex items-center">
@@ -147,11 +147,11 @@ function formatDate(timestamp: number): string {
         <div class="flex items-center flex-wrap space-x-2 pt-3 border-t border-gray-100">
           <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
             <Icon icon="lucide:route" class="w-3.5 h-3.5" />
-            <span>{{ t('directory.member.fields.track') }}: {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || t('directory.member.onlineStatus.unknown') }}</span>
+            <span>{{ t('directory.member.fields.track') }}{{ t('common.punctuation.colon') }} {{ trackTypeMap[member.track as keyof typeof trackTypeMap]?.label || t('directory.member.onlineStatus.unknown') }}</span>
           </span>
           <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
             <Icon icon="lucide:map-pin" class="w-3.5 h-3.5" />
-            <span>{{ t('directory.member.fields.locationShare') }}: {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || t('directory.member.onlineStatus.unknown') }}</span>
+            <span>{{ t('directory.member.fields.locationShare') }}{{ t('common.punctuation.colon') }} {{ locShareMap[member.loc_share as keyof typeof locShareMap]?.label || t('directory.member.onlineStatus.unknown') }}</span>
           </span>
         </div>
 

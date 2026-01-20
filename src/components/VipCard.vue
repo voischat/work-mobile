@@ -89,27 +89,27 @@ function formatSupportName(name: string): string {
             </div>
             <div v-if="support.support" class="text-xs text-gray-600 space-y-1">
               <div v-if="support.member_limit" class="flex items-center">
-                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxMembers') }}：</span>
+                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxMembers') }}{{ t('common.punctuation.colon') }}</span>
                 <span class="font-medium text-gray-700">{{ support.member_limit }}</span>
               </div>
               <div v-if="support.dept_limit" class="flex items-center">
-                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxDepartments') }}：</span>
+                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxDepartments') }}{{ t('common.punctuation.colon') }}</span>
                 <span class="font-medium text-gray-700">{{ support.dept_limit }}</span>
               </div>
               <div v-if="support.dept_member_limit" class="flex items-center">
-                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxDeptMembers') }}：</span>
+                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxDeptMembers') }}{{ t('common.punctuation.colon') }}</span>
                 <span class="font-medium text-gray-700">{{ support.dept_member_limit }}</span>
               </div>
               <div v-if="support.group_limit" class="flex items-center">
-                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxGroups') }}：</span>
+                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxGroups') }}{{ t('common.punctuation.colon') }}</span>
                 <span class="font-medium text-gray-700">{{ support.group_limit }}</span>
               </div>
               <div v-if="support.group_member_limit" class="flex items-center">
-                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxGroupMembers') }}：</span>
+                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxGroupMembers') }}{{ t('common.punctuation.colon') }}</span>
                 <span class="font-medium text-gray-700">{{ support.group_member_limit }}</span>
               </div>
               <div v-if="support.device_limit" class="flex items-center">
-                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxDevices') }}：</span>
+                <span class="text-gray-500 mr-2">{{ t('vip.limits.maxDevices') }}{{ t('common.punctuation.colon') }}</span>
                 <span class="font-medium text-gray-700">{{ support.device_limit }}</span>
               </div>
             </div>

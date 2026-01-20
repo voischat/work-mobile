@@ -129,7 +129,7 @@ function navigateToCorpLegal() {
           </p>
           <p class="text-sm text-gray-600 flex items-center">
             <Icon icon="lucide:hash" class="w-4 h-4 mr-1.5 text-gray-400" />
-            {{ t('organization.orgId') }}: <span class="font-medium text-gray-700 ml-1">{{ org.num }}</span>
+            {{ t('organization.orgId') }}{{ t('common.punctuation.colon') }} <span class="font-medium text-gray-700 ml-1">{{ org.num }}</span>
           </p>
         </div>
       </div>

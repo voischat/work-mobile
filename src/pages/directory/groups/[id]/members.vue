@@ -336,18 +336,18 @@ function handleEditGroupMember(member: Member) {
 
         <div v-if="status === 'pending' && accumulatedMembers.length === 0" class="flex items-center justify-center py-12">
           <div class="text-gray-600">
-            加载中...
+            {{ t('common.status.loading') }}
           </div>
         </div>
 
         <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="text-red-800">
-            <p>获取成员列表失败: {{ error.message }}</p>
+            <p>{{ t('directory.member.fetchFailed') }}{{ t('common.punctuation.colon') }} {{ error.message }}</p>
           </div>
         </div>
 
         <div v-if="accumulatedMembers.length === 0 && status !== 'pending'" class="bg-white rounded-lg p-6 text-center text-gray-500 border border-gray-200">
-          暂无成员数据
+          {{ t('directory.member.noData') }}
         </div>
 
         <!-- 成员列表 -->
@@ -374,14 +374,14 @@ function handleEditGroupMember(member: Member) {
 
         <div v-if="hasNextPage" ref="load-more" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-600 text-sm">
-            加载中...
+            {{ t('common.messages.loadMoreLoading') }}
           </div>
         </div>
 
         <!-- 没有更多数据提示 -->
         <div v-else-if="accumulatedMembers.length > 0" class="mt-4 flex items-center justify-center py-4">
           <div class="text-gray-400 text-sm">
-            已加载全部数据（共 {{ data?.count || 0 }} 条）
+            {{ t('common.messages.loadMoreEnd', { count: data?.count || 0 }) }}
           </div>
         </div>
       </div>

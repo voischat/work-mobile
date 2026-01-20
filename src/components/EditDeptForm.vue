@@ -10,6 +10,8 @@ const props = defineProps<{
   dept: Dept
 }>()
 
+const { t } = useI18n()
+
 // 编辑部门的 schema
 const editDeptSchema = z.object({
   dept_id: z.number(),
@@ -75,14 +77,14 @@ defineExpose({
 
 <template>
   <div v-if="!dept" class="text-center text-gray-500 py-8">
-    加载中...
+    {{ t('common.status.loading') }}
   </div>
 
   <form v-else class="space-y-4" @submit.prevent>
     <!-- 部门名称输入框 -->
     <div>
       <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-        部门名称 <span class="text-red-500">*</span>
+        {{ t('directory.department.fields.name') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
       </label>
       <input
         id="name"

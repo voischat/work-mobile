@@ -11,6 +11,8 @@ const props = defineProps<{
   group: Group
 }>()
 
+const { t } = useI18n()
+
 // 编辑群组的 schema
 const editGroupSchema = z.object({
   group_id: z.number(),
@@ -93,14 +95,14 @@ defineExpose({
 
 <template>
   <div v-if="!group" class="text-center text-gray-500 py-8">
-    加载中...
+    {{ t('common.status.loading') }}
   </div>
 
   <form v-else class="space-y-4" @submit.prevent>
     <!-- 群组名称输入框 -->
     <div>
       <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-        群组名称 <span class="text-red-500">*</span>
+        {{ t('directory.group.fields.name') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
       </label>
       <input
         id="name"
@@ -119,7 +121,7 @@ defineExpose({
     <!-- 部门选择 -->
     <div>
       <label for="dept_id" class="block text-sm font-medium text-gray-700 mb-1">
-        所属部门 <span class="text-red-500">*</span>
+        {{ t('directory.group.fields.department') }} <span class="text-red-500">{{ t('common.validation.requiredMark') }}</span>
       </label>
       <select
         id="dept_id"
@@ -129,7 +131,7 @@ defineExpose({
         :disabled="isLoading"
       >
         <option :value="0">
-          无部门
+          {{ t('directory.department.noDepartment') }}
         </option>
         <option
           v-for="dept in depts"
@@ -147,7 +149,7 @@ defineExpose({
     <!-- 头像上传按钮 -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">
-        头像
+        {{ t('directory.group.fields.avatar') }}
       </label>
       <AvatarUpload v-model="formData.avatar" />
     </div>
@@ -155,7 +157,7 @@ defineExpose({
     <!-- 对讲模式 -->
     <div>
       <label for="burst_mode" class="block text-sm font-medium text-gray-700 mb-1">
-        对讲模式
+        {{ t('directory.group.fields.intercomMode') }}
       </label>
       <select
         id="burst_mode"
@@ -165,10 +167,10 @@ defineExpose({
         :disabled="isLoading"
       >
         <option :value="0">
-          排麦
+          {{ t('directory.group.intercomModes.queue') }}
         </option>
         <option :value="1">
-          抢麦
+          {{ t('directory.group.intercomModes.free') }}
         </option>
       </select>
       <div v-if="errors.burst_mode" class="mt-1 text-sm text-red-600">

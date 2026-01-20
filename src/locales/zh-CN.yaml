@@ -2,6 +2,14 @@
 app:
   name: 微喇企业版
 
+# 演示页面
+demo:
+  hello: 你好
+  login: 登录
+  welcome: 欢迎
+  logout: 退出
+  user: 用户
+
 # 语言
 language:
   en: English
@@ -67,6 +75,7 @@ common:
     avatarDeleted: 已删除头像
     imageDeleted: 已删除图片
     loadFailed: 加载失败
+    validationFailed: 表单验证失败
   validation:
     required: 必填项
     requiredMark: '*'
@@ -127,8 +136,10 @@ auth:
   login:
     noAccount: 还没有账号？
     registerNow: 立即注册
+    back: 返回
   tips:
     refreshVerifyCode: 点击图片可刷新验证码
+    forgotPassword: 想起密码了？
     phonePrefix: '+86'
   placeholders:
     newPassword: 请输入新密码（至少6位）
@@ -306,10 +317,13 @@ directory:
     noDepartment: 无部门
     confirmDelete: 确认删除
     confirmDeleteMessage: 确定要删除部门「{name}」吗？此操作不可恢复。
+    createSuccess: 部门创建成功
+    createFailed: 部门创建失败
     fields:
       name: 部门名称
     validation:
       nameRequired: 部门名称不能为空
+    loading: 部门加载中...
   device:
     title: 设备
     count: 设备数
@@ -405,6 +419,9 @@ me:
     email: 邮箱
     createTime: 创建时间
     notSet: 未设置
+    person: 人
+    interval: 间隔
+    total: 共
   actions:
     corpAuth: 企业认证
     changePassword: 修改密码

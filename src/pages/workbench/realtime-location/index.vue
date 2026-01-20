@@ -16,6 +16,8 @@ import { weilaFetch } from '~/shared/instances'
 
 const { loadAMap, isLoaded: isMapLoaded } = useAMap()
 
+const { t } = useI18n()
+
 const selectedType = useRouteQuery<'dept' | 'group'>('type', 'dept')
 const selectedDeptId = useRouteQuery('deptId', -1, { transform: Number })
 const selectedGroupId = useRouteQuery('groupId', -1, { transform: Number })
@@ -300,7 +302,7 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
         <div v-if="!isMapLoaded" class="absolute inset-0 bg-gray-100 flex items-center justify-center">
           <div class="flex flex-col items-center space-y-3">
             <Icon icon="lucide:loader-2" class="w-8 h-8 text-blue-500 animate-spin" />
-            <span class="text-sm text-gray-500">地图加载中...</span>
+            <span class="text-sm text-gray-500">{{ t('directory.department.loading') }}</span>
           </div>
         </div>
       </Transition>
@@ -314,7 +316,7 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
                 class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 transition-colors min-w-[120px]"
               >
                 <span class="truncate">
-                  {{ selectedNode?.label || `选择${selectedType === 'dept' ? '部门' : '群组'}` }}
+                  {{ selectedNode?.label || `${t('common.placeholders.select')}${selectedType === 'dept' ? t('directory.department.title') : t('directory.group.title')}` }}
                 </span>
                 <Icon icon="lucide:chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200" :class="{ 'rotate-180': isPopoverOpen }" />
               </button>
@@ -362,19 +364,19 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
         </div>
         <div class="flex items-center text-xs mt-2">
           <span v-if="!isValid" class="text-orange-600 whitespace-nowrap">
-            选择{{ selectedType === 'dept' ? '部门' : '群组' }}
+            {{ t('common.placeholders.select') }}{{ selectedType === 'dept' ? t('directory.department.title') : t('directory.group.title') }}
           </span>
           <span v-else-if="status === 'pending'" class="text-gray-500 whitespace-nowrap">
-            加载中...
+            {{ t('common.status.loading') }}
           </span>
           <span v-else-if="error" class="text-red-600 whitespace-nowrap">
-            加载失败
+            {{ t('common.status.loadFailed') }}
           </span>
           <span v-else-if="(realtimeData?.length ?? 0) === 0" class="text-gray-500 whitespace-nowrap">
-            暂无数据
+            {{ t('common.status.noData') }}
           </span>
           <span v-else class="text-gray-600 whitespace-nowrap">
-            {{ realtimeData?.length || 0 }} 人
+            {{ realtimeData?.length || 0 }} {{ t('me.fields.person') }}
           </span>
         </div>
       </div>
