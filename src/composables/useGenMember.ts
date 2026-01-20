@@ -76,7 +76,7 @@ export function useGenerateMember(curMember?: Ref<Record<string, any> | null>) {
     }
     catch (err: any) {
       if (err instanceof z.ZodError) {
-        error.value = `字段校验失败：${err.errors.map(e => e.message).join('、')}`
+        error.value = `字段校验失败：${err.issues.map(e => e.message).join('、')}`
       }
       else {
         error.value = err.message || '解析失败，请重试'

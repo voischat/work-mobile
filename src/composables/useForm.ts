@@ -1,7 +1,7 @@
 import type { z } from 'zod'
 import { computed, ref } from 'vue'
 
-export function useForm<T extends z.ZodTypeAny>(schema: T) {
+export function useForm<T extends z.ZodType>(schema: T) {
   const errorsRef = ref<Record<string, string>>({})
   const { t } = useI18n()
 
