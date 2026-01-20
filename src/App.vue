@@ -18,6 +18,12 @@ const queryAccount = useRouteQuery('account', '')
 const queryPassword = useRouteQuery('password', '')
 const queryCountryCode = useRouteQuery('country-code', '')
 
+watchEffect(() => {
+  console.log('queryAccount.value', queryAccount.value)
+  console.log('queryPassword.value', queryPassword.value)
+  console.log('queryCountryCode.value', queryCountryCode.value)
+})
+
 const router = useRouter()
 
 // 登录 mutation
