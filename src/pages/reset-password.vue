@@ -14,24 +14,24 @@ import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
 const phoneSchema = z.object({
-  phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号'),
-  imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
-  verifycode: z.string().min(4, '验证码至少4位'),
-  password: z.string().min(6, '密码至少6位'),
-  confirmPassword: z.string().min(6, '请确认密码'),
+  phone: z.string().regex(/^1[3-9]\d{9}$/, 'me.validation.phoneInvalid'),
+  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
+  verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
+  password: z.string().min(6, 'me.validation.passwordMin'),
+  confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordMin'),
 }).refine(data => data.password === data.confirmPassword, {
-  message: '两次输入的密码不一致',
+  message: 'auth.validation.passwordMismatch',
   path: ['confirmPassword'],
 })
 
 const emailSchema = z.object({
-  email: z.string().email('请输入正确的邮箱地址'),
-  imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
-  verifycode: z.string().min(4, '验证码至少4位'),
-  password: z.string().min(6, '密码至少6位'),
-  confirmPassword: z.string().min(6, '请确认密码'),
+  email: z.string().email('me.validation.emailInvalid'),
+  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
+  verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
+  password: z.string().min(6, 'me.validation.passwordMin'),
+  confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordMin'),
 }).refine(data => data.password === data.confirmPassword, {
-  message: '两次输入的密码不一致',
+  message: 'auth.validation.passwordMismatch',
   path: ['confirmPassword'],
 })
 

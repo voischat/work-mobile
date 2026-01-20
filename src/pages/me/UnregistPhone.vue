@@ -14,9 +14,9 @@ import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
 const unregistPhoneSchema = z.object({
-  phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号'),
-  imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
-  verifycode: z.string().min(4, '验证码至少4位'),
+  phone: z.string().regex(/^1[3-9]\d{9}$/, 'me.validation.phoneInvalid'),
+  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
+  verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
 })
 
 type UnregistPhoneForm = z.infer<typeof unregistPhoneSchema>

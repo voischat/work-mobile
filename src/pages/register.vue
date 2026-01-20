@@ -22,7 +22,7 @@ const phoneSchema = z.object({
   imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
   verifycode: z.string().min(4, 'auth.validation.verifyCodeMin'),
   password: z.string().min(6, 'auth.validation.passwordMin'),
-  confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordRequired'),
+  confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordMin'),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'auth.validation.passwordMismatch',
   path: ['confirmPassword'],
@@ -33,7 +33,7 @@ const emailSchema = z.object({
   imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
   verifycode: z.string().min(4, 'auth.validation.verifyCodeMin'),
   password: z.string().min(6, 'auth.validation.passwordMin'),
-  confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordRequired'),
+  confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordMin'),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'auth.validation.passwordMismatch',
   path: ['confirmPassword'],

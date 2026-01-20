@@ -10,16 +10,15 @@ const deepseek = createDeepSeek({
 
 // 表单验证用的完整 schema（包含部门ID和头像）
 export const addMemberSchema = z.object({
-  name: z.string().min(1, '名称不能为空'),
+  name: z.string().min(1, 'directory.member.validation.nameRequired'),
   job_num: z.string().optional(),
   sex: z.number().int().min(1).max(2),
-  phone: z.string().regex(/^1[3-9]\d{9}$/, '请输入正确的手机号').optional().or(z.literal('')),
+  phone: z.string().regex(/^1[3-9]\d{9}$/, 'directory.member.validation.phoneInvalid').optional().or(z.literal('')),
   is_dept_admin: z.number().int().min(0).max(1),
   loc_share: z.number().int().min(0).max(1),
   track: z.number().int().min(0).max(4),
-  password: z.string().min(6, '密码至少6位'),
-
-  dept_id: z.number().int().min(0, '请选择部门'),
+  password: z.string().min(6, 'directory.member.validation.passwordMin'),
+  dept_id: z.number().int().min(0, 'directory.member.validation.deptRequired'),
   avatar: z.string().optional().or(z.literal('')),
 })
 

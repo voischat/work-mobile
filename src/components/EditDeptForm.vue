@@ -13,7 +13,7 @@ const props = defineProps<{
 // 编辑部门的 schema
 const editDeptSchema = z.object({
   dept_id: z.number(),
-  name: z.string().min(1, '部门名称不能为空'),
+  name: z.string().min(1, 'directory.department.validation.nameRequired'),
 })
 
 type EditDeptForm = z.infer<typeof editDeptSchema>

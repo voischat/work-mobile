@@ -12,11 +12,11 @@ import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
 const changePasswordSchema = z.object({
-  old_password: z.string().min(1, '旧密码不能为空'),
-  new_password: z.string().min(6, '新密码至少6位'),
-  confirm_password: z.string().min(1, '确认密码不能为空'),
+  old_password: z.string().min(1, 'me.validation.oldPasswordRequired'),
+  new_password: z.string().min(6, 'me.validation.newPasswordMin'),
+  confirm_password: z.string().min(1, 'auth.validation.confirmPasswordRequired'),
 }).refine(data => data.new_password === data.confirm_password, {
-  message: '两次输入的密码不一致',
+  message: 'auth.validation.passwordMismatch',
   path: ['confirm_password'],
 })
 

@@ -153,6 +153,8 @@ auth:
     imageVerifyCodeRequired: Please enter image verification code
     verifyCodeMin: Verification code must be at least 4 characters
     emailInvalid: Please enter a valid email address
+    oldPasswordRequired: Old password is required
+    newPasswordMin: New password must be at least 6 characters
 
 # Directory
 directory:
@@ -210,6 +212,11 @@ directory:
       name: Enter name
       employeeId: Enter employee ID (optional)
       phone: Enter phone number (optional)
+    validation:
+      nameRequired: Name is required
+      phoneInvalid: Please enter a valid phone number
+      passwordMin: Password must be at least 6 characters
+      deptRequired: Please select a department
     memberType:
       member: Member
       device: Device
@@ -278,6 +285,7 @@ directory:
     validation:
       nameRequired: Group name is required
       deptRequired: Please select a department
+      nameRequiredEdit: Group name is required
     placeholders:
       name: Enter group name
   department:
@@ -300,6 +308,8 @@ directory:
     confirmDeleteMessage: 'Are you sure to delete department "{name}"? This action cannot be undone.'
     fields:
       name: Department Name
+    validation:
+      nameRequired: Department name is required
   device:
     title: Device
     count: Devices
@@ -407,3 +417,8 @@ me:
     message: Are you sure you want to logout?
     confirm: Confirm Logout
     cancel: Cancel
+  validation:
+    phoneInvalid: Please enter a valid phone number
+    emailInvalid: Please enter a valid email address
+    passwordMin: Password must be at least 6 characters
+    verifyCodeMin: Verification code must be at least 4 digits

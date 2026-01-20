@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 export function useForm<T extends z.ZodTypeAny>(schema: T) {
   const errorsRef = ref<Record<string, string>>({})
+  const { t } = useI18n()
 
   function validate(data: z.infer<T>): boolean {
     // 清空之前的验证错误
@@ -13,9 +14,8 @@ export function useForm<T extends z.ZodTypeAny>(schema: T) {
       // 将验证错误按字段分组
       result.error.issues.forEach((issue) => {
         const field = issue.path[0] as string
-        if (field) {
-          errorsRef.value[field] = issue.message
-        }
+        if (field)
+          errorsRef.value[field] = t(issue.message)
       })
       return false
     }

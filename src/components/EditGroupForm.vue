@@ -14,8 +14,8 @@ const props = defineProps<{
 // 编辑群组的 schema
 const editGroupSchema = z.object({
   group_id: z.number(),
-  name: z.string().min(1, '群组名称不能为空'),
-  dept_id: z.number().int().min(0, '请选择部门'),
+  name: z.string().min(1, 'directory.group.validation.nameRequiredEdit'),
+  dept_id: z.number().int().min(0, 'directory.group.validation.deptRequired'),
   avatar: z.string().optional().or(z.literal('')),
   burst_mode: z.number().int().min(0).max(1),
 })

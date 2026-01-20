@@ -13,9 +13,9 @@ import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
 const bindEmailSchema = z.object({
-  email: z.string().email('请输入正确的邮箱地址'),
-  imageVerifyAnswer: z.string().min(1, '请输入图形验证码'),
-  verifycode: z.string().min(4, '验证码至少4位'),
+  email: z.string().email('me.validation.emailInvalid'),
+  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
+  verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
 })
 
 type BindEmailForm = z.infer<typeof bindEmailSchema>

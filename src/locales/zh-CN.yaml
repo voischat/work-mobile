@@ -153,6 +153,8 @@ auth:
     imageVerifyCodeRequired: 请输入图形验证码
     verifyCodeMin: 验证码至少4位
     emailInvalid: 请输入正确的邮箱地址
+    oldPasswordRequired: 旧密码不能为空
+    newPasswordMin: 新密码至少6位
 
 # 组织架构
 directory:
@@ -210,6 +212,11 @@ directory:
       name: 请输入名称
       employeeId: 请输入工号（可选）
       phone: 请输入手机号（可选）
+    validation:
+      nameRequired: 名称不能为空
+      phoneInvalid: 请输入正确的手机号
+      passwordMin: 密码至少6位
+      deptRequired: 请选择部门
     memberType:
       member: 成员
       device: 设备
@@ -278,6 +285,7 @@ directory:
     validation:
       nameRequired: 群组名称不能为空
       deptRequired: 请选择部门
+      nameRequiredEdit: 群组名称不能为空
     placeholders:
       name: 请输入群组名称
   department:
@@ -300,6 +308,8 @@ directory:
     confirmDeleteMessage: 确定要删除部门「{name}」吗？此操作不可恢复。
     fields:
       name: 部门名称
+    validation:
+      nameRequired: 部门名称不能为空
   device:
     title: 设备
     count: 设备数
@@ -407,3 +417,8 @@ me:
     message: 确定要退出登录吗？
     confirm: 确认退出
     cancel: 取消
+  validation:
+    phoneInvalid: 请输入正确的手机号
+    emailInvalid: 请输入正确的邮箱地址
+    passwordMin: 密码至少6位
+    verifyCodeMin: 验证码至少4位
