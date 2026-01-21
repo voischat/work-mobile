@@ -29,6 +29,7 @@ export default antfu(
     '**/api-examples.md',
     'MIGRATION_PLAN.md',
     '.claude/**',
+    '.agents/**',
     'docs/i18n-setup.md',
   ]),
 )
