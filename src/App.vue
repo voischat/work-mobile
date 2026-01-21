@@ -1,52 +1,13 @@
 <script setup lang="ts">
-import type { LoginResponse } from '~/types/auth'
 import { useMutation } from '@pinia/colada'
-import { useRouteQuery } from '@vueuse/router'
 import { useLocale } from './composables/useLocale'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
-import { isLimitedWebview } from './shared/const'
-import { weilaFetch } from './shared/instances'
 
-const { showToast } = useToast()
 useLocale()
 
-const REFRESH_INTERVAL = 3 * 60 * 1000 // 3分钟
+const REFRESH_INTERVAL = 3 * 60 * 1000
 const { token, refreshToken, clearAuth, saveAuth } = useAuth()
 
-// 从 URL query 获取账号与加密密码
-const queryAccount = useRouteQuery('account', '')
-const queryPassword = useRouteQuery('password', '')
-const queryCountryCode = useRouteQuery('country-code', '')
-
-watchEffect(() => {
-  console.log('queryAccount.value', queryAccount.value)
-  console.log('queryPassword.value', queryPassword.value)
-  console.log('queryCountryCode.value', queryCountryCode.value)
-})
-
-const router = useRouter()
-
-// 登录 mutation
-const { mutate: login } = useMutation({
-  mutation: (params: { country_code: string, account: string, password: string }) =>
-    weilaFetch<LoginResponse>('/corp/auth/login', {
-      method: 'POST',
-      body: params,
-    }),
-  onSuccess(data) {
-    saveAuth(data.access_token, data.refresh_token, data.expires_in)
-    isLimitedWebview.value = true
-    router.replace('/directory')
-  },
-  onError(error) {
-    showToast(error.message)
-    clearAuth()
-    isLimitedWebview.value = false
-    router.replace('/login')
-  },
-})
-
-// 刷新 token mutation
 const { mutate: refreshTokenMutate } = useMutation({
   mutation: (params: { refresh_token: string }) =>
     weilaFetch<{
@@ -57,7 +18,7 @@ const { mutate: refreshTokenMutate } = useMutation({
       method: 'POST',
       body: params,
     }),
-  onSuccess(data) {
+  onSuccess(data: { access_token: string, expires_in: number, refresh_token: string }) {
     saveAuth(data.access_token, data.refresh_token, data.expires_in)
   },
   onError() {
@@ -65,19 +26,6 @@ const { mutate: refreshTokenMutate } = useMutation({
   },
 })
 
-// 监听 URL query 参数，自动登录
-watch([queryAccount, queryPassword], ([account, password]) => {
-  if (account && password) {
-    isLimitedWebview.value = true
-    login({
-      country_code: queryCountryCode.value,
-      account,
-      password,
-    })
-  }
-}, { immediate: true })
-
-// 刷新 token 的函数
 function refreshAccessToken() {
   if (refreshToken.value) {
     refreshTokenMutate({
@@ -86,10 +34,8 @@ function refreshAccessToken() {
   }
 }
 
-// 使用 useIntervalFn 每 3 分钟刷新一次 token
 const { pause, resume } = useIntervalFn(refreshAccessToken, REFRESH_INTERVAL, { immediate: false })
 
-// 根据 token 状态控制定时器
 watch([token, refreshToken], ([t, rt]) => {
   if (t && rt)
     resume()
@@ -97,7 +43,6 @@ watch([token, refreshToken], ([t, rt]) => {
     pause()
 }, { immediate: true })
 
-// Toast
 const { toasts, removeToast } = useToast()
 
 const mainComp = useTemplateRef<any>('mainComp')
