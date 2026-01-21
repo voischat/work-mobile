@@ -5,6 +5,11 @@
       "type": "remote",
       "url": "https://mcp.context7.com/mcp",
       "enabled": true
+    },
+    "ESLint": {
+      "type": "local",
+      "command": ["npx", "@eslint/mcp@latest"],
+      "enabled": true
     }
   },
   "formatter": {
