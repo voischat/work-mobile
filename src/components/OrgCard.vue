@@ -35,7 +35,7 @@ const {
 })
 
 // 认证状态映射
-const authStatusMap = {
+const authStatusMap = computed(() => ({
   0: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
   1: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
   2: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
@@ -46,7 +46,7 @@ const authStatusMap = {
   7: { label: t('organization.authStatus.pending'), color: 'bg-yellow-100 text-yellow-700' },
   8: { label: t('organization.authStatus.verified'), color: 'bg-green-100 text-green-700' },
   9: { label: t('organization.authStatus.failed'), color: 'bg-red-100 text-red-700' },
-} as const
+}))
 
 // 计算认证状态
 const authStatus = computed(() => {
@@ -54,7 +54,7 @@ const authStatus = computed(() => {
     return null
   }
   const state = legalInfo.value.state
-  return authStatusMap[state as keyof typeof authStatusMap] || { label: t('organization.authStatus.unknown'), color: 'bg-gray-100 text-gray-700' }
+  return authStatusMap.value[state as keyof typeof authStatusMap.value] || { label: t('organization.authStatus.unknown'), color: 'bg-gray-100 text-gray-700' }
 })
 
 // 格式化时间戳为日期字符串

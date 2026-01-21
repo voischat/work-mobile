@@ -15,35 +15,35 @@ defineProps<{
 
 const { t } = useI18n()
 
-const memberTypeMap = {
+const memberTypeMap = computed(() => ({
   0: { label: t('directory.member.memberType.member') },
   1: { label: t('directory.member.memberType.device') },
   2: { label: t('directory.member.memberType.admin') },
   255: { label: t('directory.member.memberType.owner') },
-} as const
+}))
 
-const onlineStatusMap = {
+const onlineStatusMap = computed(() => ({
   0: { label: t('directory.member.onlineStatus.offline'), icon: 'lucide:circle' },
   1: { label: t('directory.member.onlineStatus.online'), icon: 'lucide:circle' },
-} as const
+}))
 
 const sexMap = {
   1: { icon: 'ph:gender-female-duotone', color: 'text-gray-500' },
   2: { icon: 'ph:gender-male-duotone', color: 'text-gray-500' },
 } as const
 
-const trackTypeMap = {
+const trackTypeMap = computed(() => ({
   0: { label: t('directory.member.trackOptions.off'), speed: '' },
   1: { label: t('directory.member.trackOptions.oneHour'), speed: t('directory.member.trackSpeed.slow') },
   2: { label: t('directory.member.trackOptions.fifteenMinutes'), speed: t('directory.member.trackSpeed.medium') },
   3: { label: t('directory.member.trackOptions.fiveMinutes'), speed: t('directory.member.trackSpeed.fast') },
   4: { label: t('directory.member.trackOptions.oneMinute'), speed: t('directory.member.trackSpeed.veryFast') },
-} as const
+}))
 
-const locShareMap = {
+const locShareMap = computed(() => ({
   0: { label: t('directory.member.locationShareOptions.off') },
   1: { label: t('directory.member.locationShareOptions.on') },
-} as const
+}))
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleDateString('zh-CN')
