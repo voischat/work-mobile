@@ -97,8 +97,8 @@ function handleDeptClick(deptId: number) {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '通讯录', route: '/directory' },
-          { name: '部门管理' },
+          { name: t('directory.title'), route: '/directory' },
+          { name: t('directory.department.management') },
         ]"
       />
     </template>

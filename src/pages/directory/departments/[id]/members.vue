@@ -287,7 +287,7 @@ function handleEditDeptMember(member: Member) {
       <Breadcrumb
         :items="[
           { name: t('directory.title'), route: '/directory' },
-          { name: t('directory.department.manage'), route: '/directory/departments' },
+          { name: t('directory.department.management'), route: '/directory/departments' },
           { name: t('directory.member.listTitle') },
         ]"
       />

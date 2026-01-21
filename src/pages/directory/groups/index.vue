@@ -93,8 +93,8 @@ function handleGroupCancel() {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '通讯录', route: '/directory' },
-          { name: '群组管理' },
+          { name: t('directory.title'), route: '/directory' },
+          { name: t('directory.group.management') },
         ]"
       />
     </template>

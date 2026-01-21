@@ -205,8 +205,8 @@ function handleEditMember(member: Member) {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '通讯录', route: '/directory' },
-          { name: '成员管理' },
+          { name: t('directory.title'), route: '/directory' },
+          { name: t('directory.member.management') },
         ]"
       />
     </template>

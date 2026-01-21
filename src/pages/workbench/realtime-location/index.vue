@@ -285,8 +285,8 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '工作台', route: '/workbench' },
-          { name: '实时位置' },
+          { name: t('nav.workbench'), route: '/workbench' },
+          { name: t('nav.realtimeLocation') },
         ]"
       />
     </template>

@@ -290,13 +290,13 @@ function handleEditGroupMember(member: Member) {
 </script>
 
 <template>
-  <BackLayout :title="groupName || '群成员列表'">
+  <BackLayout :title="groupName || t('directory.group.memberListTitle')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '通讯录', route: '/directory' },
-          { name: '群组管理', route: '/directory/groups' },
-          { name: '群成员列表' },
+          { name: t('directory.title'), route: '/directory' },
+          { name: t('directory.group.management'), route: '/directory/groups' },
+          { name: t('directory.group.memberListTitle') },
         ]"
       />
     </template>

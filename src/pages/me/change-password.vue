@@ -66,8 +66,8 @@ function handleSubmit() {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '我的', route: '/me' },
-          { name: '修改密码' },
+          { name: t('nav.me'), route: '/me' },
+          { name: t('me.changePassword.title') },
         ]"
       />
     </template>

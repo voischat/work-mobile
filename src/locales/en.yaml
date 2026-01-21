@@ -313,6 +313,7 @@ directory:
     createSuccess: Group created successfully
     createFailed: Failed to create group
     validationFailed: Form validation failed
+    memberListTitle: Group Members
     fields:
       name: Group Name
       department: Department

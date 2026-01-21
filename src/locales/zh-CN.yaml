@@ -313,6 +313,7 @@ directory:
     createSuccess: 群组创建成功
     createFailed: 群组创建失败
     validationFailed: 表单验证失败
+    memberListTitle: 群成员列表
     fields:
       name: 群组名称
       department: 所属部门

@@ -127,8 +127,8 @@ function handleSubmit() {
     <template #breadcrumb>
       <Breadcrumb
         :items="[
-          { name: '我的', route: '/me' },
-          { name: '绑定手机' },
+          { name: t('nav.me'), route: '/me' },
+          { name: t('me.actions.bindPhone') },
         ]"
       />
     </template>
