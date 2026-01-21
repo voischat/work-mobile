@@ -1,6 +1,8 @@
-# Agent Guidelines
+# Weila Work Webview
 
-## General
+A mobile webview SPA for the Weila Work app
+
+## Standards
 
 When reviewing or modifying code, identify and remove AI-generated patterns that humans wouldn't write:
 
@@ -11,13 +13,18 @@ When reviewing or modifying code, identify and remove AI-generated patterns that
 - **Verbose Logic**: Simplify unnecessarily complex conditionals or ternaries
 - **Boilerplate**: Remove duplicate error handling, repeated validation patterns, or unnecessary abstractions
 
-## Build/Lint/Test Commands
+MUST FOLLOW THESE RULES, NO EXCEPTIONS
 
-- **Dev**: `pnpm dev` (start Nuxt dev server)
-- **Build**: `pnpm build` (production build)
-- **Lint**: `pnpm lint` (ESLint) or `pnpm lint:fix` (auto-fix)
-- **Type Check**: `pnpm typecheck` (Vue type checking with vue-tsc)
-- **Preview**: `pnpm preview` (preview production build)
+- Stack: Vue.js, TypeScript, TailwindCSS v3, Vue Router, Pinia, Pinia Colada
+- Patterns: ALWAYS use Composition API + `<script setup>`, NEVER use Options API
+- ALWAYS Keep types alongside your code, use TypeScript for type safety, prefer `interface` over `type` for defining types
+- Keep unit and integration tests alongside the file they test: `src/ui/Button.vue` + `src/ui/Button.spec.ts`
+- ALWAYS use TailwindCSS classes rather than manual CSS
+- DO NOT hard code colors, use Tailwind's color system
+- ONLY add meaningful comments that explain why something is done, not what it does
+- Dev server is already running on `http://localhost:5173` with HMR enabled. NEVER launch it yourself
+- ALWAYS use named functions when declaring methods, use arrow functions only for callbacks
+- ALWAYS prefer named exports over default exports
 
 ## Tech Stack
 
@@ -33,34 +40,94 @@ When reviewing or modifying code, identify and remove AI-generated patterns that
 - **Naming**: camelCase for variables/functions, PascalCase for components/types
 - **Vue**: Composition API with `<script setup lang="ts">`, props/emits/model via defineProps/defineEmits/defineModel
 
-### Vue
+## Project Structure
 
-`defineProps/defineEmits` usage:
+Keep this section up to date with the project structure. Use it as a reference to find files and directories.
 
-```ts
-const props = defineProps<{
-  foo: string
-  bar?: number
-}>()
+EXAMPLES are there to illustrate the structure, not to be implemented as-is.
 
-const emit = defineEmits<{
-  change: [id: number]
-  update: [value: string]
-}>()
+```
+public/ # Public static files (favicon, robots.txt, static images, etc.)
+src/
+├── api/ # MUST export individual functions that fetch data
+│   ├── users.ts # EXAMPLE file for user-related API functions
+│   └── posts.ts # EXAMPLE file for post-related API functions
+├── components/ # Reusable Vue components
+│   ├── ui/ # Base UI components (buttons, inputs, etc.) if any
+│   ├── layout/ # Layout components (header, footer, sidebar) if any
+│   └── features/ # Feature-specific components
+│       └── home/ # EXAMPLE of components specific to the homepage
+├── composables/ # Composition functions
+├── stores/ # Pinia stores for global state (NOT data fetching)
+├── queries/ # Pinia Colada queries for data fetching
+│   ├── users.ts # EXAMPLE file for user-related queries
+│   └── posts.ts # EXAMPLE file for post-related queries
+├── pages/ # Page components (Vue Router + Unplugin Vue Router)
+│   ├── (home).vue # EXAMPLE index page using a group for a better name renders at /
+│   ├── users.vue # EXAMPLE that renders at /users
+│   └── users.[userId].vue # EXAMPLE that renders at /users/:userId
+├── plugins/ # Vue plugins
+├── utils/ # Global utility pure functions
+├── assets/ # Static assets that are processed by Vite (e.g CSS)
+├── main.ts # Entry point for the application, add and configure plugins, and mount the app
+├── App.vue # Root Vue component
+└── router/ # Vue Router configuration
+    └── index.ts # Router setup
 ```
 
-`defineModel` usage:
+For component-specific patterns and best practices, see [src/components/AGENTS.md](./src/components/AGENTS.md)
 
-```html
-<UserName v-model:first-name="first" v-model:last-name="last" />
+For page-specific patterns and best practices, see [src/pages/AGENTS.md](./src/pages/AGENTS.md)
 
-<script setup>
-  const firstName = defineModel('firstName')
-  const lastName = defineModel('lastName')
-</script>
+## Project Commands
 
-<template>
-  <input type="text" v-model="firstName" />
-  <input type="text" v-model="lastName" />
-</template>
-```
+- `pnpm run build`: bundles the project for production
+- `pnpm run test`: runs all tests
+- `pnpm exec vitest run <test-files>`: runs one or multiple specific test files
+  - add `--coverage` to check missing test coverage
+
+## Development Workflow
+
+ALWAYS follow the workflow when implementing a new feature or fixing a bug. This ensures consistency, quality, and maintainability of the codebase.
+
+1. Plan your tasks, review them with user. Include tests when possible
+2. Write code, following the [project structure](#project-structure) and [conventions](#standards)
+3. **ALWAYS test implementations work**:
+   - Write [tests](#using-playwright-mcp-server) for logic and components
+   - Use the Playwright MCP server to test like a real user
+4. Stage your changes with `git add` once a feature works
+5. Review changes and analyze the need of refactoring
+
+## Testing Workflow
+
+### Unit and Integration Tests
+
+- Test critical logic first
+- Split the code if needed to make it testable
+
+### Using Playwright MCP Server
+
+1. Navigate to the relevant page
+2. Wait for content to load completely
+3. Test primary user interactions
+4. Test secondary functionality (error states, edge cases)
+5. Check the JS console for errors or warnings
+   - If you see errors, investigate and fix them immediately
+   - If you see warnings, document them and consider fixing if they affect user experience
+6. Document any bugs found and fix them immediately
+
+## Research & Documentation
+
+- **NEVER hallucinate or guess URLs**
+- ALWAYS try accessing the `llms.txt` file first to find relevant documentation. EXAMPLE: `https://pinia-colada.esm.dev/llms.txt`
+  - If it exists, it will contain other links to the documentation for the LLMs used in this project
+- ALWAYS follow existing links in table of contents or documentation indices
+- Verify examples and patterns from documentation before using
+
+## MCP Servers
+
+You have these MCP servers configured globally:
+
+- **Playwright**: Browser automation for visual testing and UI interactions. Use this server when testing UI changes (Playwright can navigate, screenshot, and interact)
+
+Note: These are user-level servers available in all your projects.

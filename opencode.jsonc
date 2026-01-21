@@ -10,6 +10,14 @@
       "type": "local",
       "command": ["npx", "@eslint/mcp@latest"],
       "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": true
     }
   },
   "formatter": {
