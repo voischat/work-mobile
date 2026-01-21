@@ -26,7 +26,6 @@ const phoneSchema = z.object({
 
 const emailSchema = z.object({
   email: z.string().email('me.validation.emailInvalid'),
-  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
   verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
   password: z.string().min(6, 'me.validation.passwordMin'),
   confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordMin'),

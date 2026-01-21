@@ -12,19 +12,19 @@ import { useModal } from '~/composables/useModal'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
-const unregistEmailSchema = z.object({
-  email: z.string().email('me.validation.emailInvalid'),
-  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
-  verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
-})
-
-type UnregistEmailForm = z.infer<typeof unregistEmailSchema>
-
 const router = useRouter()
 const { clearAuth } = useAuth()
 const { showToast } = useToast()
 const { showModal } = useModal()
 const { t } = useI18n()
+
+const unregistEmailSchema = z.object({
+  email: z.string().email(t('me.validation.emailInvalid')),
+  imageVerifyAnswer: z.string().min(1, t('auth.validation.imageVerifyCodeRequired')),
+  verifycode: z.string().min(4, t('me.validation.verifyCodeMin')),
+})
+
+  type UnregistEmailForm = z.infer<typeof unregistEmailSchema>
 
 const formData = ref<UnregistEmailForm>({
   email: '',
@@ -44,11 +44,11 @@ const { mutate: sendEmailVerifyCode, isLoading: isSendingEmail } = useMutation({
       body: params,
     }),
   onSuccess() {
-    showToast('验证码已发送')
+    showToast(t('auth.messages.verifyCodeSent'))
     countDownButtonRef.value?.startCountdown()
   },
   onError(error) {
-    showToast(error.message || '发送验证码失败')
+    showToast(error.message || t('auth.messages.sendVerifyCodeFailed'))
     imageVerifyCodeRef.value?.refresh()
   },
 })
@@ -60,12 +60,12 @@ const { mutate: unregistByEmail, isLoading, error } = useMutation({
       body: params,
     }),
   onSuccess() {
-    showToast('账号注销成功')
+    showToast(t('directory.member.deleteSuccess'))
     clearAuth()
     router.push('/login')
   },
   onError(error) {
-    showToast(error.message || '注销失败')
+    showToast(error.message || t('directory.member.deleteFailed'))
   },
 })
 
@@ -76,12 +76,12 @@ const errorMessage = computed(() => {
 function handleSendEmailVerifyCode() {
   const emailRegex = /^[\w.-]+@[a-z0-9.-]+\.[a-z]{2,}$/i
   if (!formData.value.email || !emailRegex.test(formData.value.email)) {
-    showToast('请输入正确的邮箱地址')
+    showToast(t('auth.validation.emailInvalid'))
     return
   }
 
   if (!formData.value.imageVerifyAnswer) {
-    showToast('请输入图形验证码')
+    showToast(t('auth.validation.imageVerifyCodeRequired'))
     return
   }
 
@@ -103,15 +103,15 @@ const canSendEmail = computed(() => {
 
 async function handleSubmit() {
   if (!validate(formData.value)) {
-    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
+    showToast(Object.values(errors.value)?.[0] || t('common.validation.validationFailed'))
     return
   }
 
   await showModal({
-    title: '确认注销',
-    message: '确定要注销账号吗？此操作不可恢复！',
-    confirmText: '确认注销',
-    cancelText: '取消',
+    title: t('me.unregisterEmail.confirmTitle'),
+    message: t('me.unregisterEmail.confirmMessage'),
+    confirmText: t('me.unregisterEmail.confirmSubmit'),
+    cancelText: t('me.unregisterEmail.cancel'),
     confirmButtonType: 'danger',
     onConfirm() {
       unregistByEmail({

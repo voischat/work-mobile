@@ -42,6 +42,7 @@ common:
     refresh: Refresh
     reset: Reset
     submit: Submit
+    update: Update
     back: Back
     next: Next
     previous: Previous
@@ -80,6 +81,10 @@ common:
     required: Required
     requiredMark: '*'
     validationFailed: Form validation failed
+    passwordMin: Password must be at least 6 characters
+    phoneInvalid: Please enter a valid phone number
+    emailInvalid: Please enter a valid email address
+    verifyCodeMin: Verification code must be at least 4 characters
   placeholders:
     select: Please select
     input: Please enter
@@ -89,6 +94,31 @@ common:
     comma: ', '
     period: '. '
     slash: ' / '
+  deleteConfirm:
+    title: Confirm Delete
+    message: 'Are you sure to delete {type} "{name}"? This action cannot be undone.'
+
+# Verification Code (Shared across auth, bind, unregister)
+verifyCode:
+  fields:
+    image: Image Verification Code
+    sms: SMS Verification Code
+    email: Email Verification Code
+  actions:
+    send: Send Code
+    sending: Sending...
+  messages:
+    sent: Verification code sent
+    sendFailed: Failed to send verification code
+    refreshHint: Click image to refresh verification code
+    inputHint: Please enter image verification code first, then click send verification code
+    fetchFailed: Failed to get image verification code, please retry
+  placeholders:
+    image: Enter verification code
+    sms: Enter SMS verification code
+    email: Enter email verification code
+  validation:
+    imageRequired: Please enter image verification code
 
 # Authentication
 auth:
@@ -138,7 +168,6 @@ auth:
     noAccount: Don't have an account?
     registerNow: Register now
     back: Back
-    resettingPassword: Resetting...
   tips:
     refreshVerifyCode: Click image to refresh
     forgotPassword: Remembered password?
@@ -163,9 +192,9 @@ auth:
     accountRequired: Account is required
     passwordRequired: Password is required
     phoneInvalid: Please enter a valid phone number
+    emailInvalid: Please enter a valid email address
     imageVerifyCodeRequired: Please enter image verification code
     verifyCodeMin: Verification code must be at least 4 characters
-    emailInvalid: Please enter a valid email address
     oldPasswordRequired: Old password is required
     newPasswordMin: New password must be at least 6 characters
 
@@ -190,8 +219,7 @@ directory:
     stateDisabled: Disabled
     stateChangeFailed: Failed to change state
     confirmDelete: Confirm Delete
-    confirmDeleteMessage: 'Are you sure to delete member "{name}"? This action cannot be undone.'
-    validationFailed: Form validation failed
+    confirmDeleteMessage: Delete this member
     createSuccess: Member created successfully
     createFailed: Failed to create member
     updateSuccess: Member updated successfully
@@ -205,6 +233,7 @@ directory:
     listTitle: Department Member List
     searchPlaceholder: Enter member name, phone, or employee ID
     fetchFailed: Failed to fetch member list
+    validationFailed: Form validation failed
     fields:
       name: Name
       weilaId: Weila ID
@@ -226,9 +255,6 @@ directory:
       employeeId: Enter employee ID (optional)
       phone: Enter phone number (optional)
     validation:
-      nameRequired: Name is required
-      phoneInvalid: Please enter a valid phone number
-      passwordMin: Password must be at least 6 characters
       deptRequired: Please select a department
     memberType:
       member: Member
@@ -283,7 +309,7 @@ directory:
     memberCount: Member Count
     selectGroup: Select Group
     confirmDelete: Confirm Delete
-    confirmDeleteMessage: 'Are you sure to delete group "{name}"? This action cannot be undone.'
+    confirmDeleteMessage: Delete this group
     createSuccess: Group created successfully
     createFailed: Failed to create group
     validationFailed: Form validation failed
@@ -318,7 +344,7 @@ directory:
     select: Select Department
     noDepartment: No Department
     confirmDelete: Confirm Delete
-    confirmDeleteMessage: 'Are you sure to delete department "{name}"? This action cannot be undone.'
+    confirmDeleteMessage: Delete this department
     createSuccess: Department created successfully
     createFailed: Failed to create department
     fields:
@@ -440,7 +466,9 @@ me:
     phoneInvalid: Please enter a valid phone number
     emailInvalid: Please enter a valid email address
     passwordMin: Password must be at least 6 characters
-    verifyCodeMin: Verification code must be at least 4 digits
+    verifyCodeMin: Verification code must be at least 4 characters
+    oldPasswordRequired: Old password cannot be empty
+    newPasswordMin: New password must be at least 6 characters
   unregisterEmail:
     title: Unregister Email
     email: Email
@@ -451,6 +479,8 @@ me:
     submitting: Unregistering...
     confirmSubmit: Confirm Unregister
     cancel: Cancel
+    confirmTitle: Confirm Unregister
+    confirmMessage: Are you sure you want to unregister this account? This operation cannot be undone!
   unregisterPhone:
     title: Unregister Phone
     phone: Phone
@@ -461,6 +491,8 @@ me:
     submitting: Unregistering...
     confirmSubmit: Confirm Unregister
     cancel: Cancel
+    confirmTitle: Confirm Unregister
+    confirmMessage: Are you sure you want to unregister this account? This operation cannot be undone!
   bindEmail:
     title: Bind Email
     email: Email
@@ -471,6 +503,8 @@ me:
     submitting: Binding...
     confirmSubmit: Confirm Bind
     cancel: Cancel
+    bindSuccess: Email bound successfully
+    bindFailed: Failed to bind email
   bindPhone:
     title: Bind Phone
     phone: Phone
@@ -481,6 +515,8 @@ me:
     submitting: Binding...
     confirmSubmit: Confirm Bind
     cancel: Cancel
+    bindSuccess: Phone number bound successfully
+    bindFailed: Failed to bind phone number
   changePassword:
     title: Change Password
     oldPassword: Old Password

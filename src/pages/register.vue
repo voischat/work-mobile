@@ -18,24 +18,24 @@ const { showToast } = useToast()
 const { t } = useI18n()
 
 const phoneSchema = z.object({
-  phone: z.string().regex(/^1[3-9]\d{9}$/, 'auth.validation.phoneInvalid'),
-  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
-  verifycode: z.string().min(4, 'auth.validation.verifyCodeMin'),
-  password: z.string().min(6, 'auth.validation.passwordMin'),
-  confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordMin'),
+  phone: z.string().regex(/^1[3-9]\d{9}$/, t('auth.validation.phoneInvalid')),
+  imageVerifyAnswer: z.string().min(1, t('auth.validation.imageVerifyCodeRequired')),
+  verifycode: z.string().min(4, t('auth.validation.verifyCodeMin')),
+  password: z.string().min(6, t('auth.validation.passwordMin')),
+  confirmPassword: z.string().min(6, t('auth.validation.confirmPasswordMin')),
 }).refine(data => data.password === data.confirmPassword, {
-  message: 'auth.validation.passwordMismatch',
+  message: t('auth.validation.passwordMismatch'),
   path: ['confirmPassword'],
 })
 
 const emailSchema = z.object({
-  email: z.string().email('auth.validation.emailInvalid'),
-  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
-  verifycode: z.string().min(4, 'auth.validation.verifyCodeMin'),
-  password: z.string().min(6, 'auth.validation.passwordMin'),
-  confirmPassword: z.string().min(6, 'auth.validation.confirmPasswordMin'),
+  email: z.string().email(t('auth.validation.emailInvalid')),
+  imageVerifyAnswer: z.string().min(1, t('auth.validation.imageVerifyCodeRequired')),
+  verifycode: z.string().min(4, t('auth.validation.verifyCodeMin')),
+  password: z.string().min(6, t('auth.validation.passwordMin')),
+  confirmPassword: z.string().min(6, t('auth.validation.confirmPasswordMin')),
 }).refine(data => data.password === data.confirmPassword, {
-  message: 'auth.validation.passwordMismatch',
+  message: t('auth.validation.passwordMismatch'),
   path: ['confirmPassword'],
 })
 

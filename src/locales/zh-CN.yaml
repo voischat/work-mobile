@@ -81,6 +81,10 @@ common:
     required: 必填项
     requiredMark: '*'
     validationFailed: 表单验证失败
+    passwordMin: 密码至少6位
+    phoneInvalid: 请输入正确的手机号
+    emailInvalid: 请输入正确的邮箱地址
+    verifyCodeMin: 验证码至少4位
   placeholders:
     select: 请选择
     input: 请输入
@@ -90,6 +94,31 @@ common:
     comma: ，
     period: 。
     slash: ' / '
+  deleteConfirm:
+    title: 确认删除
+    message: '确定要删除{type}「{name}」吗？此操作不可恢复。'
+
+# 验证码通用配置（在 auth、绑定、注销中共享）
+verifyCode:
+  fields:
+    image: 图形验证码
+    sms: 短信验证码
+    email: 邮箱验证码
+  actions:
+    send: 发送验证码
+    sending: 发送中...
+  messages:
+    sent: 验证码已发送
+    sendFailed: 发送验证码失败
+    refreshHint: 点击图片可刷新验证码
+    inputHint: 请先输入图形验证码，然后点击发送验证码
+    fetchFailed: 获取图形验证码失败，请重试
+  placeholders:
+    image: 请输入验证码
+    sms: 请输入短信验证码
+    email: 请输入邮箱验证码
+  validation:
+    imageRequired: 请输入图形验证码
 
 # 认证相关
 auth:
@@ -163,9 +192,9 @@ auth:
     accountRequired: 账号不能为空
     passwordRequired: 密码不能为空
     phoneInvalid: 请输入正确的手机号
+    emailInvalid: 请输入正确的邮箱地址
     imageVerifyCodeRequired: 请输入图形验证码
     verifyCodeMin: 验证码至少4位
-    emailInvalid: 请输入正确的邮箱地址
     oldPasswordRequired: 旧密码不能为空
     newPasswordMin: 新密码至少6位
 
@@ -190,8 +219,7 @@ directory:
     stateDisabled: 已停用
     stateChangeFailed: 修改状态失败
     confirmDelete: 确认删除
-    confirmDeleteMessage: 确定要删除成员「{name}」吗？此操作不可恢复。
-    validationFailed: 表单验证失败
+    confirmDeleteMessage: 删除此成员
     createSuccess: 成员创建成功
     createFailed: 成员创建失败
     updateSuccess: 成员更新成功
@@ -205,6 +233,7 @@ directory:
     listTitle: 部门成员列表
     searchPlaceholder: 请输入成员姓名、手机号或工号
     fetchFailed: 获取成员列表失败
+    validationFailed: 表单验证失败
     fields:
       name: 名称
       weilaId: 微喇号
@@ -226,9 +255,6 @@ directory:
       employeeId: 请输入工号（可选）
       phone: 请输入手机号（可选）
     validation:
-      nameRequired: 名称不能为空
-      phoneInvalid: 请输入正确的手机号
-      passwordMin: 密码至少6位
       deptRequired: 请选择部门
     memberType:
       member: 成员
@@ -283,7 +309,7 @@ directory:
     memberCount: 成员数量
     selectGroup: 选择群组
     confirmDelete: 确认删除
-    confirmDeleteMessage: 确定要删除群组「{name}」吗？此操作不可恢复。
+    confirmDeleteMessage: 删除此群组
     createSuccess: 群组创建成功
     createFailed: 群组创建失败
     validationFailed: 表单验证失败
@@ -318,7 +344,7 @@ directory:
     select: 选择部门
     noDepartment: 无部门
     confirmDelete: 确认删除
-    confirmDeleteMessage: 确定要删除部门「{name}」吗？此操作不可恢复。
+    confirmDeleteMessage: 删除此部门
     createSuccess: 部门创建成功
     createFailed: 部门创建失败
     fields:
@@ -441,6 +467,8 @@ me:
     emailInvalid: 请输入正确的邮箱地址
     passwordMin: 密码至少6位
     verifyCodeMin: 验证码至少4位
+    oldPasswordRequired: 旧密码不能为空
+    newPasswordMin: 新密码至少6位
   unregisterEmail:
     title: 注销邮箱
     email: 邮箱
@@ -451,6 +479,8 @@ me:
     submitting: 注销中...
     confirmSubmit: 确认注销
     cancel: 取消
+    confirmTitle: 确认注销
+    confirmMessage: 确定要注销账号吗？此操作不可恢复！
   unregisterPhone:
     title: 注销手机号
     phone: 手机号
@@ -461,6 +491,8 @@ me:
     submitting: 注销中...
     confirmSubmit: 确认注销
     cancel: 取消
+    confirmTitle: 确认注销
+    confirmMessage: 确定要注销账号吗？此操作不可恢复！
   bindEmail:
     title: 绑定邮箱
     email: 邮箱
@@ -471,6 +503,8 @@ me:
     submitting: 绑定中...
     confirmSubmit: 确认绑定
     cancel: 取消
+    bindSuccess: 邮箱绑定成功
+    bindFailed: 邮箱绑定失败
   bindPhone:
     title: 绑定手机号
     phone: 手机号
@@ -481,6 +515,8 @@ me:
     submitting: 绑定中...
     confirmSubmit: 确认绑定
     cancel: 取消
+    bindSuccess: 手机号绑定成功
+    bindFailed: 手机号绑定失败
   changePassword:
     title: 修改密码
     oldPassword: 旧密码

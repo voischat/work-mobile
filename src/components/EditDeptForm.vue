@@ -15,7 +15,7 @@ const { t } = useI18n()
 // 编辑部门的 schema
 const editDeptSchema = z.object({
   dept_id: z.number(),
-  name: z.string().min(1, 'directory.department.validation.nameRequired'),
+  name: z.string().min(1, t('directory.department.validation.nameRequired')),
 })
 
 type EditDeptForm = z.infer<typeof editDeptSchema>

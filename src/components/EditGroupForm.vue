@@ -16,8 +16,8 @@ const { t } = useI18n()
 // 编辑群组的 schema
 const editGroupSchema = z.object({
   group_id: z.number(),
-  name: z.string().min(1, 'directory.group.validation.nameRequiredEdit'),
-  dept_id: z.number().int().min(0, 'directory.group.validation.deptRequired'),
+  name: z.string().min(1, t('directory.group.validation.nameRequired')),
+  dept_id: z.number().int().min(0, t('directory.group.validation.deptRequired')),
   avatar: z.string().optional().or(z.literal('')),
   burst_mode: z.number().int().min(0).max(1),
 })
@@ -80,7 +80,7 @@ const errorMessage = computed(() => {
 // 提交方法，返回 Promise
 async function submit(): Promise<void> {
   if (!validate(formData.value)) {
-    throw new Error(Object.values(errors.value)?.[0] || '表单验证失败')
+    throw new Error(Object.values(errors.value)?.[0] || t('common.validation.validationFailed'))
   }
 
   await editGroup(formData.value)

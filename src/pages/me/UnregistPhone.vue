@@ -13,19 +13,19 @@ import { useModal } from '~/composables/useModal'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
-const unregistPhoneSchema = z.object({
-  phone: z.string().regex(/^1[3-9]\d{9}$/, 'me.validation.phoneInvalid'),
-  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
-  verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
-})
-
-type UnregistPhoneForm = z.infer<typeof unregistPhoneSchema>
-
 const router = useRouter()
 const { clearAuth } = useAuth()
 const { showToast } = useToast()
 const { showModal } = useModal()
 const { t } = useI18n()
+
+const unregistPhoneSchema = z.object({
+  phone: z.string().regex(/^1[3-9]\d{9}$/, t('me.validation.phoneInvalid')),
+  imageVerifyAnswer: z.string().min(1, t('auth.validation.imageVerifyCodeRequired')),
+  verifycode: z.string().min(4, t('me.validation.verifyCodeMin')),
+})
+
+  type UnregistPhoneForm = z.infer<typeof unregistPhoneSchema>
 
 const formData = ref<UnregistPhoneForm>({
   phone: '',
@@ -45,11 +45,11 @@ const { mutate: sendSmsVerifyCode, isLoading: isSendingSms } = useMutation({
       body: params,
     }),
   onSuccess() {
-    showToast('验证码已发送')
+    showToast(t('auth.messages.verifyCodeSent'))
     countDownButtonRef.value?.startCountdown()
   },
   onError(error) {
-    showToast(error.message || '发送验证码失败')
+    showToast(error.message || t('auth.messages.sendVerifyCodeFailed'))
     imageVerifyCodeRef.value?.refresh()
   },
 })
@@ -61,12 +61,12 @@ const { mutate: unregistByPhone, isLoading, error } = useMutation({
       body: params,
     }),
   onSuccess() {
-    showToast('账号注销成功')
+    showToast(t('directory.member.deleteSuccess'))
     clearAuth()
     router.push('/login')
   },
   onError(error) {
-    showToast(error.message || '注销失败')
+    showToast(error.message || t('directory.member.deleteFailed'))
   },
 })
 
@@ -76,12 +76,12 @@ const errorMessage = computed(() => {
 
 function handleSendSmsVerifyCode() {
   if (!formData.value.phone || !/^1[3-9]\d{9}$/.test(formData.value.phone)) {
-    showToast('请输入正确的手机号')
+    showToast(t('auth.validation.phoneInvalid'))
     return
   }
 
   if (!formData.value.imageVerifyAnswer) {
-    showToast('请输入图形验证码')
+    showToast(t('auth.validation.imageVerifyCodeRequired'))
     return
   }
 
@@ -103,15 +103,15 @@ const canSendSms = computed(() => {
 
 async function handleSubmit() {
   if (!validate(formData.value)) {
-    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
+    showToast(Object.values(errors.value)?.[0] || t('common.validation.validationFailed'))
     return
   }
 
   await showModal({
-    title: '确认注销',
-    message: '确定要注销账号吗？此操作不可恢复！',
-    confirmText: '确认注销',
-    cancelText: '取消',
+    title: t('me.unregisterPhone.confirmTitle'),
+    message: t('me.unregisterPhone.confirmMessage'),
+    confirmText: t('me.unregisterPhone.confirmSubmit'),
+    cancelText: t('me.unregisterPhone.cancel'),
     confirmButtonType: 'danger',
     onConfirm() {
       unregistByPhone({

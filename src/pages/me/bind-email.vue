@@ -12,17 +12,17 @@ import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
-const bindEmailSchema = z.object({
-  email: z.string().email('me.validation.emailInvalid'),
-  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
-  verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
-})
-
-type BindEmailForm = z.infer<typeof bindEmailSchema>
-
 const router = useRouter()
 const { showToast } = useToast()
 const { t } = useI18n()
+
+const bindEmailSchema = z.object({
+  email: z.string().email(t('me.validation.emailInvalid')),
+  imageVerifyAnswer: z.string().min(1, t('auth.validation.imageVerifyCodeRequired')),
+  verifycode: z.string().min(4, t('me.validation.verifyCodeMin')),
+})
+
+  type BindEmailForm = z.infer<typeof bindEmailSchema>
 
 const formData = ref<BindEmailForm>({
   email: '',
@@ -42,11 +42,11 @@ const { mutate: sendEmailVerifyCode, isLoading: isSendingEmail } = useMutation({
       body: params,
     }),
   onSuccess() {
-    showToast('验证码已发送')
+    showToast(t('auth.messages.verifyCodeSent'))
     countDownButtonRef.value?.startCountdown()
   },
   onError(error) {
-    showToast(error.message || '发送验证码失败')
+    showToast(error.message || t('auth.messages.sendVerifyCodeFailed'))
     imageVerifyCodeRef.value?.refresh()
   },
 })
@@ -58,11 +58,11 @@ const { mutate: bindEmail, isLoading } = useMutation({
       body: params,
     }),
   onSuccess() {
-    showToast('邮箱绑定成功')
+    showToast(t('me.bindEmail.bindSuccess'))
     router.push('/me')
   },
   onError(error) {
-    showToast(error.message || '邮箱绑定失败')
+    showToast(error.message || t('me.bindEmail.bindFailed'))
   },
 })
 
@@ -70,12 +70,12 @@ async function handleSendEmailVerifyCode() {
   // 简单的邮箱格式验证
   const emailRegex = /^[\w.-]+@[a-z0-9.-]+\.[a-z]{2,}$/i
   if (!formData.value.email || !emailRegex.test(formData.value.email)) {
-    showToast('请输入正确的邮箱地址')
+    showToast(t('auth.validation.emailInvalid'))
     return
   }
 
   if (!formData.value.imageVerifyAnswer) {
-    showToast('请输入图形验证码')
+    showToast(t('auth.validation.imageVerifyCodeRequired'))
     return
   }
 
@@ -108,7 +108,7 @@ const canSendEmail = computed(() => {
 
 function handleSubmit() {
   if (!validate(formData.value)) {
-    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
+    showToast(Object.values(errors.value)?.[0] || t('common.validation.validationFailed'))
     return
   }
   bindEmail({

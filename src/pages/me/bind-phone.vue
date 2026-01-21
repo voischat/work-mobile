@@ -13,17 +13,17 @@ import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
-const bindPhoneSchema = z.object({
-  phone: z.string().regex(/^1[3-9]\d{9}$/, 'me.validation.phoneInvalid'),
-  imageVerifyAnswer: z.string().min(1, 'auth.validation.imageVerifyCodeRequired'),
-  verifycode: z.string().min(4, 'me.validation.verifyCodeMin'),
-})
-
-type BindPhoneForm = z.infer<typeof bindPhoneSchema>
-
 const router = useRouter()
 const { showToast } = useToast()
 const { t } = useI18n()
+
+const bindPhoneSchema = z.object({
+  phone: z.string().regex(/^1[3-9]\d{9}$/, t('me.validation.phoneInvalid')),
+  imageVerifyAnswer: z.string().min(1, t('auth.validation.imageVerifyCodeRequired')),
+  verifycode: z.string().min(4, t('me.validation.verifyCodeMin')),
+})
+
+  type BindPhoneForm = z.infer<typeof bindPhoneSchema>
 
 const formData = ref<BindPhoneForm>({
   phone: '',
@@ -43,11 +43,11 @@ const { mutate: sendSmsVerifyCode, isLoading: isSendingSms } = useMutation({
       body: params,
     }),
   onSuccess() {
-    showToast('验证码已发送')
+    showToast(t('auth.messages.verifyCodeSent'))
     countDownButtonRef.value?.startCountdown()
   },
   onError(error) {
-    showToast(error.message || '发送验证码失败')
+    showToast(error.message || t('auth.messages.sendVerifyCodeFailed'))
     imageVerifyCodeRef.value?.refresh()
   },
 })
@@ -59,8 +59,11 @@ const { mutate: bindPhone, isLoading, error } = useMutation({
       body: params,
     }),
   onSuccess() {
-    showToast('手机号绑定成功')
+    showToast(t('me.bindPhone.bindSuccess'))
     router.back()
+  },
+  onError(error) {
+    showToast(error.message || t('me.bindPhone.bindFailed'))
   },
 })
 
@@ -70,12 +73,12 @@ const errorMessage = computed(() => {
 
 async function handleSendSmsVerifyCode() {
   if (!formData.value.phone || !/^1[3-9]\d{9}$/.test(formData.value.phone)) {
-    showToast('请输入正确的手机号')
+    showToast(t('auth.validation.phoneInvalid'))
     return
   }
 
   if (!formData.value.imageVerifyAnswer) {
-    showToast('请输入图形验证码')
+    showToast(t('auth.validation.imageVerifyCodeRequired'))
     return
   }
 
@@ -108,7 +111,7 @@ const canSendSms = computed(() => {
 
 function handleSubmit() {
   if (!validate(formData.value)) {
-    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
+    showToast(Object.values(errors.value)?.[0] || t('common.validation.validationFailed'))
     return
   }
   bindPhone({

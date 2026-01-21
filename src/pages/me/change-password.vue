@@ -11,20 +11,20 @@ import { useForm } from '~/composables/useForm'
 import { useToast } from '~/composables/useToast'
 import { weilaFetch } from '~/shared/instances'
 
-const changePasswordSchema = z.object({
-  old_password: z.string().min(1, 'me.validation.oldPasswordRequired'),
-  new_password: z.string().min(6, 'me.validation.newPasswordMin'),
-  confirm_password: z.string().min(1, 'auth.validation.confirmPasswordRequired'),
-}).refine(data => data.new_password === data.confirm_password, {
-  message: 'auth.validation.passwordMismatch',
-  path: ['confirm_password'],
-})
-
-type ChangePasswordForm = z.infer<typeof changePasswordSchema>
-
 const router = useRouter()
 const { showToast } = useToast()
 const { t } = useI18n()
+
+const changePasswordSchema = z.object({
+  old_password: z.string().min(1, t('me.validation.oldPasswordRequired')),
+  new_password: z.string().min(6, t('me.validation.newPasswordMin')),
+  confirm_password: z.string().min(1, t('auth.validation.confirmPasswordRequired')),
+}).refine(data => data.new_password === data.confirm_password, {
+  message: t('auth.validation.passwordMismatch'),
+  path: ['confirm_password'],
+})
+
+  type ChangePasswordForm = z.infer<typeof changePasswordSchema>
 
 const formData = ref<ChangePasswordForm>({
   old_password: '',
@@ -51,7 +51,7 @@ const { mutate: changePassword, isLoading } = useMutation({
 
 function handleSubmit() {
   if (!validate(formData.value)) {
-    showToast(Object.values(errors.value)?.[0] || '表单验证失败')
+    showToast(Object.values(errors.value)?.[0] || t('common.validation.validationFailed'))
     return
   }
   changePassword({
