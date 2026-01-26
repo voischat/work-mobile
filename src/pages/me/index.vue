@@ -137,6 +137,13 @@ function formatDate(timestamp: number) {
             </button>
             <button
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
+              @click="router.push('/me/language')"
+            >
+              <span class="text-gray-900 font-medium">{{ t('me.actions.changeLanguage') }}</span>
+              <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
+            </button>
+            <button
+              class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/bind-phone')"
             >
               <span class="text-gray-900 font-medium">{{ t('me.actions.bindPhone') }}</span>

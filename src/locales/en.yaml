@@ -1,6 +1,6 @@
 # Global
 app:
-  name: Weila Enterprise
+  name: VoisWork
 
 # Demo pages
 demo:
@@ -456,6 +456,7 @@ me:
   actions:
     corpAuth: Enterprise Authentication
     changePassword: Change Password
+    changeLanguage: Change Language
     bindPhone: Bind Phone
     bindEmail: Bind Email
     unregister: Unregister Account

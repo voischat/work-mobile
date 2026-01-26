@@ -1,6 +1,6 @@
 # 全局通用
 app:
-  name: 微喇企业版
+  name: VoisWork
 
 # 演示页面
 demo:
@@ -456,6 +456,7 @@ me:
   actions:
     corpAuth: 企业认证
     changePassword: 修改密码
+    changeLanguage: 切换语言
     bindPhone: 绑定手机
     bindEmail: 绑定邮箱
     unregister: 注销账号
