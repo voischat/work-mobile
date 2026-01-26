@@ -48,16 +48,17 @@ const route = useRoute()
     >
       <span
         v-if="item.route"
-        class="hover:text-blue-600 transition-colors duration-200 hover:underline"
+        class="hover:text-blue-600 transition-colors duration-200 hover:underline cursor-pointer max-w-[120px] truncate block"
+        :title="item.name"
         @click="handleClick(item.route)"
       >
         {{ item.name }}
       </span>
-      <span v-else class="text-gray-900 font-medium">
+      <span v-else class="text-gray-900 font-medium max-w-[120px] truncate block" :title="item.name">
         {{ item.name }}
       </span>
 
-      <span v-if="index < filterdItems.length - 1" class="text-gray-400">
+      <span v-if="index < filterdItems.length - 1" class="text-gray-400 flex-shrink-0">
         {{ separator }}
       </span>
     </template>
