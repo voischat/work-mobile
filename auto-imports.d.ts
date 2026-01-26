@@ -58,6 +58,7 @@ declare global {
   const isAtBottom: typeof import('./src/shared/states')['isAtBottom']
   const isDark: typeof import('./src/composables/dark')['isDark']
   const isDefined: typeof import('@vueuse/core')['isDefined']
+  const isGlobalLoading: typeof import('./src/composables/useGlobalLoading')['isGlobalLoading']
   const isGlobalModalVisible: typeof import('./src/composables/useModal')['isGlobalModalVisible']
   const isLimitedWebview: typeof import('./src/shared/const')['isLimitedWebview']
   const isProxy: typeof import('vue')['isProxy']
@@ -209,6 +210,7 @@ declare global {
   const useGamepad: typeof import('@vueuse/core')['useGamepad']
   const useGenerateMember: typeof import('./src/composables/useGenMember')['useGenerateMember']
   const useGeolocation: typeof import('@vueuse/core')['useGeolocation']
+  const useGlobalLoading: typeof import('./src/composables/useGlobalLoading')['useGlobalLoading']
   const useI18n: typeof import('vue-i18n')['useI18n']
   const useId: typeof import('vue')['useId']
   const useIdle: typeof import('@vueuse/core')['useIdle']
@@ -416,6 +418,7 @@ declare module 'vue' {
     readonly isAtBottom: UnwrapRef<typeof import('./src/shared/states')['isAtBottom']>
     readonly isDark: UnwrapRef<typeof import('./src/composables/dark')['isDark']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
+    readonly isGlobalLoading: UnwrapRef<typeof import('./src/composables/useGlobalLoading')['isGlobalLoading']>
     readonly isGlobalModalVisible: UnwrapRef<typeof import('./src/composables/useModal')['isGlobalModalVisible']>
     readonly isLimitedWebview: UnwrapRef<typeof import('./src/shared/const')['isLimitedWebview']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
@@ -564,6 +567,7 @@ declare module 'vue' {
     readonly useGamepad: UnwrapRef<typeof import('@vueuse/core')['useGamepad']>
     readonly useGenerateMember: UnwrapRef<typeof import('./src/composables/useGenMember')['useGenerateMember']>
     readonly useGeolocation: UnwrapRef<typeof import('@vueuse/core')['useGeolocation']>
+    readonly useGlobalLoading: UnwrapRef<typeof import('./src/composables/useGlobalLoading')['useGlobalLoading']>
     readonly useI18n: UnwrapRef<typeof import('vue-i18n')['useI18n']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useIdle: UnwrapRef<typeof import('@vueuse/core')['useIdle']>

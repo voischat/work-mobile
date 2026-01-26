@@ -1,6 +1,7 @@
 import type { LoginResponse } from '~/types/auth'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
+import { isGlobalLoading } from '~/composables/useGlobalLoading'
 import { isLimitedWebview } from '~/shared/const'
 import { storage, weilaFetch } from '~/shared/instances'
 
@@ -13,6 +14,7 @@ router.beforeEach(async (to, from) => {
   const { account, password, 'country-code': countryCode } = to.query
 
   if (account && password && !from.name) {
+    isGlobalLoading.value = true
     try {
       const response = await weilaFetch<LoginResponse>('/corp/auth/login', {
         method: 'POST',
@@ -28,11 +30,13 @@ router.beforeEach(async (to, from) => {
       await storage.setItem('expires_in', response.expires_in)
 
       isLimitedWebview.value = true
+      isGlobalLoading.value = false
       return { path: '/directory' }
     }
     catch (error) {
       console.error('Auto-login failed:', error)
       isLimitedWebview.value = false
+      isGlobalLoading.value = false
       return { path: '/login' }
     }
   }

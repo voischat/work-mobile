@@ -32,6 +32,7 @@ declare module 'vue' {
     ImageVerifyCode: typeof import('./src/components/ImageVerifyCode.vue')['default']
     LanguageSwitcher: typeof import('./src/components/LanguageSwitcher.vue')['default']
     LicenseUpload: typeof import('./src/components/LicenseUpload.vue')['default']
+    LoadingOverlay: typeof import('./src/components/LoadingOverlay.vue')['default']
     MemberActions: typeof import('./src/components/MemberActions.vue')['default']
     MemberAddForm: typeof import('./src/components/forms/MemberAddForm.vue')['default']
     MemberAIGenerator: typeof import('./src/components/MemberAIGenerator.vue')['default']

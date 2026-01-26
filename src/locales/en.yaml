@@ -94,6 +94,8 @@ common:
     comma: ', '
     period: '. '
     slash: ' / '
+  symbols:
+    add: '+'
   deleteConfirm:
     title: Confirm Delete
     message: 'Are you sure to delete {type} "{name}"? This action cannot be undone.'

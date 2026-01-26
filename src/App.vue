@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useMutation } from '@pinia/colada'
+import { useI18n } from 'vue-i18n'
 import { useLocale } from './composables/useLocale'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
 
+const { t } = useI18n()
 useLocale()
 
 const REFRESH_INTERVAL = 3 * 60 * 1000
@@ -51,7 +53,7 @@ watchEffect(() => {
 })
 
 const { currentTitle } = useBreadcrumb()
-useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - VoisWork` : 'VoisWork'))
+useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - ${t('app.name')}` : t('app.name')))
 </script>
 
 <template>
@@ -68,5 +70,14 @@ useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - VoisWork` 
       :on-confirm="globalModalConfirmCallback"
       :on-cancel="globalModalCancelCallback"
     />
+    <LoadingOverlay>
+      <div class="flex flex-col items-center space-y-6">
+        <img src="/logo.png" :alt="t('app.name')" class="w-24 h-24">
+        <div class="text-2xl font-semibold text-gray-800">
+          {{ t('app.name') }}
+        </div>
+        <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    </LoadingOverlay>
   </main>
 </template>

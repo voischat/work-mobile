@@ -177,7 +177,7 @@ function triggerFileSelect() {
 
       <!-- 无图片占位 -->
       <div v-else class="text-3xl text-gray-400">
-        +
+        {{ t('common.symbols.add') }}
       </div>
     </button>
   </div>
