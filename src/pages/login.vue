@@ -19,6 +19,7 @@ const router = useRouter()
 const { saveAuth } = useAuth()
 const { showToast } = useToast()
 const { t } = useI18n()
+const { isEnabled } = useFeatureFlags()
 
 const passwordSchema = z.object({
   account: z.string().min(1, t('auth.validation.accountRequired')),
@@ -279,12 +280,14 @@ function handleEmailLogin() {
               {{ t('auth.loginMethods.password') }}
             </TabsTrigger>
             <TabsTrigger
+              v-if="isEnabled('phoneLogin')"
               value="phone"
               class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
               {{ t('auth.loginMethods.phone') }}
             </TabsTrigger>
             <TabsTrigger
+              v-if="isEnabled('emailLogin')"
               value="email"
               class="flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
             >
@@ -399,7 +402,7 @@ function handleEmailLogin() {
             </form>
           </TabsContent>
 
-          <TabsContent value="phone">
+          <TabsContent v-if="isEnabled('phoneLogin')" value="phone">
             <form class="space-y-4" @submit.prevent="handlePhoneLogin">
               <div>
                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
@@ -486,7 +489,7 @@ function handleEmailLogin() {
             </form>
           </TabsContent>
 
-          <TabsContent value="email">
+          <TabsContent v-if="isEnabled('emailLogin')" value="email">
             <form class="space-y-4" @submit.prevent="handleEmailLogin">
               <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
