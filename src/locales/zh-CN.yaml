@@ -25,6 +25,11 @@ nav:
   realtimeLocation: 实时位置
   me: 我的
 
+# 菜单
+menu:
+  settings: 设置
+  exit: 退出
+
 # 通用操作
 common:
   actions:

@@ -326,33 +326,36 @@ function handleEmailLogin() {
                     </button>
                   </div>
                   <PopoverPortal>
-                    <PopoverContent
-                      :side-offset="4"
-                      align="start"
-                      class="z-50 w-[--reka-popover-trigger-width] max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg"
-                      @open-auto-focus.prevent
-                    >
-                      <div
-                        v-for="account in savedAccounts"
-                        :key="account"
-                        class="flex items-center justify-between px-3 py-2 hover:bg-gray-100"
+                    <Transition name="popover">
+                      <PopoverContent
+                        v-if="showAccountHints"
+                        :side-offset="4"
+                        align="start"
+                        class="z-50 w-[--reka-popover-trigger-width] max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg"
+                        @open-auto-focus.prevent
                       >
-                        <button
-                          type="button"
-                          class="flex-1 text-sm text-left cursor-pointer"
-                          @mousedown.prevent="selectAccount(account)"
+                        <div
+                          v-for="account in savedAccounts"
+                          :key="account"
+                          class="flex items-center justify-between px-3 py-2 hover:bg-gray-100"
                         >
-                          {{ account }}
-                        </button>
-                        <button
-                          type="button"
-                          class="p-1 text-gray-400 hover:text-red-500"
-                          @mousedown.prevent="deleteAccount(account)"
-                        >
-                          <Icon icon="lucide:x" class="w-4 h-4" />
-                        </button>
-                      </div>
-                    </PopoverContent>
+                          <button
+                            type="button"
+                            class="flex-1 text-sm text-left cursor-pointer"
+                            @mousedown.prevent="selectAccount(account)"
+                          >
+                            {{ account }}
+                          </button>
+                          <button
+                            type="button"
+                            class="p-1 text-gray-400 hover:text-red-500"
+                            @mousedown.prevent="deleteAccount(account)"
+                          >
+                            <Icon icon="lucide:x" class="w-4 h-4" />
+                          </button>
+                        </div>
+                      </PopoverContent>
+                    </Transition>
                   </PopoverPortal>
                 </PopoverRoot>
                 <div v-if="passwordErrors.account" class="mt-1 text-sm text-red-600">

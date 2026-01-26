@@ -25,6 +25,11 @@ nav:
   realtimeLocation: Real-time Location
   me: Me
 
+# Menu
+menu:
+  settings: Settings
+  exit: Exit
+
 # Common
 common:
   actions:
@@ -207,7 +212,7 @@ directory:
   member:
     title: Member
     titlePlural: Members
-    management: Member Management
+    management: Member
     add: Add Member
     addDevice: Add Device
     create: Create Member
@@ -302,7 +307,7 @@ directory:
   group:
     title: Group
     titlePlural: Groups
-    management: Group Management
+    management: Group
     add: Add Group
     create: Create Group
     edit: Edit Group
@@ -334,8 +339,8 @@ directory:
   department:
     title: Department
     titlePlural: Departments
-    management: Department Management
-    manage: Department Management
+    management: Department
+    manage: Department
     add: Add Department
     create: Create Department
     edit: Edit Department

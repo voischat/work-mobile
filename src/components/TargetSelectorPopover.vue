@@ -37,14 +37,17 @@ function close() {
       </slot>
     </PopoverTrigger>
     <PopoverPortal to="body">
-      <PopoverContent
-        class="z-[9999] bg-white rounded-lg shadow-lg border border-gray-200 p-0 w-[calc(min(100vw-2rem,300px))] overflow-hidden"
-        align="start"
-        :side-offset="4"
-      >
-        <slot :close="close" />
-        <PopoverArrow class="fill-white" />
-      </PopoverContent>
+      <Transition name="popover">
+        <PopoverContent
+          v-if="isOpen"
+          class="z-[9999] bg-white rounded-lg shadow-lg border border-gray-200 p-0 w-[calc(min(100vw-2rem,300px))] overflow-hidden"
+          align="start"
+          :side-offset="4"
+        >
+          <slot :close="close" />
+          <PopoverArrow class="fill-white" />
+        </PopoverContent>
+      </Transition>
     </PopoverPortal>
   </PopoverRoot>
 </template>
