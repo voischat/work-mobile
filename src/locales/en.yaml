@@ -19,6 +19,7 @@ language:
 # Navigation
 nav:
   home: Home
+  directory: Directory
   workbench: Workbench
   track: Track
   realtimeLocation: Real-time Location

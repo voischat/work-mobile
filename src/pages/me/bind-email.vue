@@ -119,7 +119,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BackLayout title="绑定邮箱">
+  <BackLayout :title="t('me.actions.bindEmail')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

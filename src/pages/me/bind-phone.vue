@@ -123,7 +123,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BackLayout title="绑定手机">
+  <BackLayout :title="t('me.actions.bindPhone')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

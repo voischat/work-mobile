@@ -62,7 +62,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BackLayout title="修改密码">
+  <BackLayout :title="t('me.actions.changePassword')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

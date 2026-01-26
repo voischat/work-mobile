@@ -93,7 +93,7 @@ function handleDeptClick(deptId: number) {
 </script>
 
 <template>
-  <BackLayout title="部门管理">
+  <BackLayout :title="t('directory.department.management')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

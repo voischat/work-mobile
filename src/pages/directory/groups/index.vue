@@ -89,7 +89,7 @@ function handleGroupCancel() {
 </script>
 
 <template>
-  <BackLayout title="群组管理">
+  <BackLayout :title="t('directory.group.management')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

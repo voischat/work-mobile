@@ -201,7 +201,7 @@ function handleEditMember(member: Member) {
 </script>
 
 <template>
-  <BackLayout title="成员管理">
+  <BackLayout :title="t('directory.member.management')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

@@ -19,6 +19,7 @@ language:
 # 导航
 nav:
   home: 主页
+  directory: 通讯录
   workbench: 工作台
   track: 轨迹
   realtimeLocation: 实时位置

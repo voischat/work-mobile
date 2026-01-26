@@ -136,7 +136,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BackLayout title="企业认证">
+  <BackLayout :title="t('me.actions.corpAuth')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

@@ -11,11 +11,11 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  title: '微喇',
   showBack: true,
   showExit: false,
 })
 
+const { t } = useI18n()
 const router = useRouter()
 
 function handleBack() {
@@ -40,7 +40,7 @@ function handleExit() {
       </button>
       <!-- 标题 - 绝对居中 -->
       <h1 class="absolute left-1/2 transform -translate-x-1/2 text-lg font-semibold text-gray-900">
-        {{ title }}
+        {{ title ?? t('app.name') }}
       </h1>
       <!-- 右侧按钮组 -->
       <div class="ml-auto flex items-center gap-1">

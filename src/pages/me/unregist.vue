@@ -18,7 +18,7 @@ const tabs = [
 </script>
 
 <template>
-  <BackLayout title="注销账号">
+  <BackLayout :title="t('me.actions.unregister')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

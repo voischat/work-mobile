@@ -360,7 +360,7 @@ function navigateToPoint(point: TrackPoint, index: number): void {
 </script>
 
 <template>
-  <BackLayout title="轨迹">
+  <BackLayout :title="t('nav.track')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

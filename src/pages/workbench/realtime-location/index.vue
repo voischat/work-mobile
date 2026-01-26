@@ -281,7 +281,7 @@ function renderMarkers(locations: RealtimeLocationsResponse): void {
 </script>
 
 <template>
-  <BackLayout title="实时位置">
+  <BackLayout :title="t('nav.realtimeLocation')">
     <template #breadcrumb>
       <Breadcrumb
         :items="[

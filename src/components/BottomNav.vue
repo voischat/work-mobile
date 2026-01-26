@@ -1,33 +1,35 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { isActiveRoute } from '~/utils/router'
 
+const { t } = useI18n()
 const router = useRouter()
 
 // 导航项配置
-const navItems = [
+const navItems = computed(() => [
   {
-    name: '首页',
+    name: t('nav.home'),
     path: '/',
     icon: 'lucide:home',
   },
   {
-    name: '通讯录',
+    name: t('nav.directory'),
     path: '/directory',
     icon: 'lucide:book',
   },
   {
-    name: '工作台',
+    name: t('nav.workbench'),
     path: '/workbench',
     icon: 'lucide:layout-dashboard',
   },
   {
-    name: '我的',
+    name: t('nav.me'),
     path: '/me',
     icon: 'lucide:user',
   },
-]
+])
 
 // 处理导航点击
 function handleNavClick(path: string) {
