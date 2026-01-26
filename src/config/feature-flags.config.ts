@@ -36,10 +36,20 @@ export function defineFeatureFlags<T extends Record<string, boolean>>(
   return config(context)
 }
 
-export const featureFlags = defineFeatureFlags(() => ({
-  phoneLogin: true,
-  emailLogin: import.meta.env.MODE === 'intl',
-}))
+export const featureFlags = defineFeatureFlags((context) => {
+  const configs = {
+    phoneLogin: context.mode !== 'intl',
+    emailLogin: context.mode === 'intl',
+  }
+
+  if (import.meta.env.DEV) {
+    for (const key in configs) {
+      configs[key as keyof typeof configs] = true
+    }
+  }
+
+  return configs
+})
 
 export type FeatureFlagName = keyof typeof featureFlags
 export type FeatureFlags = typeof featureFlags
