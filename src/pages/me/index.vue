@@ -3,6 +3,7 @@ import type { UserInfo } from '~/types/auth'
 import { useQuery } from '@pinia/colada'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import pkg from '~/../package.json'
 import Avatar from '~/components/Avatar.vue'
 import HomeLayout from '~/components/HomeLayout.vue'
 import { useAuth } from '~/composables/useAuth'
@@ -178,6 +179,10 @@ function formatDate(timestamp: number) {
           <span class="text-red-600 font-medium">{{ t('me.actions.logout') }}</span>
           <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
         </button>
+
+        <div class="text-center text-sm text-gray-400 mt-8">
+          v{{ pkg.version }}
+        </div>
       </div>
     </div>
   </HomeLayout>
