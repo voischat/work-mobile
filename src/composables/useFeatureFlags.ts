@@ -1,13 +1,11 @@
 import type { FeatureFlagName, FeatureFlags } from '~/config/feature-flags.config'
 import { featureFlags } from '~/config/feature-flags.config'
-import { useFeatureFlagsDevToolsStore } from '~/stores/featureFlagsDevTools'
+import { overrideFeatures } from '~/shared/states'
 
 export function useFeatureFlags() {
-  const devToolsStore = import.meta.env.DEV ? useFeatureFlagsDevToolsStore() : null
-
   function isEnabled(flagName: FeatureFlagName): boolean {
-    if (devToolsStore) {
-      const override = devToolsStore.getOverride(flagName)
+    if (import.meta.env.DEV) {
+      const override = overrideFeatures.value[flagName]
       if (override !== undefined) {
         return override
       }

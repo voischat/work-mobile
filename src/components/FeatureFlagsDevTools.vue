@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { FeatureFlagName } from '~/config/feature-flags.config'
 import { Icon } from '@iconify/vue'
 import {
   PopoverArrow,
@@ -20,9 +19,7 @@ import {
   SwitchThumb,
 } from 'reka-ui'
 import { featureFlags } from '~/config/feature-flags.config'
-import { useFeatureFlagsDevToolsStore } from '~/stores/featureFlagsDevTools'
-
-const store = useFeatureFlagsDevToolsStore()
+import { overrideEnvMode, overrideFeatures } from '~/shared/states'
 
 const modes = [
   { value: 'current', label: 'Current Mode' },
@@ -31,36 +28,35 @@ const modes = [
   { value: 'production', label: 'Production' },
 ] as const
 
+function writableFlag(flagName: keyof typeof featureFlags) {
+  return computed({
+    get: () => overrideFeatures.value[flagName] ?? featureFlags[flagName],
+    set: (checked: boolean) => {
+      if (checked === featureFlags[flagName]) {
+        delete overrideFeatures.value[flagName]
+      }
+      else {
+        overrideFeatures.value[flagName] = checked
+      }
+    },
+  })
+}
+
+const phoneLogin = writableFlag('phoneLogin')
+const emailLogin = writableFlag('emailLogin')
+const languageSwitching = writableFlag('languageSwitching')
+
 const selectedMode = computed({
-  get: () => store.mockMode ?? 'current',
+  get: () => overrideEnvMode.value ?? 'current',
   set: (value: string) => {
-    store.setMockMode(value === 'current' ? null : value as 'development' | 'intl' | 'production')
+    overrideEnvMode.value = value === 'current' ? null : value as 'development' | 'intl' | 'production'
+    overrideFeatures.value = {}
   },
 })
 
-const flags = computed(() => {
-  return Object.entries(featureFlags).map(([name, defaultValue]) => {
-    const override = store.getOverride(name as FeatureFlagName)
-    return {
-      name: name as FeatureFlagName,
-      value: override !== undefined ? override : defaultValue,
-      isOverridden: override !== undefined,
-    }
-  })
-})
-
-function handleFlagToggle(name: FeatureFlagName, checked: boolean) {
-  if (checked === featureFlags[name]) {
-    store.clearOverride(name)
-  }
-  else {
-    store.setOverride(name, checked)
-  }
-}
-
 function resetAll() {
-  store.clearAllOverrides()
-  store.setMockMode(null)
+  overrideFeatures.value = {}
+  overrideEnvMode.value = null
 }
 </script>
 
@@ -103,7 +99,7 @@ function resetAll() {
 
               <SelectPortal>
                 <SelectContent
-                  class="overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
+                  class="z-[10000] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
                   :side-offset="4"
                 >
                   <SelectViewport class="p-1">
@@ -114,9 +110,6 @@ function resetAll() {
                       class="relative flex cursor-pointer items-center rounded px-8 py-2 text-sm outline-none data-[highlighted]:bg-purple-50"
                     >
                       <SelectItemText>{{ mode.label }}</SelectItemText>
-                      <span class="absolute left-2 flex h-4 w-4 items-center justify-center">
-                        <Icon icon="lucide:check" class="h-3 w-3 data-[state=checked]:opacity-100 data-[state=unchecked]:opacity-0" />
-                      </span>
                     </SelectItem>
                   </SelectViewport>
                 </SelectContent>
@@ -130,23 +123,64 @@ function resetAll() {
             </div>
             <div class="flex max-h-64 flex-col gap-2 overflow-y-auto">
               <div
-                v-for="flag in flags"
-                :key="flag.name"
                 class="flex items-center justify-between rounded px-2 py-1.5 transition-colors hover:bg-gray-50"
-                :class="{ 'bg-purple-50': flag.isOverridden }"
+                :class="{ 'bg-purple-50': 'phoneLogin' in overrideFeatures }"
               >
                 <label
-                  :for="`flag-${flag.name}`"
+                  for="flag-phoneLogin"
                   class="flex-1 cursor-pointer text-sm text-gray-700"
                 >
-                  {{ flag.name }}
+                  phoneLogin
                 </label>
                 <SwitchRoot
-                  :id="`flag-${flag.name}`"
-                  :checked="flag.value"
+                  id="flag-phoneLogin"
+                  v-model="phoneLogin"
                   class="relative h-6 w-11 cursor-pointer rounded-full transition-colors data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300"
-                  :class="{ 'ring-2 ring-purple-400 ring-offset-2': flag.isOverridden }"
-                  @update:checked="(checked: boolean) => handleFlagToggle(flag.name, checked)"
+                  :class="{ 'ring-2 ring-purple-400 ring-offset-2': 'phoneLogin' in overrideFeatures }"
+                >
+                  <SwitchThumb
+                    class="block h-5 w-5 translate-x-0.5 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-[22px]"
+                  />
+                </SwitchRoot>
+              </div>
+
+              <div
+                class="flex items-center justify-between rounded px-2 py-1.5 transition-colors hover:bg-gray-50"
+                :class="{ 'bg-purple-50': 'emailLogin' in overrideFeatures }"
+              >
+                <label
+                  for="flag-emailLogin"
+                  class="flex-1 cursor-pointer text-sm text-gray-700"
+                >
+                  emailLogin
+                </label>
+                <SwitchRoot
+                  id="flag-emailLogin"
+                  v-model="emailLogin"
+                  class="relative h-6 w-11 cursor-pointer rounded-full transition-colors data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300"
+                  :class="{ 'ring-2 ring-purple-400 ring-offset-2': 'emailLogin' in overrideFeatures }"
+                >
+                  <SwitchThumb
+                    class="block h-5 w-5 translate-x-0.5 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-[22px]"
+                  />
+                </SwitchRoot>
+              </div>
+
+              <div
+                class="flex items-center justify-between rounded px-2 py-1.5 transition-colors hover:bg-gray-50"
+                :class="{ 'bg-purple-50': 'languageSwitching' in overrideFeatures }"
+              >
+                <label
+                  for="flag-languageSwitching"
+                  class="flex-1 cursor-pointer text-sm text-gray-700"
+                >
+                  languageSwitching
+                </label>
+                <SwitchRoot
+                  id="flag-languageSwitching"
+                  v-model="languageSwitching"
+                  class="relative h-6 w-11 cursor-pointer rounded-full transition-colors data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300"
+                  :class="{ 'ring-2 ring-purple-400 ring-offset-2': 'languageSwitching' in overrideFeatures }"
                 >
                   <SwitchThumb
                     class="block h-5 w-5 translate-x-0.5 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-[22px]"
