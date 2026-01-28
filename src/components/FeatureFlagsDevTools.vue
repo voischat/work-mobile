@@ -22,11 +22,43 @@ import { featureFlags } from '~/config/feature-flags.config'
 import { overrideEnvMode, overrideFeatures } from '~/shared/states'
 
 const modes = [
-  { value: 'current', label: 'Current Mode' },
   { value: 'development', label: 'Development' },
   { value: 'intl', label: 'International' },
   { value: 'production', label: 'Production' },
+  { value: 'custom', label: 'Custom' },
 ] as const
+
+type ModeValue = 'development' | 'intl' | 'production' | 'custom'
+
+const presets: Record<'development' | 'intl' | 'production', Record<keyof typeof featureFlags, boolean>> = {
+  development: {
+    phoneLogin: true,
+    emailLogin: true,
+    languageSwitching: true,
+  },
+  intl: {
+    phoneLogin: false,
+    emailLogin: true,
+    languageSwitching: true,
+  },
+  production: {
+    phoneLogin: true,
+    emailLogin: false,
+    languageSwitching: false,
+  },
+}
+
+function getPresetForFlags(): ModeValue {
+  for (const [mode, preset] of Object.entries(presets)) {
+    const allMatch = Object.entries(preset).every(
+      ([key, value]) => overrideFeatures.value[key as keyof typeof featureFlags] === value,
+    )
+    if (allMatch) {
+      return mode as 'development' | 'intl' | 'production'
+    }
+  }
+  return 'custom'
+}
 
 function writableFlag(flagName: keyof typeof featureFlags) {
   return computed({
@@ -47,10 +79,21 @@ const emailLogin = writableFlag('emailLogin')
 const languageSwitching = writableFlag('languageSwitching')
 
 const selectedMode = computed({
-  get: () => overrideEnvMode.value ?? 'current',
+  get: () => {
+    if (Object.keys(overrideFeatures.value).length === 0) {
+      return overrideEnvMode.value ?? 'custom'
+    }
+    return getPresetForFlags()
+  },
   set: (value: string) => {
-    overrideEnvMode.value = value === 'current' ? null : value as 'development' | 'intl' | 'production'
-    overrideFeatures.value = {}
+    if (value === 'custom') {
+      overrideEnvMode.value = null
+      return
+    }
+
+    const mode = value as 'development' | 'intl' | 'production'
+    overrideEnvMode.value = mode
+    overrideFeatures.value = { ...presets[mode] }
   },
 })
 

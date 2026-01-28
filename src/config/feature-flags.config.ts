@@ -43,12 +43,6 @@ export const featureFlags = defineFeatureFlags((context) => {
     languageSwitching: context.mode === 'intl',
   }
 
-  if (import.meta.env.DEV) {
-    for (const key in configs) {
-      configs[key as keyof typeof configs] = true
-    }
-  }
-
   return configs
 })
 
