@@ -6,6 +6,7 @@ import { useLocale } from './composables/useLocale'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
 
 const { t } = useI18n()
+
 useLocale()
 
 const isDev = import.meta.env.DEV
