@@ -279,7 +279,6 @@ directory:
       fast: Fast
       veryFast: Very Fast
     genderOptions:
-      unknown: Unknown
       male: Male
       female: Female
     adminOptions:

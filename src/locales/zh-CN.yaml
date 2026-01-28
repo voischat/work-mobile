@@ -279,7 +279,6 @@ directory:
       fast: 快
       veryFast: 极快
     genderOptions:
-      unknown: 未知
       male: 男
       female: 女
     adminOptions:

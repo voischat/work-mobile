@@ -23,7 +23,7 @@ const form = ref<AddMemberForm>({
   name: '',
   job_num: '',
   dept_id: 0,
-  sex: 2,
+  sex: 0,
   avatar: '',
   phone: '',
   is_dept_admin: 0,
@@ -109,7 +109,7 @@ function reset() {
     name: '',
     job_num: '',
     dept_id: 0,
-    sex: 2,
+    sex: 0,
     avatar: '',
     phone: '',
     is_dept_admin: 0,
@@ -216,7 +216,7 @@ defineExpose({
         class="w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         :class="errors.sex ? 'border-red-500' : 'border-gray-300'"
       >
-        <option :value="2">
+        <option :value="0">
           {{ t('directory.member.genderOptions.male') }}
         </option>
         <option :value="1">

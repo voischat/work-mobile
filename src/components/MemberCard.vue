@@ -28,8 +28,8 @@ const onlineStatusMap = computed(() => ({
 }))
 
 const sexMap = {
+  0: { icon: 'ph:gender-male-duotone', color: 'text-gray-500' },
   1: { icon: 'ph:gender-female-duotone', color: 'text-gray-500' },
-  2: { icon: 'ph:gender-male-duotone', color: 'text-gray-500' },
 } as const
 
 const trackTypeMap = computed(() => ({

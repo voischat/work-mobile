@@ -12,7 +12,7 @@ const deepseek = createDeepSeek({
 export const addMemberSchema = z.object({
   name: z.string().min(1, 'directory.member.validation.nameRequired'),
   job_num: z.string().optional(),
-  sex: z.number().int().min(1).max(2),
+  sex: z.number().int().min(0).max(1),
   phone: z.string().regex(/^1[3-9]\d{9}$/, 'directory.member.validation.phoneInvalid').optional().or(z.literal('')),
   is_dept_admin: z.number().int().min(0).max(1),
   loc_share: z.number().int().min(0).max(1),
@@ -56,7 +56,7 @@ export function useGenerateMember(curMember?: Ref<Record<string, any> | null>) {
           '- avatar：头像 url，空字符串',
           '- name：成员姓名，字符串，可以添加一个随机数在名称后面',
           '- job_num：工号，可为空字符串',
-          '- sex：数字 1 表示男、2 表示女',
+          '- sex：数字 0 表示男、1 表示女',
           '- phone：11 位手机号，可为空字符串',
           '- is_dept_admin：0 非部门管理员，1 部门管理员',
           '- loc_share：0 不共享位置，1 共享位置',

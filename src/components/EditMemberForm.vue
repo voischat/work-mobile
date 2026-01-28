@@ -20,7 +20,7 @@ const editMemberSchema = z.object({
   name: z.string().min(1, t('directory.device.validation.nameRequired')),
   job_num: z.string().optional(),
   dept_id: z.number().int().min(0, t('directory.device.validation.deptRequired')),
-  sex: z.number().int().min(0).max(2),
+  sex: z.number().int().min(0).max(1),
   avatar: z.string().optional().or(z.literal('')),
   phone: z.string().regex(/^1[3-9]\d{9}$/, t('directory.device.validation.phoneInvalid')).optional().or(z.literal('')),
   is_dept_admin: z.number().int().min(0).max(1).optional(),
@@ -324,13 +324,10 @@ defineExpose({
         :disabled="isLoading"
       >
         <option :value="0">
-          {{ t('directory.member.genderOptions.unknown') }}
+          {{ t('directory.member.genderOptions.male') }}
         </option>
         <option :value="1">
           {{ t('directory.member.genderOptions.female') }}
-        </option>
-        <option :value="2">
-          {{ t('directory.member.genderOptions.male') }}
         </option>
       </select>
       <div v-if="errors.sex" class="mt-1 text-sm text-red-600">
