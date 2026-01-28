@@ -1,4 +1,5 @@
 export * from './dark'
+export * from './useAppName'
 export * from './useBreadcrumb'
 export * from './useFeatureFlags'
 export * from './useForm'

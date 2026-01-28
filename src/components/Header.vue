@@ -11,6 +11,7 @@ import {
   RadioGroupRoot,
 } from 'reka-ui'
 import { useRouter } from 'vue-router'
+import { useAppName } from '~/composables/useAppName'
 import { useLocale } from '~/composables/useLocale'
 import { bridge } from '~/utils/bridge'
 
@@ -25,10 +26,10 @@ withDefaults(defineProps<Props>(), {
   showExit: false,
 })
 
-const { t } = useI18n()
 const router = useRouter()
 const { locale, availableLocales, setLocale } = useLocale()
 const { isEnabled } = useFeatureFlags()
+const { appName } = useAppName()
 
 const localeOptions = computed(() => {
   const localeMap: Record<string, string> = {
@@ -66,7 +67,7 @@ function handleLocaleChange(newLocale: string) {
         <Icon icon="lucide:arrow-left" class="w-6 h-6" />
       </button>
       <h1 class="absolute left-1/2 transform -translate-x-1/2 text-lg font-semibold text-gray-900">
-        {{ title ?? t('app.name') }}
+        {{ title ?? appName }}
       </h1>
       <!-- 右侧按钮组 -->
       <div class="ml-auto flex items-center">

@@ -1,6 +1,7 @@
 # 全局通用
 app:
-  name: VoisWork
+  name: 微喇企业版
+  nameIntl: VoisWork
 
 # 演示页面
 demo:

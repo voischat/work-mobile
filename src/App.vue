@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { useMutation } from '@pinia/colada'
-import { useI18n } from 'vue-i18n'
 import FeatureFlagsDevTools from './components/FeatureFlagsDevTools.vue'
+import { useAppName } from './composables/useAppName'
 import { useLocale } from './composables/useLocale'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
 
-const { t } = useI18n()
-
 useLocale()
 
+const { appName } = useAppName()
 const isDev = import.meta.env.DEV
 
 const REFRESH_INTERVAL = 3 * 60 * 1000
@@ -57,7 +56,7 @@ watchEffect(() => {
 })
 
 const { currentTitle } = useBreadcrumb()
-useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - ${t('app.name')}` : t('app.name')))
+useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - ${appName.value}` : appName.value))
 </script>
 
 <template>
@@ -76,9 +75,9 @@ useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - ${t('app.n
     />
     <LoadingOverlay>
       <div class="flex flex-col items-center space-y-6">
-        <img src="/logo.png" :alt="t('app.name')" class="w-24 h-24">
+        <img src="/logo.png" :alt="appName" class="w-24 h-24">
         <div class="text-2xl font-semibold text-gray-800">
-          {{ t('app.name') }}
+          {{ appName }}
         </div>
         <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>

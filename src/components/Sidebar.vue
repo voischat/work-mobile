@@ -2,6 +2,7 @@
 import { Icon } from '@iconify/vue'
 import { TreeItem, TreeRoot } from 'reka-ui'
 import { useRouter } from 'vue-router'
+import { useAppName } from '~/composables/useAppName'
 import { isActiveRoute } from '~/utils/router'
 
 interface NavItem {
@@ -13,6 +14,7 @@ interface NavItem {
 
 const router = useRouter()
 const { t } = useI18n()
+const { appName } = useAppName()
 
 const items = computed<NavItem[]>(() => [
   {
@@ -82,7 +84,7 @@ function handleItemClick(item: NavItem) {
     :default-expanded="[t('directory.title'), t('nav.workbench')]"
   >
     <h2 class="font-semibold text-sm text-neutral-400 px-2 pt-1 pb-3">
-      {{ t('app.name') }}
+      {{ appName }}
     </h2>
     <TransitionGroup name="tree-item" tag="div">
       <TreeItem

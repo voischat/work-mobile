@@ -1,6 +1,7 @@
 # Global
 app:
-  name: VoisWork
+  name: Weila Enterprise
+  nameIntl: VoisWork
 
 # Demo pages
 demo:

@@ -90,6 +90,8 @@ declare global {
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
   const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
+  const overrideEnvMode: typeof import('./src/shared/states')['overrideEnvMode']
+  const overrideFeatures: typeof import('./src/shared/states')['overrideFeatures']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
   const pickWeilaData: typeof import('./src/composables/useWeilaFetch')['pickWeilaData']
   const provide: typeof import('vue')['provide']
@@ -139,6 +141,7 @@ declare global {
   const useAMap: typeof import('./src/composables/useAMap')['useAMap']
   const useActiveElement: typeof import('@vueuse/core')['useActiveElement']
   const useAnimate: typeof import('@vueuse/core')['useAnimate']
+  const useAppName: typeof import('./src/composables/useAppName')['useAppName']
   const useArrayDifference: typeof import('@vueuse/core')['useArrayDifference']
   const useArrayEvery: typeof import('@vueuse/core')['useArrayEvery']
   const useArrayFilter: typeof import('@vueuse/core')['useArrayFilter']
@@ -451,6 +454,8 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly overrideEnvMode: UnwrapRef<typeof import('./src/shared/states')['overrideEnvMode']>
+    readonly overrideFeatures: UnwrapRef<typeof import('./src/shared/states')['overrideFeatures']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly pickWeilaData: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['pickWeilaData']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
@@ -498,6 +503,7 @@ declare module 'vue' {
     readonly useAMap: UnwrapRef<typeof import('./src/composables/useAMap')['useAMap']>
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
+    readonly useAppName: UnwrapRef<typeof import('./src/composables/useAppName')['useAppName']>
     readonly useArrayDifference: UnwrapRef<typeof import('@vueuse/core')['useArrayDifference']>
     readonly useArrayEvery: UnwrapRef<typeof import('@vueuse/core')['useArrayEvery']>
     readonly useArrayFilter: UnwrapRef<typeof import('@vueuse/core')['useArrayFilter']>
