@@ -24,7 +24,6 @@ declare module 'vue' {
     EditGroupModal: typeof import('./src/components/EditGroupModal.vue')['default']
     EditMemberForm: typeof import('./src/components/EditMemberForm.vue')['default']
     EditMemberModal: typeof import('./src/components/EditMemberModal.vue')['default']
-    Footer: typeof import('./src/components/Footer.vue')['default']
     GestureDialog: typeof import('./src/components/GestureDialog.vue')['default']
     GroupActions: typeof import('./src/components/GroupActions.vue')['default']
     GroupAddForm: typeof import('./src/components/forms/GroupAddForm.vue')['default']

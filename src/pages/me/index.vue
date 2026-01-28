@@ -13,6 +13,7 @@ import { weilaFetch } from '~/shared/instances'
 const router = useRouter()
 const { clearAuth } = useAuth()
 const { t, locale } = useI18n()
+const { isEnabled } = useFeatureFlags()
 const {
   data: userInfo,
   error: userError,
@@ -137,6 +138,7 @@ function formatDate(timestamp: number) {
               <Icon icon="lucide:chevron-right" class="w-5 h-5 text-gray-400" />
             </button>
             <button
+              v-if="isEnabled('languageSwitching')"
               class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
               @click="router.push('/me/language')"
             >

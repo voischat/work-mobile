@@ -582,7 +582,7 @@ function handleEmailLogin() {
           </router-link>
         </div>
 
-        <div class="mt-4 pt-4 border-t border-gray-200 flex justify-center">
+        <div v-if="isEnabled('languageSwitching')" class="mt-4 pt-4 border-t border-gray-200 flex justify-center">
           <LanguageSwitcher />
         </div>
       </div>

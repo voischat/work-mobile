@@ -40,6 +40,7 @@ export const featureFlags = defineFeatureFlags((context) => {
   const configs = {
     phoneLogin: context.mode !== 'intl',
     emailLogin: context.mode === 'intl',
+    languageSwitching: context.mode === 'intl',
   }
 
   if (import.meta.env.DEV) {

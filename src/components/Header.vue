@@ -28,6 +28,7 @@ withDefaults(defineProps<Props>(), {
 const { t } = useI18n()
 const router = useRouter()
 const { locale, availableLocales, setLocale } = useLocale()
+const { isEnabled } = useFeatureFlags()
 
 const localeOptions = computed(() => {
   const localeMap: Record<string, string> = {
@@ -80,7 +81,7 @@ function handleLocaleChange(newLocale: string) {
         </button>
 
         <!-- 语言菜单 -->
-        <PopoverRoot>
+        <PopoverRoot v-if="isEnabled('languageSwitching')">
           <PopoverTrigger
             class="bg-transparent p-2 -mr-2 text-gray-600 hover:text-gray-900"
             aria-label="Language"
