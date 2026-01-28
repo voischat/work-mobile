@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useMutation } from '@pinia/colada'
 import { useI18n } from 'vue-i18n'
+import FeatureFlagsDevTools from './components/FeatureFlagsDevTools.vue'
 import { useLocale } from './composables/useLocale'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
 
 const { t } = useI18n()
 useLocale()
+
+const isDev = import.meta.env.DEV
 
 const REFRESH_INTERVAL = 3 * 60 * 1000
 const { token, refreshToken, clearAuth, saveAuth } = useAuth()
@@ -79,5 +82,6 @@ useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - ${t('app.n
         <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     </LoadingOverlay>
+    <FeatureFlagsDevTools v-if="isDev" />
   </main>
 </template>
