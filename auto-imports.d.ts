@@ -45,6 +45,7 @@ declare global {
   const generateV2Query: typeof import('./src/composables/useWeilaFetch')['generateV2Query']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
+  const getDefaultLocale: typeof import('./src/shared/states')['getDefaultLocale']
   const globalModalCancelCallback: typeof import('./src/composables/useModal')['globalModalCancelCallback']
   const globalModalConfirmCallback: typeof import('./src/composables/useModal')['globalModalConfirmCallback']
   const globalModalProps: typeof import('./src/composables/useModal')['globalModalProps']
@@ -113,6 +114,7 @@ declare global {
   const resolveComponent: typeof import('vue')['resolveComponent']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
+  const savedLocale: typeof import('./src/shared/states')['savedLocale']
   const shallowReactive: typeof import('vue')['shallowReactive']
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
@@ -409,6 +411,7 @@ declare module 'vue' {
     readonly generateV2Query: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['generateV2Query']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getDefaultLocale: UnwrapRef<typeof import('./src/shared/states')['getDefaultLocale']>
     readonly globalModalCancelCallback: UnwrapRef<typeof import('./src/composables/useModal')['globalModalCancelCallback']>
     readonly globalModalConfirmCallback: UnwrapRef<typeof import('./src/composables/useModal')['globalModalConfirmCallback']>
     readonly globalModalProps: UnwrapRef<typeof import('./src/composables/useModal')['globalModalProps']>
@@ -476,6 +479,7 @@ declare module 'vue' {
     readonly refWithControl: UnwrapRef<typeof import('@vueuse/core')['refWithControl']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
+    readonly savedLocale: UnwrapRef<typeof import('./src/shared/states')['savedLocale']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>

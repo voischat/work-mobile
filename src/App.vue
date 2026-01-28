@@ -4,6 +4,7 @@ import FeatureFlagsDevTools from './components/FeatureFlagsDevTools.vue'
 import { useAppName } from './composables/useAppName'
 import { useLocale } from './composables/useLocale'
 import { globalModalCancelCallback, globalModalConfirmCallback, globalModalProps, isGlobalModalVisible } from './composables/useModal'
+import { savedLocale } from './shared/states'
 
 useLocale()
 
@@ -57,6 +58,18 @@ watchEffect(() => {
 
 const { currentTitle } = useBreadcrumb()
 useTitle(computed(() => currentTitle.value ? `${currentTitle.value} - ${appName.value}` : appName.value))
+
+const { locale } = useLocale()
+watch(savedLocale, (newValue) => {
+  locale.value = newValue
+}, { immediate: true })
+
+const { isEnabled } = useFeatureFlags()
+
+watch(() => isEnabled('languageSwitching'), (value) => {
+  if (!value)
+    savedLocale.value = 'zh-CN'
+}, { immediate: true })
 </script>
 
 <template>
