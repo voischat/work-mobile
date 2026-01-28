@@ -1,4 +1,4 @@
 export const isAtBottom = ref(false)
 
-export const overrideFeatures = ref<Record<string, boolean>>({})
-export const overrideEnvMode = ref<'development' | 'intl' | 'production' | null>(null)
+export const overrideFeatures = useLocalStorage<Record<string, boolean>>('devtools-override-features', {})
+export const overrideEnvMode = useLocalStorage<'development' | 'intl' | 'production' | null>('devtools-override-env-mode', null)

@@ -25,12 +25,12 @@ const modes = [
   { value: 'development', label: 'Development' },
   { value: 'intl', label: 'International' },
   { value: 'production', label: 'Production' },
-  { value: 'custom', label: 'Custom' },
 ] as const
 
-type ModeValue = 'development' | 'intl' | 'production' | 'custom'
+type PresetMode = 'development' | 'intl' | 'production'
+type ModeValue = PresetMode | 'custom'
 
-const presets: Record<'development' | 'intl' | 'production', Record<keyof typeof featureFlags, boolean>> = {
+const presets: Record<PresetMode, Record<keyof typeof featureFlags, boolean>> = {
   development: {
     phoneLogin: true,
     emailLogin: true,
@@ -48,13 +48,17 @@ const presets: Record<'development' | 'intl' | 'production', Record<keyof typeof
   },
 }
 
-function getPresetForFlags(): ModeValue {
+function getCurrentMode(): ModeValue {
+  if (Object.keys(overrideFeatures.value).length === 0) {
+    return 'custom'
+  }
+
   for (const [mode, preset] of Object.entries(presets)) {
     const allMatch = Object.entries(preset).every(
       ([key, value]) => overrideFeatures.value[key as keyof typeof featureFlags] === value,
     )
     if (allMatch) {
-      return mode as 'development' | 'intl' | 'production'
+      return mode as PresetMode
     }
   }
   return 'custom'
@@ -79,19 +83,9 @@ const emailLogin = writableFlag('emailLogin')
 const languageSwitching = writableFlag('languageSwitching')
 
 const selectedMode = computed({
-  get: () => {
-    if (Object.keys(overrideFeatures.value).length === 0) {
-      return overrideEnvMode.value ?? 'custom'
-    }
-    return getPresetForFlags()
-  },
+  get: () => getCurrentMode(),
   set: (value: string) => {
-    if (value === 'custom') {
-      overrideEnvMode.value = null
-      return
-    }
-
-    const mode = value as 'development' | 'intl' | 'production'
+    const mode = value as PresetMode
     overrideEnvMode.value = mode
     overrideFeatures.value = { ...presets[mode] }
   },
@@ -131,12 +125,14 @@ function resetAll() {
           </div>
 
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium text-gray-700">Mock Environment</label>
+            <label class="text-sm font-medium text-gray-700">Environment Preset</label>
             <SelectRoot v-model="selectedMode">
               <SelectTrigger
                 class="flex items-center justify-between rounded border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-purple-500 focus:outline-none"
               >
-                <SelectValue placeholder="Current Mode" />
+                <SelectValue :placeholder="selectedMode === 'custom' ? 'Custom' : 'Select preset'">
+                  {{ selectedMode === 'custom' ? 'Custom' : modes.find(m => m.value === selectedMode)?.label }}
+                </SelectValue>
                 <Icon icon="lucide:chevron-down" class="h-4 w-4" />
               </SelectTrigger>
 
