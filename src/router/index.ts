@@ -1,9 +1,12 @@
 import type { LoginResponse } from '~/types/auth'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
+import { useAuth } from '~/composables/useAuth'
 import { isGlobalLoading } from '~/composables/useGlobalLoading'
 import { isLimitedWebview } from '~/shared/const'
-import { storage, weilaFetch } from '~/shared/instances'
+import { weilaFetch } from '~/shared/instances'
+
+const { saveAuth } = useAuth()
 
 const router = createRouter({
   routes,
@@ -25,9 +28,7 @@ router.beforeEach(async (to, from) => {
         },
       })
 
-      await storage.setItem('token', response.access_token)
-      await storage.setItem('refresh_token', response.refresh_token)
-      await storage.setItem('expires_in', response.expires_in)
+      saveAuth(response.access_token, response.refresh_token, response.expires_in)
 
       isLimitedWebview.value = true
       isGlobalLoading.value = false
