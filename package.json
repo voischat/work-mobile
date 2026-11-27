@@ -18,7 +18,7 @@
     "up": "taze major -I",
     "postinstall": "npx simple-git-hooks",
     "archive": "esno scripts/archive.ts",
-    "release": "npx bumpp && esno scripts/release.ts"
+    "release": "bumpp --tag 'v{version}' --commit 'chore: release v{version}'"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.28",
@@ -59,13 +59,13 @@
     "@vue/test-utils": "^2.4.6",
     "@vueuse/router": "14.0.0-alpha.0",
     "autoprefixer": "^10.4.20",
-    "dotenv": "^17.2.3",
+    "bumpp": "^12.3.0",
+    "changelogithub": "^15.0.5",
     "eslint": "^9.28.0",
     "eslint-plugin-format": "^1.0.1",
     "esno": "^4.8.0",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.0",
-    "octokit": "^5.0.5",
     "postcss": "^8.4.47",
     "simple-git-hooks": "^2.13.0",
     "tailwindcss": "~3.4.17",

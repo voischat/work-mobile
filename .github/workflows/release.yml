@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+
+    env:
+      PROD_APP_ID: ${{ secrets.PROD_APP_ID }}
+      PROD_APP_KEY: ${{ secrets.PROD_APP_KEY }}
+      STAGING_APP_ID: ${{ secrets.STAGING_APP_ID }}
+      STAGING_APP_KEY: ${{ secrets.STAGING_APP_KEY }}
+      INTL_APP_ID: ${{ secrets.INTL_APP_ID }}
+      INTL_APP_KEY: ${{ secrets.INTL_APP_KEY }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check app credentials
+        run: |
+          for name in PROD_APP_ID PROD_APP_KEY STAGING_APP_ID STAGING_APP_KEY INTL_APP_ID INTL_APP_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "Missing secret $name"
+              exit 1
+            fi
+          done
+
+      - name: Verify tag version
+        run: node scripts/release/check.ts
+
+      - name: Build pkg archives
+        run: node scripts/release/archive.ts
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/release/notes.ts

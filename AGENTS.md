@@ -86,6 +86,10 @@ For page-specific patterns and best practices, see [src/pages/AGENTS.md](./src/p
 - `pnpm exec vitest run <test-files>`: runs one or multiple specific test files
   - add `--coverage` to check missing test coverage
 
+## Releases
+
+Tags drive `.github/workflows/release.yml`. `pnpm release` runs bumpp to bump `package.json`, commit, tag and push `vX.Y.Z`. The workflow verifies the tag against the package version, builds prod, staging and intl, writes the three `pkg/*.tar.gz` archives, and creates a GitHub Release in this repo with them attached. It needs the `PROD_APP_ID`/`PROD_APP_KEY`, `STAGING_APP_ID`/`STAGING_APP_KEY` and `INTL_APP_ID`/`INTL_APP_KEY` repository secrets.
+
 ## Development Workflow
 
 ALWAYS follow the workflow when implementing a new feature or fixing a bug. This ensures consistency, quality, and maintainability of the codebase.
