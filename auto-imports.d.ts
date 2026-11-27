@@ -36,13 +36,9 @@ declare global {
   const debouncedWatch: typeof import('@vueuse/core')['debouncedWatch']
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
-  const defineLoader: typeof import('vue-router/auto')['defineLoader']
-  const definePage: typeof import('unplugin-vue-router/runtime')['definePage']
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
   const extendRef: typeof import('@vueuse/core')['extendRef']
-  const genUUID: typeof import('./src/composables/useWeilaFetch')['genUUID']
-  const generateV2Query: typeof import('./src/composables/useWeilaFetch')['generateV2Query']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const getDefaultLocale: typeof import('./src/shared/states')['getDefaultLocale']
@@ -94,7 +90,6 @@ declare global {
   const overrideEnvMode: typeof import('./src/shared/states')['overrideEnvMode']
   const overrideFeatures: typeof import('./src/shared/states')['overrideFeatures']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
-  const pickWeilaData: typeof import('./src/composables/useWeilaFetch')['pickWeilaData']
   const provide: typeof import('vue')['provide']
   const provideLocal: typeof import('@vueuse/core')['provideLocal']
   const reactify: typeof import('@vueuse/core')['reactify']
@@ -113,12 +108,12 @@ declare global {
   const refWithControl: typeof import('@vueuse/core')['refWithControl']
   const resolveComponent: typeof import('vue')['resolveComponent']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
-  const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
   const savedLocale: typeof import('./src/shared/states')['savedLocale']
   const shallowReactive: typeof import('vue')['shallowReactive']
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
-  const storage: typeof import('./src/shared/instances')['storage']
+  const storage: typeof import('./src/shared/storage')['storage']
+  const storageKey: typeof import('./src/shared/storage')['storageKey']
   const syncRef: typeof import('@vueuse/core')['syncRef']
   const syncRefs: typeof import('@vueuse/core')['syncRefs']
   const templateRef: typeof import('@vueuse/core')['templateRef']
@@ -139,7 +134,6 @@ declare global {
   const unref: typeof import('vue')['unref']
   const unrefElement: typeof import('@vueuse/core')['unrefElement']
   const until: typeof import('@vueuse/core')['until']
-  const useAIMemberParser: typeof import('./src/composables/useGenMember')['generateMember']
   const useAMap: typeof import('./src/composables/useAMap')['useAMap']
   const useActiveElement: typeof import('@vueuse/core')['useActiveElement']
   const useAnimate: typeof import('@vueuse/core')['useAnimate']
@@ -173,7 +167,6 @@ declare global {
   const useCloned: typeof import('@vueuse/core')['useCloned']
   const useColorMode: typeof import('@vueuse/core')['useColorMode']
   const useConfirmDialog: typeof import('@vueuse/core')['useConfirmDialog']
-  const useConfirmModal: typeof import('./src/composables/useConfirmModal')['useConfirmModal']
   const useCountdown: typeof import('@vueuse/core')['useCountdown']
   const useCounter: typeof import('@vueuse/core')['useCounter']
   const useCssModule: typeof import('vue')['useCssModule']
@@ -249,7 +242,6 @@ declare global {
   const useObjectUrl: typeof import('@vueuse/core')['useObjectUrl']
   const useOffsetPagination: typeof import('@vueuse/core')['useOffsetPagination']
   const useOnline: typeof import('@vueuse/core')['useOnline']
-  const useOrg: typeof import('./src/queries/org')['useOrg']
   const usePage: typeof import('./src/composables/usePage')['usePage']
   const usePageLeave: typeof import('@vueuse/core')['usePageLeave']
   const useParallax: typeof import('@vueuse/core')['useParallax']
@@ -321,7 +313,6 @@ declare global {
   const useWebSocket: typeof import('@vueuse/core')['useWebSocket']
   const useWebWorker: typeof import('@vueuse/core')['useWebWorker']
   const useWebWorkerFn: typeof import('@vueuse/core')['useWebWorkerFn']
-  const useWeilaFetch: typeof import('./src/composables/useWeilaFetch')['useWeilaFetch']
   const useWindowFocus: typeof import('@vueuse/core')['useWindowFocus']
   const useWindowScroll: typeof import('@vueuse/core')['useWindowScroll']
   const useWindowSize: typeof import('@vueuse/core')['useWindowSize']
@@ -340,7 +331,6 @@ declare global {
   const watchThrottled: typeof import('@vueuse/core')['watchThrottled']
   const watchTriggerable: typeof import('@vueuse/core')['watchTriggerable']
   const watchWithFilter: typeof import('@vueuse/core')['watchWithFilter']
-  const weilaApi: typeof import('./src/utils/weilaApi')['weilaApi']
   const weilaFetch: typeof import('./src/shared/instances')['weilaFetch']
   const whenever: typeof import('@vueuse/core')['whenever']
 }
@@ -364,9 +354,6 @@ declare global {
   // @ts-ignore
   export type { ToastItem } from './src/composables/useToast'
   import('./src/composables/useToast')
-  // @ts-ignore
-  export type { WeilaRes } from './src/composables/useWeilaFetch'
-  import('./src/composables/useWeilaFetch')
 }
 
 // for vue template auto import
@@ -407,8 +394,6 @@ declare module 'vue' {
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
-    readonly genUUID: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['genUUID']>
-    readonly generateV2Query: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['generateV2Query']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getDefaultLocale: UnwrapRef<typeof import('./src/shared/states')['getDefaultLocale']>
@@ -460,7 +445,6 @@ declare module 'vue' {
     readonly overrideEnvMode: UnwrapRef<typeof import('./src/shared/states')['overrideEnvMode']>
     readonly overrideFeatures: UnwrapRef<typeof import('./src/shared/states')['overrideFeatures']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
-    readonly pickWeilaData: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['pickWeilaData']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>
     readonly reactify: UnwrapRef<typeof import('@vueuse/core')['reactify']>
@@ -483,7 +467,8 @@ declare module 'vue' {
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
-    readonly storage: UnwrapRef<typeof import('./src/shared/instances')['storage']>
+    readonly storage: UnwrapRef<typeof import('./src/shared/storage')['storage']>
+    readonly storageKey: UnwrapRef<typeof import('./src/shared/storage')['storageKey']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
@@ -683,7 +668,6 @@ declare module 'vue' {
     readonly useWebSocket: UnwrapRef<typeof import('@vueuse/core')['useWebSocket']>
     readonly useWebWorker: UnwrapRef<typeof import('@vueuse/core')['useWebWorker']>
     readonly useWebWorkerFn: UnwrapRef<typeof import('@vueuse/core')['useWebWorkerFn']>
-    readonly useWeilaFetch: UnwrapRef<typeof import('./src/composables/useWeilaFetch')['useWeilaFetch']>
     readonly useWindowFocus: UnwrapRef<typeof import('@vueuse/core')['useWindowFocus']>
     readonly useWindowScroll: UnwrapRef<typeof import('@vueuse/core')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@vueuse/core')['useWindowSize']>
@@ -702,7 +686,6 @@ declare module 'vue' {
     readonly watchThrottled: UnwrapRef<typeof import('@vueuse/core')['watchThrottled']>
     readonly watchTriggerable: UnwrapRef<typeof import('@vueuse/core')['watchTriggerable']>
     readonly watchWithFilter: UnwrapRef<typeof import('@vueuse/core')['watchWithFilter']>
-    readonly weilaApi: UnwrapRef<typeof import('./src/utils/weilaApi')['weilaApi']>
     readonly weilaFetch: UnwrapRef<typeof import('./src/shared/instances')['weilaFetch']>
     readonly whenever: UnwrapRef<typeof import('@vueuse/core')['whenever']>
   }

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useMutation } from '@pinia/colada'
 import FeatureFlagsDevTools from './components/FeatureFlagsDevTools.vue'
 import { useAppName } from './composables/useAppName'
 import { useLocale } from './composables/useLocale'
@@ -10,44 +9,6 @@ useLocale()
 
 const { appName } = useAppName()
 const isDev = import.meta.env.DEV
-
-const REFRESH_INTERVAL = 3 * 60 * 1000
-const { token, refreshToken, clearAuth, saveAuth } = useAuth()
-
-const { mutate: refreshTokenMutate } = useMutation({
-  mutation: (params: { refresh_token: string }) =>
-    weilaFetch<{
-      access_token: string
-      expires_in: number
-      refresh_token: string
-    }>('/corp/auth/refresh', {
-      method: 'POST',
-      body: params,
-    }),
-  onSuccess(data: { access_token: string, expires_in: number, refresh_token: string }) {
-    saveAuth(data.access_token, data.refresh_token, data.expires_in)
-  },
-  onError() {
-    clearAuth()
-  },
-})
-
-function refreshAccessToken() {
-  if (refreshToken.value) {
-    refreshTokenMutate({
-      refresh_token: refreshToken.value,
-    })
-  }
-}
-
-const { pause, resume } = useIntervalFn(refreshAccessToken, REFRESH_INTERVAL, { immediate: false })
-
-watch([token, refreshToken], ([t, rt]) => {
-  if (t && rt)
-    resume()
-  else
-    pause()
-}, { immediate: true })
 
 const { toasts, removeToast } = useToast()
 
