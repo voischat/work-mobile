@@ -2,18 +2,10 @@ import type { RefreshTokenResult } from 'weila-auth'
 import { getRootUrl } from '@kvoon/utils'
 import md5 from 'md5'
 import { nanoid } from 'nanoid'
-import { createStorage } from 'unstorage'
-import localStorage from 'unstorage/drivers/localstorage'
 import { createWeilaFetch } from 'weila-auth'
 import { useAuth } from '~/composables/useAuth'
 import { appid, appkey } from '~/shared/const'
-import { name } from '../../package.json'
-
-export const storage = createStorage({
-  driver: localStorage({
-    base: name,
-  }),
-})
+import { storage } from '~/shared/storage'
 
 const { refreshToken, saveAuth, clearAuth } = useAuth()
 
@@ -85,8 +77,9 @@ export const weilaFetch = createWeilaFetch({
 
     throw new Error(result.errmsg || 'Token refresh failed')
   },
-  onLogout: async () => {
+  onLogout: () => {
     clearAuth()
-    window.location.href = '/login'
+    window.location.hash = '#/login'
+    window.location.reload()
   },
 })

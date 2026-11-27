@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { getRootUrl } from '@kvoon/utils'
 import { computed, ref } from 'vue'
 import { useToast } from '~/composables/useToast'
-import { generateV2Query } from '~/composables/useWeilaFetch'
+import { weilaFetch } from '~/shared/instances'
 
 const url = defineModel<string>({ default: '' })
 
@@ -49,28 +48,16 @@ async function uploadAvatar(file: File) {
     const formData = new FormData()
     formData.append('file', file)
 
-    // 使用 fetch 直接发送 FormData
-    const queryParams = generateV2Query()
-    const baseUrl = `${getRootUrl(window.location.href)}/v2`
-    const urlObj = new URL(`${baseUrl}/common/upload-file`)
-    Object.entries(queryParams).forEach(([key, value]) => {
-      urlObj.searchParams.set(key, value)
-    })
-
-    const response = await fetch(urlObj.toString(), {
+    const uploadedUrl = await weilaFetch<string>('/common/upload-file', {
       method: 'POST',
       body: formData,
     })
 
-    const result = await response.json()
+    if (!uploadedUrl)
+      throw new Error(t('common.messages.uploadFailed'))
 
-    if (result.errcode === 0 && result.data?.url) {
-      url.value = result.data.url
-      showToast(t('common.messages.uploadSuccess'))
-    }
-    else {
-      throw new Error(result.errmsg || t('common.messages.uploadFailed'))
-    }
+    url.value = uploadedUrl
+    showToast(t('common.messages.uploadSuccess'))
   }
   catch (error) {
     console.error('上传失败:', error)
