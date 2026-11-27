@@ -11,8 +11,8 @@ const octokit = new Octokit({
 async function release() {
   try {
     await octokit.request('POST /repos/{owner}/{repo}/dispatches', {
-      owner: 'kvoon9',
-      repo: 'weila-work-webview-releases',
+      owner: 'voischat',
+      repo: 'work-mobile-releases',
       event_type: 'on-demand-release',
       client_payload: {
         unit: false,
@@ -25,8 +25,8 @@ async function release() {
     })
     console.log('Release triggered successfully')
   }
-  catch (error: any) {
-    console.error('Failed to trigger release:', error.message)
+  catch (error) {
+    console.error('Failed to trigger release:', error instanceof Error ? error.message : String(error))
   }
 }
 
